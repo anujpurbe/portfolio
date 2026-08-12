@@ -1,0 +1,29 @@
+export const meta = {
+  title: "Normalization isn't theory — it's fewer bug reports",
+  slug: "normalization-payoff",
+  date: "2026-06-30",
+  tags: ["databases", "sql", "backend"],
+  excerpt:
+    "What designing a normalized relational schema for a mini project actually taught me about writing SQL that doesn't fight you.",
+};
+
+Normalization felt like theory until I designed a real relational schema for a database mini project. Now I think about it as *removing ways for data to disagree with itself*.
+
+## What I learned the hard way
+
+**Denormalization hides the bug until the bug is expensive.** Early on I stored `student_name` alongside `student_id` in every table that referenced a student. The JOINs were simpler — and updating a name meant remembering to update it everywhere. One forgotten update and reports quietly disagreed.
+
+**JOIN, GROUP BY, and aggregation are only as good as the schema.** Clean up the schema and queries read like English:
+
+```sql
+SELECT student_id, COUNT(*) AS enrollments
+FROM enrollments
+GROUP BY student_id
+HAVING COUNT(*) > 3;
+```
+
+That's not clever SQL. It's SQL that's *allowed* to be simple because the schema already did the hard work.
+
+## The takeaway
+
+A normalized schema is a design decision that pays compound interest: every future query is simpler, every future bug is more likely to be caught by the database instead of the developer. That's the mindset I carry into backend work now.

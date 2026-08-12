@@ -1,0 +1,22 @@
+export const meta = {
+  title: "Why complexity analysis changed how I solve problems",
+  slug: "complexity-analysis-first",
+  date: "2026-07-28",
+  tags: ["dsa", "competitive-programming"],
+  excerpt:
+    "The single most useful habit from 100+ solved problems: write the naive solution first, then ask what the constraints actually require.",
+};
+
+When I started competitive programming I made the classic mistake: trying to write the optimal solution immediately, every single time. I'd burn an hour staring at a problem, then realize a straightforward approach would have been the correct start.
+
+## The habit that stuck
+
+1. **Write the brute force first.** If it runs in `O(n²)` and the constraints allow it, ship it.
+2. **Read the constraints like they're a spec.** `n ≤ 10⁵` is a message: your `O(n²)` isn't going to pass, so what's the `O(n log n)` structure the problem is hinting at?
+3. **Name the complexity out loud.** Before I finish any solution I write down time and space complexity. It turns "this feels right" into something I can defend.
+
+## What changed
+
+The 100+ problems I've solved aren't just reps — they've made complexity analysis instinctive. When I look at a piece of Java code now, I don't just see what it does. I see what it costs.
+
+This is exactly why my portfolio's hero diagram starts with `ALGORITHM` and ends at `RESULT`: the whole point of an algorithm is that it's the cheapest correct path to the result.
