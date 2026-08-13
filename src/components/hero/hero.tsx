@@ -1,20 +1,37 @@
-import { ArrowRight, Download, Mail } from "lucide-react";
+import { ArrowRight, Download, Eye, Mail } from "lucide-react";
 import { site } from "@/data/site";
 import { profile } from "@/data/profile";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { SystemDiagram } from "@/components/hero/system-diagram";
+import { ProfilePhoto } from "@/components/hero/profile-photo";
+import { ParallaxFrame } from "@/components/hero/parallax-frame";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28">
-      <div className="container-shell grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+    <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
+      <div
+        className="bg-grid pointer-events-none absolute inset-0"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px] dark:bg-accent/15"
+        aria-hidden="true"
+      />
+
+      <div className="container-shell relative grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <Reveal>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1.5 shadow-sm">
               <span
-                className="size-2 rounded-full bg-emerald-400"
+                className={cn(
+                  "size-2 rounded-full",
+                  site.availability.open
+                    ? "bg-emerald-500 animate-pulse-soft"
+                    : "bg-subtle",
+                )}
                 aria-hidden="true"
               />
               <span className="font-mono text-xs text-muted">
@@ -44,9 +61,13 @@ export function Hero() {
                 View Projects
                 <ArrowRight className="size-4" />
               </Button>
-              <Button href={site.resume} variant="outline" download>
+              <Button href={site.resume} variant="outline">
+                <Eye className="size-4" />
+                View Resume
+              </Button>
+              <Button href={site.resumeDownload} variant="ghost" download>
                 <Download className="size-4" />
-                Download Resume
+                Download
               </Button>
             </div>
           </Reveal>
@@ -88,8 +109,19 @@ export function Hero() {
           </Reveal>
         </div>
 
-        <Reveal delay={0.2} y={32}>
-          <SystemDiagram steps={profile.heroSystem} />
+        <Reveal delay={0.2} y={28}>
+          <div className="mx-auto w-full max-w-md lg:max-w-none">
+            <ParallaxFrame className="relative">
+              <div
+                className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent/20 to-transparent blur-2xl"
+                aria-hidden="true"
+              />
+              <ProfilePhoto className="relative shadow-elevated" priority />
+            </ParallaxFrame>
+            <div className="mt-8">
+              <SystemDiagram steps={profile.heroSystem} />
+            </div>
+          </div>
         </Reveal>
       </div>
     </section>

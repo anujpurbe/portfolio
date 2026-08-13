@@ -119,6 +119,29 @@ export async function getGitHubUser(
   }
 }
 
+export async function getGitHubStars(
+  username: string,
+): Promise<number | null> {
+  try {
+    const res = await fetch(
+      `${GH_API}/users/${username}/repos?sort=created&per_page=100&type=owner`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "User-Agent": "anujpurbe-portfolio",
+        },
+        next: { revalidate: 86400 },
+      },
+    );
+    if (!res.ok) return null;
+    const json: unknown = await res.json();
+    if (!isRepoResponse(json)) return null;
+    return json.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+  } catch {
+    return null;
+  }
+}
+
 export async function getGitHubRepos(
   username: string,
 ): Promise<GitHubRepo[] | null> {

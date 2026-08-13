@@ -10,6 +10,9 @@ export const profile = {
   heroTagline:
     "I build efficient, well-structured software — grounded in data structures, algorithms, and systems thinking.",
   heroSystem: ["PROBLEM", "ALGORITHM", "CODE", "DATA", "RESULT"],
+  photo: {
+    alt: "Portrait of Anuj Purbe",
+  },
   about: [
     "I'm a computer engineering undergraduate at Amrita Vishwa Vidyapeetham with a strong foundation in data structures, algorithms, object-oriented programming, and relational databases. I care about writing code that is correct first, then fast — and I build that rigor through competitive programming and deliberate practice.",
     "Most of my work so far lives in two places: Java-based DSA and algorithm implementations, and SQL-backed database design. I've solved 100+ algorithmic problems with attention to complexity analysis, and designed normalized relational schemas where clean data modeling mattered.",

@@ -3,29 +3,36 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #fafafa;
+  --background: #f2f3f6;
   --surface: #ffffff;
   --card: #ffffff;
-  --foreground: #18181b;
-  --muted: #52525b;
-  --subtle: #8b8b95;
-  --border: rgba(24, 24, 27, 0.12);
-  --accent: oklch(0.55 0.2 265);
+  --surface-2: #eceef2;
+  --foreground: #17181c;
+  --muted: #4b4f58;
+  --subtle: #7a7f8c;
+  --border: rgba(23, 24, 28, 0.1);
+  --accent: oklch(0.52 0.2 265);
   --accent-foreground: #ffffff;
-  --accent-soft: oklch(0.94 0.045 265);
-  --ring: oklch(0.55 0.2 265 / 0.35);
-  --heat-0: #e9e9ee;
-  --heat-1: oklch(0.88 0.09 265);
-  --heat-2: oklch(0.76 0.14 265);
-  --heat-3: oklch(0.62 0.19 265);
-  --heat-4: oklch(0.5 0.2 265);
+  --accent-soft: oklch(0.93 0.05 265);
+  --ring: oklch(0.52 0.2 265 / 0.3);
+  --heat-0: #e4e6eb;
+  --heat-1: oklch(0.85 0.1 265);
+  --heat-2: oklch(0.72 0.15 265);
+  --heat-3: oklch(0.58 0.19 265);
+  --heat-4: oklch(0.47 0.2 265);
   --navy-900: #101018;
+  --shadow-card: 0 1px 2px rgba(23, 24, 28, 0.04),
+    0 4px 16px -4px rgba(23, 24, 28, 0.06);
+  --shadow-elevated: 0 2px 4px rgba(23, 24, 28, 0.05),
+    0 16px 40px -8px rgba(23, 24, 28, 0.12);
+  --glow-accent: 0 0 40px -8px oklch(0.52 0.2 265 / 0.35);
 }
 
 .dark {
   --background: #09090f;
   --surface: #0e0e16;
   --card: #13131c;
+  --surface-2: #0a0a12;
   --foreground: #f4f4f5;
   --muted: #a1a1aa;
   --subtle: #63636f;
@@ -40,11 +47,18 @@
   --heat-3: oklch(0.68 0.16 265);
   --heat-4: oklch(0.8 0.14 265);
   --navy-900: #06060a;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0 4px 8px rgba(0, 0, 0, 0.45),
+    0 24px 64px -16px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 60px -12px oklch(0.74 0.15 265 / 0.45);
 }
 
 @theme {
   --animate-flow-x: flow-x 2s ease-in-out infinite;
   --animate-flow-y: flow-y 2s ease-in-out infinite;
+  --animate-dash: dash 1.6s linear infinite;
+  --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
 
   @keyframes flow-x {
     0% {
@@ -79,11 +93,28 @@
       opacity: 0;
     }
   }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -24;
+    }
+  }
+
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -99,6 +130,9 @@
   --color-heat-3: var(--heat-3);
   --color-heat-4: var(--heat-4);
   --color-navy-900: var(--navy-900);
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-glow: var(--glow-accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -122,6 +156,7 @@
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   ::selection {
@@ -173,6 +208,17 @@
     background-color: var(--card);
     border: 1px solid var(--border);
     border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-hover {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .card-hover:hover {
+    border-color: oklch(0.52 0.2 265 / 0.45);
+    box-shadow: var(--shadow-elevated);
   }
 
   .focus-ring {
@@ -192,5 +238,40 @@
 
   .muted-link:hover {
     color: var(--foreground);
+  }
+
+  .bg-grid {
+    background-image: linear-gradient(
+        to right,
+        var(--border) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      black 40%,
+      transparent 100%
+    );
+  }
+
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(
+      120deg,
+      var(--accent),
+      oklch(0.65 0.15 320)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .backdrop-shell {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }

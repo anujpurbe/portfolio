@@ -61,6 +61,11 @@ export default async function JournalEntryPage({ params }: PageProps) {
             >
               {formatDate(entry.date)}
             </time>
+            {entry.readingTime && (
+              <span className="font-mono text-xs uppercase tracking-widest text-subtle">
+                {entry.readingTime}
+              </span>
+            )}
             <div className="flex flex-wrap gap-1.5">
               {entry.tags.map((tag) => (
                 <Badge key={tag}>#{tag}</Badge>

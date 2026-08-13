@@ -5,12 +5,16 @@ import {
   CalendarDays,
   Code2,
   Folder,
+  GitFork,
+  Star,
   Users,
 } from "lucide-react";
 import { site } from "@/data/site";
+import { coding } from "@/data/coding";
 import {
   getContributions,
   getGitHubRepos,
+  getGitHubStars,
   getGitHubUser,
 } from "@/lib/github";
 import { Section } from "@/components/ui/section";
@@ -24,11 +28,41 @@ function formatYear(date: string) {
   });
 }
 
+function UnavailableCard() {
+  return (
+    <Reveal>
+      <div className="card flex flex-col items-start gap-4 p-8 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="flex items-center gap-2 font-semibold">
+            <Activity className="size-4 text-accent" />
+            GitHub activity unavailable
+          </h3>
+          <p className="mt-1 text-sm text-muted">
+            The GitHub API couldn&apos;t be reached right now.
+          </p>
+        </div>
+        <a
+          href={site.socials.github.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="focus-ring muted-link inline-flex items-center gap-1.5 rounded-md text-sm font-medium"
+        >
+          View GitHub
+          <ArrowUpRight className="size-4" />
+        </a>
+      </div>
+    </Reveal>
+  );
+}
+
 export async function GithubActivity() {
-  const [user, repos, weeks] = await Promise.all([
-    getGitHubUser(site.githubUsername),
-    getGitHubRepos(site.githubUsername),
-    getContributions(site.githubUsername, process.env.GITHUB_TOKEN),
+  const username =
+    process.env.NEXT_PUBLIC_GITHUB_USERNAME ?? site.githubUsername;
+  const [user, repos, weeks, stars] = await Promise.all([
+    getGitHubUser(username),
+    getGitHubRepos(username),
+    getContributions(username, process.env.GITHUB_TOKEN),
+    getGitHubStars(username),
   ]);
 
   return (
@@ -39,28 +73,7 @@ export async function GithubActivity() {
       description="Live from the GitHub API. If data can't be fetched, this section says so honestly instead of showing stale numbers."
     >
       {!user ? (
-        <Reveal>
-          <div className="card flex flex-col items-start gap-4 p-8 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="flex items-center gap-2 font-semibold">
-                <Activity className="size-4 text-accent" />
-                Data unavailable
-              </h3>
-              <p className="mt-1 text-sm text-muted">
-                The GitHub API couldn&apos;t be reached right now.
-              </p>
-            </div>
-            <a
-              href={site.socials.github.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="focus-ring muted-link inline-flex items-center gap-1.5 rounded-md text-sm font-medium"
-            >
-              View profile
-              <ArrowUpRight className="size-4" />
-            </a>
-          </div>
-        </Reveal>
+        <UnavailableCard />
       ) : (
         <div className="space-y-6">
           <Reveal>
@@ -93,9 +106,9 @@ export async function GithubActivity() {
                   </p>
                 )}
               </div>
-              <dl className="grid shrink-0 grid-cols-3 gap-6 text-center sm:gap-8">
+              <dl className="grid shrink-0 grid-cols-4 gap-5 text-center sm:gap-8">
                 <div>
-                  <dt className="flex items-center justify-center gap-1 font-mono text-[11px] uppercase tracking-wider text-subtle">
+                  <dt className="flex items-center justify-center gap-1 font-mono text-[10px] uppercase tracking-wider text-subtle">
                     <Folder className="size-3" /> Repos
                   </dt>
                   <dd className="mt-1 text-lg font-semibold">
@@ -103,7 +116,15 @@ export async function GithubActivity() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="flex items-center justify-center gap-1 font-mono text-[11px] uppercase tracking-wider text-subtle">
+                  <dt className="flex items-center justify-center gap-1 font-mono text-[10px] uppercase tracking-wider text-subtle">
+                    <Star className="size-3" /> Stars
+                  </dt>
+                  <dd className="mt-1 text-lg font-semibold">
+                    {stars ?? "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="flex items-center justify-center gap-1 font-mono text-[10px] uppercase tracking-wider text-subtle">
                     <Users className="size-3" /> Followers
                   </dt>
                   <dd className="mt-1 text-lg font-semibold">
@@ -111,7 +132,7 @@ export async function GithubActivity() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="flex items-center justify-center gap-1 font-mono text-[11px] uppercase tracking-wider text-subtle">
+                  <dt className="flex items-center justify-center gap-1 font-mono text-[10px] uppercase tracking-wider text-subtle">
                     <CalendarDays className="size-3" /> Since
                   </dt>
                   <dd className="mt-1 text-lg font-semibold">
@@ -129,13 +150,12 @@ export async function GithubActivity() {
               ) : (
                 <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h3 className="font-semibold">Contribution heatmap</h3>
+                    <h3 className="font-semibold">
+                      Contribution heatmap
+                    </h3>
                     <p className="mt-1 text-sm text-muted">
-                      The heatmap needs a GitHub token to fetch —{" "}
-                      <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-xs">
-                        GITHUB_TOKEN
-                      </code>{" "}
-                      isn&apos;t set on this deployment.
+                      Contribution history isn&apos;t available for this
+                      deployment right now.
                     </p>
                   </div>
                   <a
@@ -144,11 +164,45 @@ export async function GithubActivity() {
                     rel="noopener noreferrer"
                     className="focus-ring muted-link inline-flex items-center gap-1.5 rounded-md text-sm font-medium"
                   >
-                    View profile
+                    View GitHub
                     <ArrowUpRight className="size-4" />
                   </a>
                 </div>
               )}
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <div>
+              <h3 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">
+                <GitFork className="size-3.5" /> Featured repositories
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {coding.featuredRepos.map((repo) => (
+                  <a
+                    key={repo.name}
+                    href={repo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="card card-hover focus-ring flex items-start gap-3 p-4"
+                  >
+                    <Star className="mt-0.5 size-4 shrink-0 text-accent" />
+                    <span className="min-w-0">
+                      <span className="block truncate font-mono text-sm font-medium">
+                        {repo.name}
+                      </span>
+                      {repo.description && (
+                        <span className="mt-1 line-clamp-2 block text-sm leading-5 text-muted">
+                          {repo.description}
+                        </span>
+                      )}
+                      <span className="mt-2 block font-mono text-xs text-subtle">
+                        {repo.language ?? "—"}
+                      </span>
+                    </span>
+                  </a>
+                ))}
+              </div>
             </div>
           </Reveal>
 
@@ -165,7 +219,7 @@ export async function GithubActivity() {
                       href={repo.htmlUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="card focus-ring flex items-start gap-3 p-4 transition-colors hover:border-accent/50"
+                      className="card card-hover focus-ring flex items-start gap-3 p-4"
                     >
                       <Folder className="mt-0.5 size-4 shrink-0 text-accent" />
                       <span className="min-w-0">

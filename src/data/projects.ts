@@ -15,10 +15,16 @@ export const projects: Project[] = [
       "Deep, transferable fluency in data structures — the foundation of every efficient system.",
     approach:
       "Implemented core data structures from scratch in Java and practiced pattern-based problem solving, always documenting time and space complexity.",
+    architecture:
+      "A growing library of standalone Java implementations: stacks, queues, linked lists, trees, and recursion patterns. Each implementation is small, tested, and annotated with complexity.",
     results:
       "100+ algorithmic problems solved, with implementations spanning stacks, queues, linked lists, trees, and recursion.",
     lessons:
       "Optimization is only meaningful after correctness — profile first, optimize second.",
+    media: {
+      cover: "/projects/dsa/cover.webp",
+      screenshots: ["/projects/dsa/screenshot-1.webp"],
+    },
   },
   {
     title: "Relational Database Mini Project",
@@ -34,9 +40,15 @@ export const projects: Project[] = [
       "Prove that I can turn an ambiguous real-world problem into a clean, normalized data model.",
     approach:
       "Designed a normalized relational schema, then wrote and refined SQL queries that exercise JOIN, GROUP BY, and aggregation semantics.",
+    architecture:
+      "A normalized schema (users, orders, products, payments) with clear foreign keys, plus a query set demonstrating JOIN, GROUP BY, and aggregation semantics.",
     results:
       "A working relational schema and query set, with structured data modeling that measurably simplified query logic.",
     lessons:
       "Schema design decisions are the difference between a query that reads cleanly and one that fights you.",
+    media: {
+      cover: "/projects/database/cover.webp",
+      screenshots: ["/projects/database/screenshot-1.webp"],
+    },
   },
 ];

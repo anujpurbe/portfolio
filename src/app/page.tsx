@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Hero } from "@/components/hero/hero";
 import { Currently } from "@/components/currently/currently";
 import { About } from "@/components/about/about";
@@ -7,13 +8,16 @@ import { Achievements } from "@/components/achievements/achievements";
 import { Education } from "@/components/education/education";
 import { Certifications } from "@/components/certifications/certifications";
 import { GithubActivity } from "@/components/github/github-activity";
+import { LeetCodeSection } from "@/components/coding/leetcode-section";
 import { JournalSection } from "@/components/journal/journal-section";
 import { Contact } from "@/components/contact/contact";
+import { SectionSkeleton } from "@/components/ui/section-skeleton";
 
 const contactConfigured = Boolean(
-  process.env.EMAILJS_SERVICE_ID &&
+  (process.env.EMAILJS_SERVICE_ID &&
     process.env.EMAILJS_TEMPLATE_ID &&
-    process.env.EMAILJS_PUBLIC_KEY,
+    process.env.EMAILJS_PUBLIC_KEY) ||
+    (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
 );
 
 export default function Home() {
@@ -27,7 +31,12 @@ export default function Home() {
       <Achievements />
       <Education />
       <Certifications />
-      <GithubActivity />
+      <Suspense fallback={<SectionSkeleton label="Loading GitHub data…" />}>
+        <GithubActivity />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton label="Loading coding stats…" />}>
+        <LeetCodeSection />
+      </Suspense>
       <JournalSection />
       <Contact configured={contactConfigured} />
     </>

@@ -20,11 +20,18 @@ export function JournalEntryCard({
         <span className="font-mono text-xs text-subtle">
           {formatDate(entry.date)}
         </span>
-        {typeof index === "number" && (
-          <span className="font-mono text-xs text-subtle">
-            {String(index).padStart(2, "0")}
-          </span>
-        )}
+        <span className="flex items-center gap-3">
+          {entry.readingTime && (
+            <span className="font-mono text-xs text-subtle">
+              {entry.readingTime}
+            </span>
+          )}
+          {typeof index === "number" && (
+            <span className="font-mono text-xs text-subtle">
+              {String(index).padStart(2, "0")}
+            </span>
+          )}
+        </span>
       </div>
       <h3 className="font-semibold leading-6 tracking-tight">
         {entry.title}

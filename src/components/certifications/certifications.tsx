@@ -1,44 +1,87 @@
-import { Award, ExternalLink } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Award, BadgeCheck, ExternalLink } from "lucide-react";
 import { certifications } from "@/data/profile";
+import type { Certification } from "@/lib/types";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
-import { cn } from "@/lib/utils";
+import { CertificateViewer } from "@/components/certifications/certificate-viewer";
 
 export function Certifications() {
+  const [active, setActive] = useState<Certification | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const openCertificate = (cert: Certification) => {
+    setActive(cert);
+    setOpen(true);
+  };
+
   return (
     <Section
       id="certifications"
-      eyebrow="Certifications"
-      title="Verified training"
-      description="Quality over quantity — no padding with trivial badges."
+      eyebrow="Credentials"
+      title="Certifications"
+      description="Evidence-backed — click a card to open the original certificate."
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        {certifications.map((cert, i) => (
-          <Reveal key={cert.title} delay={i * 0.06}>
-            <a
-              href={cert.verificationUrl ?? "#contact"}
-              className={cn(
-                "card group flex h-full items-center gap-4 p-5",
-                cert.verificationUrl && "hover:border-accent/50",
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {certifications.map((cert, i) => {
+          const viewable = Boolean(cert.preview || cert.file);
+          return (
+            <Reveal key={cert.title} delay={i * 0.06}>
+              {viewable ? (
+                <button
+                  type="button"
+                  onClick={() => openCertificate(cert)}
+                  className="card card-hover focus-ring flex h-full w-full flex-col items-start gap-3 p-5 text-left"
+                >
+                  <Award className="size-5 text-accent" />
+                  <span>
+                    <span className="block text-sm font-semibold">
+                      {cert.title}
+                    </span>
+                    <span className="mt-1 block font-mono text-xs text-subtle">
+                      {cert.issuer}
+                    </span>
+                  </span>
+                  <span className="mt-auto flex items-center gap-1.5 rounded-md border border-emerald-500/40 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    <BadgeCheck className="size-3" />
+                    View certificate
+                  </span>
+                </button>
+              ) : (
+                <div className="card flex h-full flex-col items-start gap-3 p-5">
+                  <Award className="size-5 text-accent" />
+                  <div>
+                    <p className="text-sm font-semibold">{cert.title}</p>
+                    <p className="mt-1 font-mono text-xs text-subtle">
+                      {cert.issuer}
+                      {cert.date ? ` · ${cert.date}` : ""}
+                    </p>
+                  </div>
+                  {cert.verificationUrl && (
+                    <a
+                      href={cert.verificationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="focus-ring muted-link mt-auto inline-flex items-center gap-1 rounded-md text-xs font-medium"
+                    >
+                      Verify
+                      <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                </div>
               )}
-            >
-              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
-                <Award className="size-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold leading-6">{cert.title}</h3>
-                <p className="mt-1 text-sm text-subtle">
-                  {cert.issuer}
-                  {cert.date ? ` · ${cert.date}` : ""}
-                </p>
-              </div>
-              {cert.verificationUrl && (
-                <ExternalLink className="size-4 shrink-0 text-subtle transition-colors group-hover:text-accent" />
-              )}
-            </a>
-          </Reveal>
-        ))}
+            </Reveal>
+          );
+        })}
       </div>
+
+      <CertificateViewer
+        certificate={active}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </Section>
   );
 }
