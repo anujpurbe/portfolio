@@ -37,12 +37,14 @@ export function Certifications() {
                 >
                   <Award className="size-5 text-accent" />
                   <span>
-                    <span className="block text-sm font-semibold">
-                      {cert.title}
-                    </span>
+                  <span className="block text-sm font-semibold">
+                    {cert.title}
+                  </span>
+                  {cert.issuer && (
                     <span className="mt-1 block font-mono text-xs text-subtle">
                       {cert.issuer}
                     </span>
+                  )}
                   </span>
                   <span className="mt-auto flex items-center gap-1.5 rounded-md border border-emerald-500/40 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                     <BadgeCheck className="size-3" />
@@ -54,10 +56,13 @@ export function Certifications() {
                   <Award className="size-5 text-accent" />
                   <div>
                     <p className="text-sm font-semibold">{cert.title}</p>
-                    <p className="mt-1 font-mono text-xs text-subtle">
-                      {cert.issuer}
-                      {cert.date ? ` · ${cert.date}` : ""}
-                    </p>
+                    {(cert.issuer || cert.date) && (
+                      <p className="mt-1 font-mono text-xs text-subtle">
+                        {cert.issuer}
+                        {cert.issuer && cert.date ? " · " : ""}
+                        {cert.date}
+                      </p>
+                    )}
                   </div>
                   {cert.verificationUrl && (
                     <a

@@ -78,7 +78,8 @@ export function CertificateViewer({
                 </h2>
                 <p className="mt-0.5 text-xs text-subtle">
                   {certificate.issuer}
-                  {certificate.date ? ` · ${certificate.date}` : ""}
+                  {certificate.issuer && certificate.date ? " · " : ""}
+                  {certificate.date}
                 </p>
               </div>
               <button

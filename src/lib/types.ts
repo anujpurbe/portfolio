@@ -29,7 +29,7 @@ export type Project = {
 
 export type Certification = {
   title: string;
-  issuer: string;
+  issuer?: string;
   date?: string;
   preview?: string;
   file?: string;
