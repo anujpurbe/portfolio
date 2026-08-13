@@ -27,7 +27,7 @@ export const academicJourney: AcademicJourney = {
   institution: "Amrita Vishwa Vidyapeetham",
   campus: "Chennai, India",
   creditsCompleted: 64, // TODO: VERIFY — total credits completed so far
-  semestersCompleted: 3,
+  semestersCompleted: 3, // Verified — user-confirmed 3 of 8
   totalSemesters: 8,
   domains: [
     {
@@ -77,7 +77,6 @@ export const academicJourney: AcademicJourney = {
       name: "Semester III",
       period: "2026",
       status: "completed",
-      credits: 22, // TODO: VERIFY — credits completed in Semester III
       note: "Verified semester — currently in progress this year.",
       subjects: [
         "Data Structures and Algorithms",

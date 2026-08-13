@@ -2,11 +2,13 @@ import { projects } from "@/data/projects";
 import { certifications } from "@/data/certifications";
 
 // Central source of truth for homepage statistics.
-// Project and certification counts are derived from their data files.
-// Hardcoded values are flagged TODO: VERIFY until confirmed by the user.
+// Only CGPA is verified (user-confirmed 8.60). Everything else is derived
+// from data files or pending verification — nothing is invented.
 export const stats = {
+  // TODO: VERIFY — derived from the projects file; confirm the final count
   projects: projects.length,
   problemsSolved: 100, // TODO: VERIFY — total algorithmic problems solved
+  // TODO: VERIFY — derived from the certifications file; confirm the final count
   certificates: certifications.length,
-  cgpa: 8.6, // TODO: VERIFY — latest term CGPA (user-provided)
+  cgpa: 8.6, // Verified — user-confirmed 8.60
 } as const;
