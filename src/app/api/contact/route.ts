@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, rateLimited } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -37,30 +38,6 @@ function isValid(body: ContactPayload) {
     body.message.trim().length >= 10 &&
     body.message.trim().length <= MAX_MESSAGE
   );
-}
-
-function clientIp(request: Request) {
-  const fwd = request.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return "unknown";
-}
-
-const rateStore = new Map<string, number[]>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 60 * 60 * 1000;
-
-function rateLimited(ip: string) {
-  const now = Date.now();
-  const hits = (rateStore.get(ip) ?? []).filter(
-    (t) => now - t < RATE_WINDOW_MS,
-  );
-  if (hits.length >= RATE_LIMIT) {
-    rateStore.set(ip, hits);
-    return true;
-  }
-  hits.push(now);
-  rateStore.set(ip, hits);
-  return false;
 }
 
 async function deliverViaEmail(body: ContactPayload) {
@@ -114,6 +91,7 @@ async function storeViaSupabase(
         email: body.reply_to.trim(),
         subject: body.subject.trim(),
         message: body.message.trim(),
+        status: "new",
         ip,
         user_agent: request.headers.get("user-agent")?.slice(0, 500) ?? null,
       }),
@@ -125,7 +103,7 @@ async function storeViaSupabase(
 }
 
 export async function POST(request: Request) {
-  if (clientIp(request) === "unknown" || rateLimited(clientIp(request))) {
+  if (rateLimited(clientIp(request))) {
     return NextResponse.json(
       { error: "Too many messages. Try again later." },
       { status: 429 },

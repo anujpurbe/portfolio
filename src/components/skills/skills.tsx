@@ -1,131 +1,103 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowDownRight } from "lucide-react";
-import { skillCategories, skills } from "@/data/skills";
+import { ArrowUpRight, Sparkles } from "lucide-react";
+import { aspiringStack, currentStack, type TechItem } from "@/data/skills";
 import { projects } from "@/data/projects";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
-import { cn } from "@/lib/utils";
+import { TechRing } from "@/components/skills/tech-ring";
 
-const categoryIntro: Record<string, string> = {
-  Languages: "What I write software in.",
-  "Core CS": "The fundamentals everything else rests on.",
-  Mathematics: "Applied math from coursework.",
-  Database: "Structured data, querying, modeling.",
-  Tools: "The everyday toolchain.",
-};
+function findItem(items: TechItem[], name: string) {
+  return items.find((item) => item.name === name) ?? null;
+}
+
+function AspiringChip({ item }: { item: TechItem }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent/40 hover:text-foreground">
+      <span className="size-1.5 rounded-full bg-accent/60" aria-hidden="true" />
+      {item.name}
+    </span>
+  );
+}
 
 export function Skills() {
   const [selected, setSelected] = useState<string | null>(null);
-
-  const selectedSkill = skills.find((s) => s.name === selected);
+  const selectedItem = selected
+    ? findItem(currentStack, selected)
+    : null;
 
   return (
     <Section
       id="skills"
-      eyebrow="Skills"
-      title="Evidence-backed, not self-rated"
-      description="No percentage bars — skills are grouped by area. Select a skill to see which project actually uses it."
+      eyebrow="Tech stack"
+      title="What I work with"
+      description="No percentage bars — tap a technology to see where it actually shows up in real work."
     >
-      <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="space-y-6">
-          {skillCategories.map((category) => {
-            const categorySkills = skills.filter(
-              (s) => s.category === category,
-            );
-            return (
-              <Reveal key={category}>
-                <div>
-                  <div className="mb-3 flex items-baseline gap-3">
-                    <h3 className="font-mono text-xs uppercase tracking-widest text-accent">
-                      {category}
-                    </h3>
-                    <p className="text-xs text-subtle">
-                      {categoryIntro[category]}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {categorySkills.map((skill) => {
-                      const active = selected === skill.name;
-                      return (
-                        <button
-                          key={skill.name}
-                          type="button"
-                          onClick={() =>
-                            setSelected(active ? null : skill.name)
-                          }
-                          aria-pressed={active}
-                          className={cn(
-                            "focus-ring rounded-lg border px-3.5 py-2 text-sm transition-colors",
-                            active
-                              ? "border-accent bg-accent-soft text-foreground"
-                              : "border-border bg-card text-muted hover:border-accent/50 hover:text-foreground",
-                          )}
-                        >
-                          {skill.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+      <div className="grid items-center gap-10 lg:grid-cols-2">
+        <Reveal>
+          <TechRing
+            items={currentStack}
+            selected={selected}
+            onSelect={setSelected}
+          />
+        </Reveal>
 
-        <Reveal delay={0.15}>
-          <div className="card sticky top-24 min-h-52 p-6">
-            <div className="mb-4 flex items-center gap-2">
+        <Reveal delay={0.1}>
+          <div className="card min-h-52 p-6">
+            <div className="mb-4 flex items-center justify-between">
               <span className="font-mono text-xs uppercase tracking-widest text-subtle">
-                Skill detail
+                Selected
               </span>
-              <ArrowDownRight className="size-3.5 text-subtle" />
+              {selectedItem && (
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  className="focus-ring rounded-md font-mono text-xs text-subtle hover:text-foreground"
+                >
+                  clear
+                </button>
+              )}
             </div>
 
             <AnimatePresence mode="wait">
-              {selectedSkill ? (
+              {selectedItem ? (
                 <motion.div
-                  key={selectedSkill.name}
+                  key={selectedItem.name}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
                 >
                   <h3 className="text-lg font-semibold">
-                    {selectedSkill.name}
+                    {selectedItem.name}
                   </h3>
-                  {selectedSkill.note && (
+                  {selectedItem.note && (
                     <p className="mt-2 text-sm leading-6 text-muted">
-                      {selectedSkill.note}
+                      {selectedItem.note}
                     </p>
                   )}
-                  {selectedSkill.usedIn.length > 0 ? (
+                  {selectedItem.usedIn && selectedItem.usedIn.length > 0 ? (
                     <div className="mt-4">
                       <p className="mb-2 text-xs uppercase tracking-widest text-subtle">
-                        Used in
+                        Where it shows up
                       </p>
                       <ul className="space-y-1.5">
-                        {selectedSkill.usedIn.map((slug) => {
-                          const project = projects.find(
-                            (p) => p.slug === slug,
-                          );
+                        {selectedItem.usedIn.map((slug) => {
+                          const project = projects.find((p) => p.slug === slug);
                           if (!project) return null;
                           return (
                             <li key={slug}>
-                              <a
-                                href="#projects"
-                                onClick={() =>
-                                  document
-                                    .getElementById("projects")
-                                    ?.scrollIntoView({ behavior: "smooth" })
-                                }
+                              <Link
+                                href={`/projects/${slug}`}
                                 className="focus-ring muted-link inline-flex items-center gap-1.5 rounded-md text-sm"
                               >
                                 <span className="text-accent">↳</span>
                                 {project.title}
-                              </a>
+                                <ArrowUpRight className="size-3" />
+                              </Link>
                             </li>
                           );
                         })}
@@ -133,8 +105,8 @@ export function Skills() {
                     </div>
                   ) : (
                     <p className="mt-3 text-sm leading-6 text-subtle">
-                      Learned and practiced — appears in coursework and personal
-                      work. Will be linked here as soon as a project uses it.
+                      Part of my everyday toolchain — linked to a project here
+                      as soon as one ships with it.
                     </p>
                   )}
                 </motion.div>
@@ -147,12 +119,24 @@ export function Skills() {
                   transition={{ duration: 0.2 }}
                 >
                   <p className="text-sm leading-6 text-subtle">
-                    Select a skill on the left to see where it shows up in real
-                    work.
+                    Tap a technology on the ring to see the evidence — which
+                    project uses it and what it does there.
                   </p>
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">
+              <Sparkles className="size-3.5" />
+              Aspiring to master
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {aspiringStack.map((item) => (
+                <AspiringChip key={item.name} item={item} />
+              ))}
+            </div>
           </div>
         </Reveal>
       </div>

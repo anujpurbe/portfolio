@@ -1,7 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import Image from "next/image";
-import { Binary, Table2 } from "lucide-react";
+import {
+  Activity,
+  BatteryCharging,
+  Binary,
+  LayoutGrid,
+  Table2,
+  Utensils,
+} from "lucide-react";
 import type { Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -14,25 +21,91 @@ function hasAsset(asset: string | undefined) {
   }
 }
 
+const placeholderConfig: Record<
+  string,
+  { icon: typeof Binary; tag: string; note: string; lines: string[] }
+> = {
+  "dsa-algorithms": {
+    icon: Binary,
+    tag: "java · dsa",
+    note: "/* source */",
+    lines: [
+      "Stack<Integer> stack = new Stack<>();",
+      "stack.push(1);",
+      "while (!stack.isEmpty()) {",
+      "  int top = stack.pop();",
+      "  // process top…",
+      "}",
+    ],
+  },
+  "sql-database": {
+    icon: Table2,
+    tag: "schema · sql",
+    note: "/* relational */",
+    lines: [
+      "SELECT u.name, o.total",
+      "FROM users u",
+      "JOIN orders o ON o.user_id = u.id",
+      "GROUP BY u.id",
+      "HAVING SUM(o.total) > 0;",
+    ],
+  },
+  hiingers: {
+    icon: Activity,
+    tag: "typescript · python",
+    note: "/* realtime */",
+    lines: [
+      "const socket = new WebSocket(url);",
+      "socket.onmessage = (event) => {",
+      "  const bid = JSON.parse(event.data);",
+      "  allocateHospitalBed(bid);",
+      "};",
+    ],
+  },
+  "atomic-endurance": {
+    icon: BatteryCharging,
+    tag: "python · pandas",
+    note: "/* data */",
+    lines: [
+      "df = pd.read_csv('cycles.csv')",
+      "capacity = df.groupby('cycle')",
+      "  ['discharge'].mean()",
+      "degradation = fit_curve(capacity)",
+      "predict_remaining_life()",
+    ],
+  },
+  foodiehub: {
+    icon: Utensils,
+    tag: "javascript · firebase",
+    note: "/* ordering */",
+    lines: [
+      "const order = await addDoc(cart, {",
+      "  items, total, customerId",
+      "});",
+      "sendPushNotification(order.id);",
+      "renderOrderConfirmation(order);",
+    ],
+  },
+  portfolio: {
+    icon: LayoutGrid,
+    tag: "typescript · next.js",
+    note: "/* this site */",
+    lines: [
+      "export default function Home() {",
+      "  return (",
+      "    <Suspense fallback={null}>",
+      "      <Section id='projects' />",
+      "    </Suspense>",
+      "  );",
+      "}",
+    ],
+  },
+};
+
 function Placeholder({ project }: { project: Project }) {
-  const isDatabase = project.slug === "sql-database";
-  const lines = isDatabase
-    ? [
-        "SELECT u.name, o.total",
-        "FROM users u",
-        "JOIN orders o ON o.user_id = u.id",
-        "GROUP BY u.id",
-        "HAVING SUM(o.total) > 0;",
-      ]
-    : [
-        "Stack<Integer> stack = new Stack<>();",
-        "stack.push(1);",
-        "while (!stack.isEmpty()) {",
-        "  int top = stack.pop();",
-        "  // process top…",
-        "}",
-      ];
-  const Icon = isDatabase ? Table2 : Binary;
+  const config = placeholderConfig[project.slug] ?? placeholderConfig.portfolio;
+  const Icon = config.icon;
+  const lines = config.lines;
 
   return (
     <div
@@ -42,12 +115,7 @@ function Placeholder({ project }: { project: Project }) {
     >
       <div className="bg-grid absolute inset-0" aria-hidden="true" />
       <div
-        className={cn(
-          "absolute -top-10 -right-10 size-40 rounded-full blur-3xl",
-          isDatabase
-            ? "bg-emerald-500/10 dark:bg-emerald-500/15"
-            : "bg-accent/15 dark:bg-accent/20",
-        )}
+        className="absolute -top-10 -right-10 size-40 rounded-full bg-accent/15 blur-3xl dark:bg-accent/20"
         aria-hidden="true"
       />
       <div className="relative w-full p-6">
@@ -57,11 +125,11 @@ function Placeholder({ project }: { project: Project }) {
               <Icon className="size-4" />
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-subtle">
-              {isDatabase ? "schema · sql" : "java · dsa"}
+              {config.tag}
             </span>
           </div>
           <span className="font-mono text-[10px] text-subtle">
-            {isDatabase ? "/* relational */" : "/* source */"}
+            {config.note}
           </span>
         </div>
         <div className="overflow-hidden rounded-lg border border-border bg-navy-900/80 p-3 font-mono text-[11px] leading-5 text-emerald-300/90 shadow-lg dark:bg-black/40">

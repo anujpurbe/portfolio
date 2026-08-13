@@ -2,16 +2,37 @@ import { ArrowRight, Download, Eye, Mail } from "lucide-react";
 import { site } from "@/data/site";
 import { profile } from "@/data/profile";
 import { Button } from "@/components/ui/button";
+import { Magnetic } from "@/components/ui/magnetic";
 import { Reveal } from "@/components/ui/reveal";
+import { HeroNetwork } from "@/components/hero/hero-network";
 import { SystemDiagram } from "@/components/hero/system-diagram";
+import { RotatingWord } from "@/components/hero/rotating-word";
 import { ProfilePhoto } from "@/components/hero/profile-photo";
 import { ParallaxFrame } from "@/components/hero/parallax-frame";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
+const verbs = ["BUILD", "SOLVE", "DESIGN", "LEARN", "CREATE"];
+
+const socials = [
+  {
+    label: "GitHub",
+    href: site.socials.github.href,
+    external: true,
+    icon: GithubIcon,
+  },
+  {
+    label: "LinkedIn",
+    href: site.socials.linkedin.href,
+    external: true,
+    icon: LinkedinIcon,
+  },
+];
+
 export function Hero() {
   return (
     <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
+      <HeroNetwork />
       <div
         className="bg-grid pointer-events-none absolute inset-0"
         aria-hidden="true"
@@ -47,6 +68,9 @@ export function Hero() {
             <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-6xl">
               {profile.heroName}
             </h1>
+            <p className="mt-3 font-mono text-lg tracking-wide text-muted sm:text-xl">
+              I <RotatingWord words={verbs} />
+            </p>
           </Reveal>
 
           <Reveal delay={0.16}>
@@ -73,33 +97,29 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={0.32}>
-            <ul className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <li>
-                <a
-                  href={site.socials.github.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="focus-ring muted-link inline-flex items-center gap-2 rounded-md text-sm"
-                >
-                  <GithubIcon className="size-4" />
-                  {site.socials.github.handle}
-                </a>
-              </li>
-              <li>
-                <a
-                  href={site.socials.linkedin.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="focus-ring muted-link inline-flex items-center gap-2 rounded-md text-sm"
-                >
-                  <LinkedinIcon className="size-4" />
-                  {site.socials.linkedin.handle}
-                </a>
-              </li>
+            <ul className="mt-10 flex flex-wrap items-center gap-3">
+              {socials.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <li key={social.label}>
+                    <Magnetic strength={0.25}>
+                      <a
+                        href={social.href}
+                        target={social.external ? "_blank" : undefined}
+                        rel={social.external ? "noopener noreferrer" : undefined}
+                        className="focus-ring muted-link inline-flex items-center gap-2 rounded-md border border-border bg-surface/60 px-4 py-2 text-sm shadow-sm transition-colors hover:border-accent/50 hover:text-foreground"
+                      >
+                        <Icon className="size-4" />
+                        {social.label}
+                      </a>
+                    </Magnetic>
+                  </li>
+                );
+              })}
               <li>
                 <a
                   href={site.socials.email.href}
-                  className="focus-ring muted-link inline-flex items-center gap-2 rounded-md text-sm"
+                  className="focus-ring muted-link inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm"
                 >
                   <Mail className="size-4" />
                   {site.socials.email.handle}
@@ -110,15 +130,19 @@ export function Hero() {
         </div>
 
         <Reveal delay={0.2} y={28}>
-          <div className="mx-auto w-full max-w-md lg:max-w-none">
-            <ParallaxFrame className="relative">
-              <div
-                className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent/20 to-transparent blur-2xl"
-                aria-hidden="true"
-              />
-              <ProfilePhoto className="relative shadow-elevated" priority />
+          <div className="flex flex-col items-center gap-8">
+            <ParallaxFrame>
+              <div className="relative">
+                <div
+                  className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent/20 to-transparent blur-2xl"
+                  aria-hidden="true"
+                />
+                <div className="relative w-52 sm:w-60">
+                  <ProfilePhoto priority />
+                </div>
+              </div>
             </ParallaxFrame>
-            <div className="mt-8">
+            <div className="w-full max-w-md" data-cursor="drag">
               <SystemDiagram steps={profile.heroSystem} />
             </div>
           </div>

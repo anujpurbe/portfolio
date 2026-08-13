@@ -1,5 +1,5 @@
 import { GraduationCap, MapPin } from "lucide-react";
-import { education } from "@/data/profile";
+import { education } from "@/data/education";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { Badge } from "@/components/ui/badge";

@@ -1,84 +1,74 @@
-import type { Skill } from "@/lib/types";
+export type TechItem = {
+  name: string;
+  short: string;
+  usedIn?: string[];
+  note?: string;
+};
 
-export const skills: Skill[] = [
+export const currentStack: TechItem[] = [
   {
     name: "Python",
-    category: "Languages",
-    usedIn: ["dsa-algorithms", "sql-database"],
-    note: "Advanced developer training; used for scripting and problem solving.",
+    short: "PY",
+    usedIn: ["hiingers"],
+    note: "FastAPI backend work; scripting and problem solving.",
   },
   {
     name: "Java",
-    category: "Languages",
+    short: "JV",
     usedIn: ["dsa-algorithms"],
-    note: "Core OOP language for DSA implementations.",
+    note: "Core OOP language — my DSA implementations live here.",
   },
   {
-    name: "SQL",
-    category: "Languages",
-    usedIn: ["sql-database"],
-    note: "JOINs, GROUP BY, aggregation, schema design.",
+    name: "TypeScript",
+    short: "TS",
+    usedIn: ["portfolio", "hiingers"],
+    note: "Typed frontend work in Next.js and React tooling.",
   },
   {
-    name: "HTML",
-    category: "Languages",
-    usedIn: [],
-    note: "Web fundamentals.",
+    name: "React",
+    short: "RC",
+    usedIn: ["portfolio"],
+    note: "Component model behind this site and my React-based builds.",
   },
   {
-    name: "CSS",
-    category: "Languages",
-    usedIn: [],
-    note: "Web fundamentals.",
+    name: "HTML / CSS",
+    short: "HT",
+    usedIn: ["atomic-endurance", "foodiehub"],
+    note: "Semantic markup and responsive styling across my web projects.",
   },
   {
-    name: "Data Structures & Algorithms",
-    category: "Core CS",
-    usedIn: ["dsa-algorithms"],
-    note: "Stacks, queues, linked lists, trees, recursion; 100+ problems solved.",
-  },
-  {
-    name: "Object-Oriented Programming",
-    category: "Core CS",
-    usedIn: ["dsa-algorithms"],
-    note: "Encapsulation, inheritance, polymorphism in Java.",
-  },
-  {
-    name: "Complexity Analysis",
-    category: "Core CS",
-    usedIn: ["dsa-algorithms"],
-    note: "Time and space complexity, optimization.",
-  },
-  {
-    name: "Linear Algebra",
-    category: "Mathematics",
-    usedIn: [],
-    note: "Eigenvalues, QR decomposition, orthogonality.",
-  },
-  {
-    name: "MySQL",
-    category: "Database",
-    usedIn: ["sql-database"],
-    note: "Normalized relational schemas, query tuning.",
+    name: "JavaScript",
+    short: "JS",
+    usedIn: ["foodiehub", "atomic-endurance"],
+    note: "Interactive web features and cart logic in FoodieHub.",
   },
   {
     name: "Git",
-    category: "Tools",
-    usedIn: [],
-    note: "Version control workflow.",
+    short: "GT",
+    note: "Version control for every repo I ship.",
   },
   {
-    name: "VS Code",
-    category: "Tools",
-    usedIn: [],
-    note: "Primary editor.",
+    name: "DSA",
+    short: "DS",
+    usedIn: ["dsa-algorithms"],
+    note: "Stacks, queues, linked lists, trees, recursion — 100+ problems solved.",
+  },
+  {
+    name: "Supabase",
+    short: "SB",
+    note: "Backend for this site's contact and comments.",
+  },
+  {
+    name: "Claude API",
+    short: "CA",
+    note: "AI-assisted development workflows.",
   },
 ];
 
-export const skillCategories: Skill["category"][] = [
-  "Languages",
-  "Core CS",
-  "Mathematics",
-  "Database",
-  "Tools",
+export const aspiringStack: TechItem[] = [
+  { name: "Flask", short: "FL", note: "Lightweight Python web frameworks." },
+  { name: "NLP", short: "NL", note: "Language models and text processing." },
+  { name: "ML", short: "ML", note: "Machine learning fundamentals." },
+  { name: "SQL", short: "SQ", note: "Deeper query optimization and tuning." },
+  { name: "Node.js", short: "ND", note: "JavaScript on the server." },
 ];

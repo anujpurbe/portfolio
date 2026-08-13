@@ -19,6 +19,8 @@ const statusLabel: Record<string, string> = {
   "in-progress": "In progress",
 };
 
+const vizProjects = projects.filter((project) => project.visualization);
+
 function ProjectDemo({ slug }: { slug: string }) {
   if (slug === "dsa-algorithms") return <DsaVisualization />;
   return <DatabaseVisualization />;
@@ -36,7 +38,11 @@ export function Projects() {
         {projects.map((project, i) => (
           <Reveal key={project.slug} delay={i * 0.1}>
             <article className="card group flex h-full flex-col overflow-hidden">
-              <div className="relative overflow-hidden">
+              <a
+                href={`/projects/${project.slug}`}
+                data-cursor="project"
+                className="focus-ring relative block overflow-hidden"
+              >
                 <ProjectCover
                   project={project}
                   className="rounded-none border-x-0 border-t-0"
@@ -46,7 +52,11 @@ export function Projects() {
                     {statusLabel[project.status]}
                   </span>
                 </div>
-              </div>
+                <span className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-1.5 bg-accent/95 py-2 text-sm font-medium text-accent-foreground backdrop-shell transition-transform duration-300 group-hover:translate-y-0">
+                  View case study
+                  <ArrowUpRight className="size-4" />
+                </span>
+              </a>
 
               <div className="flex flex-1 flex-col p-6 sm:p-7">
                 <div className="mb-3 flex items-center justify-between gap-4">
@@ -58,7 +68,12 @@ export function Projects() {
                 </div>
 
                 <h3 className="text-xl font-semibold tracking-tight">
-                  {project.title}
+                  <a
+                    href={`/projects/${project.slug}`}
+                    className="focus-ring rounded-md transition-colors hover:text-accent"
+                  >
+                    {project.title}
+                  </a>
                 </h3>
                 <p className="mt-3 leading-7 text-muted">
                   {project.description}
@@ -100,7 +115,7 @@ export function Projects() {
                   </div>
                 </details>
 
-                <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
+                <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-border pt-5">
                   {project.github && (
                     <a
                       href={project.github}
@@ -124,6 +139,13 @@ export function Projects() {
                       <ArrowUpRight className="size-3.5" />
                     </a>
                   )}
+                  <a
+                    href={`/projects/${project.slug}`}
+                    className="focus-ring inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-accent"
+                  >
+                    Case study
+                    <ArrowUpRight className="size-3.5" />
+                  </a>
                 </div>
               </div>
             </article>
@@ -131,30 +153,34 @@ export function Projects() {
         ))}
       </div>
 
-      <Reveal delay={0.1}>
-        <div className="mt-10 flex flex-wrap items-center gap-2 text-subtle">
-          <MousePointer2 className="size-4" />
-          <p className="font-mono text-xs uppercase tracking-widest">
-            Engineering previews — run the ideas behind these projects
-          </p>
-        </div>
-      </Reveal>
-
-      <div className="mt-5 grid gap-6 lg:grid-cols-2">
-        {projects.map((project, i) => (
-          <Reveal key={`${project.slug}-demo`} delay={i * 0.08}>
-            <div className="card flex h-full flex-col p-6">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold">{project.title}</h3>
-                <Badge className="text-[10px]">interactive</Badge>
-              </div>
-              <div className={cn("min-h-72 flex-1")}>
-                <ProjectDemo slug={project.slug} />
-              </div>
+      {vizProjects.length > 0 && (
+        <>
+          <Reveal delay={0.1}>
+            <div className="mt-10 flex flex-wrap items-center gap-2 text-subtle">
+              <MousePointer2 className="size-4" />
+              <p className="font-mono text-xs uppercase tracking-widest">
+                Engineering previews — run the ideas behind these projects
+              </p>
             </div>
           </Reveal>
-        ))}
-      </div>
+
+          <div className="mt-5 grid gap-6 lg:grid-cols-2">
+            {vizProjects.map((project, i) => (
+              <Reveal key={`${project.slug}-demo`} delay={i * 0.08}>
+                <div className="card flex h-full flex-col p-6">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold">{project.title}</h3>
+                    <Badge className="text-[10px]">interactive</Badge>
+                  </div>
+                  <div className={cn("min-h-72 flex-1")}>
+                    <ProjectDemo slug={project.slug} />
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </>
+      )}
     </Section>
   );
 }

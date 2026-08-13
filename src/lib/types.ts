@@ -19,23 +19,12 @@ export type Project = {
   problem?: string;
   approach?: string;
   architecture?: string;
+  challenges?: string;
+  solutions?: string;
   results?: string;
   lessons?: string;
+  visualization?: "dsa" | "database";
   media?: ProjectMedia;
-};
-
-export type SkillCategory =
-  | "Languages"
-  | "Core CS"
-  | "Mathematics"
-  | "Database"
-  | "Tools";
-
-export type Skill = {
-  name: string;
-  category: SkillCategory;
-  usedIn: string[];
-  note?: string;
 };
 
 export type Certification = {
@@ -55,6 +44,15 @@ export type EducationItem = {
   details?: string;
   coursework?: string[];
   highlight?: string;
+};
+
+export type JourneyNode = {
+  label: string;
+  period?: string;
+  title?: string;
+  items?: string[];
+  text?: string;
+  current?: boolean;
 };
 
 export type Achievement = {

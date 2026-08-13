@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
 import { site } from "@/data/site";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer/footer";
 import "./globals.css";
+
+const Cursor = dynamic(() =>
+  import("@/components/cursor/cursor").then((mod) => mod.Cursor),
+);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -83,6 +88,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {children}
           </main>
           <Footer />
+          <Cursor />
         </ThemeProvider>
       </body>
     </html>

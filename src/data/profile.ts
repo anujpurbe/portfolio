@@ -1,7 +1,6 @@
 import type {
   Achievement,
   Certification,
-  EducationItem,
 } from "@/lib/types";
 
 export const profile = {
@@ -25,33 +24,6 @@ export const profile = {
     exploring: ["Competitive Programming", "AI", "Backend Architecture"],
   },
 };
-
-export const education: EducationItem[] = [
-  {
-    institution: "Amrita Vishwa Vidyapeetham",
-    location: "Chennai, India",
-    period: "2024 – Present",
-    degree: "B.Tech, Computer Engineering",
-    details:
-      "Relevant coursework: Data Structures, Algorithms, Linear Algebra, Object-Oriented Programming, Database Systems.",
-    coursework: [
-      "Data Structures",
-      "Algorithms",
-      "Linear Algebra",
-      "Object-Oriented Programming",
-      "Database Systems",
-    ],
-  },
-  {
-    institution: "Nightingale International School",
-    location: "Nepal",
-    period: "2022 – 2024",
-    degree: "Higher Secondary (+2), Computer Science",
-    details: "4.00 GPA — Top 3 Rank.",
-    highlight: "4.00 GPA · Top 3 Rank",
-    coursework: ["Computer Science", "Mathematics", "Physics"],
-  },
-];
 
 export const achievements: Achievement[] = [
   {

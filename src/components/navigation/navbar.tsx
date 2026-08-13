@@ -5,11 +5,32 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FileText, Menu, Send, X } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  Home,
+  Mail,
+  Menu,
+  Send,
+  Trophy,
+  User,
+  Wrench,
+  X,
+} from "lucide-react";
 import { site } from "@/data/site";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GithubIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+
+const navIcons: Record<string, { icon: typeof Home; label: string }> = {
+  Home: { icon: Home, label: "Home" },
+  About: { icon: User, label: "About" },
+  Projects: { icon: Wrench, label: "Projects" },
+  Skills: { icon: Wrench, label: "Skills" },
+  Achievements: { icon: Trophy, label: "Achievements" },
+  Journal: { icon: BookOpen, label: "Journal" },
+  Contact: { icon: Mail, label: "Contact" },
+};
 
 function useScrolled() {
   const [scrolled, setScrolled] = useState(false);
@@ -22,23 +43,40 @@ function useScrolled() {
   return scrolled;
 }
 
-const sectionIds = ["about", "projects", "skills", "achievements", "contact"];
+const sectionIds = [
+  "about",
+  "skills",
+  "projects",
+  "github",
+  "leetcode",
+  "certifications",
+  "journey",
+  "comments",
+  "contact",
+];
 
 function useActiveSection() {
   const [active, setActive] = useState<string | null>(null);
   useEffect(() => {
+    let raf = 0;
     const onScroll = () => {
-      const probe = window.scrollY + window.innerHeight * 0.35;
-      let current: string | null = null;
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el && el.offsetTop <= probe) current = id;
-      }
-      setActive(current);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const probe = window.scrollY + window.innerHeight * 0.35;
+        let current: string | null = null;
+        for (const id of sectionIds) {
+          const el = document.getElementById(id);
+          if (el && el.offsetTop <= probe) current = id;
+        }
+        setActive(current);
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
   return active;
 }
@@ -60,24 +98,28 @@ export function Navbar() {
           : "bg-transparent",
       )}
     >
-      <div className="container-shell flex h-16 items-center justify-between gap-4">
+      <div className="container-shell flex h-[72px] items-center justify-between gap-4">
         <Link
           href="/"
-          className="focus-ring flex items-center gap-2 rounded-md font-semibold tracking-tight"
+          className="focus-ring flex items-center gap-3 rounded-lg font-semibold tracking-tight"
           aria-label="Home"
         >
-          <Image
-            src={site.logo}
-            alt={site.name}
-            width={1254}
-            height={1254}
-            className="size-7 rounded-lg border border-border/40 object-cover shadow-sm"
-            priority
-          />
+          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm sm:size-11 lg:size-12">
+            <Image
+              src={site.logo}
+              alt={site.name}
+              width={1254}
+              height={1254}
+              className="size-9 rounded-lg object-cover sm:size-9 lg:size-10"
+              priority
+            />
+          </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
           {site.nav.map((item) => {
+            const meta = navIcons[item.label];
+            const Icon = meta?.icon ?? Home;
             const isHash = item.href.startsWith("/#");
             const isActive = isHash
               ? onHome && active === item.href.slice(2)
@@ -89,12 +131,19 @@ export function Navbar() {
                 key={item.label}
                 href={item.href}
                 className={cn(
-                  "focus-ring relative rounded-md px-3 py-2 text-sm transition-colors",
+                  "focus-ring group relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors",
                   isActive
                     ? "font-medium text-foreground"
                     : "text-muted hover:text-foreground",
                 )}
               >
+                <Icon
+                  className={cn(
+                    "size-3.5 transition-transform duration-200 group-hover:-translate-y-0.5",
+                    isActive ? "text-accent" : "text-subtle",
+                  )}
+                  aria-hidden="true"
+                />
                 {item.label}
                 {isActive && (
                   <motion.span
@@ -113,8 +162,8 @@ export function Navbar() {
             href={site.socials.github.href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="GitHub profile"
-            className="focus-ring hidden size-9 place-items-center rounded-md text-muted transition-colors hover:text-foreground sm:grid"
+            aria-label="GitHub"
+            className="focus-ring grid size-9 place-items-center rounded-md text-muted transition-colors hover:text-foreground"
           >
             <GithubIcon className="size-4" />
           </a>
@@ -160,25 +209,32 @@ export function Navbar() {
             aria-label="Mobile"
           >
             <div className="container-shell flex flex-col py-3">
-              {site.nav.map((item, i) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.04 * i, duration: 0.2 }}
-                >
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="focus-ring flex items-center justify-between rounded-md px-2 py-2.5 text-sm text-muted transition-colors hover:text-foreground"
+              {site.nav.map((item, i) => {
+                const meta = navIcons[item.label];
+                const Icon = meta?.icon ?? Home;
+                return (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.04 * i, duration: 0.2 }}
                   >
-                    {item.label}
-                    <span className="font-mono text-[10px] text-subtle">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="focus-ring flex items-center justify-between rounded-md px-2 py-2.5 text-sm text-muted transition-colors hover:text-foreground"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Icon className="size-4 text-subtle" aria-hidden="true" />
+                        {item.label}
+                      </span>
+                      <span className="font-mono text-[10px] text-subtle">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
               <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-border px-2 pt-3 pb-1">
                 <a
                   href={site.socials.github.href}
