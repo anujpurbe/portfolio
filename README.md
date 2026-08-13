@@ -21,7 +21,12 @@ Live at **https://anuj-purbe-portfolio.vercel.app**
   no backend is configured.
 - **Precise build log** — the homepage changelog is generated from the real
   git history of this repository (real hashes, real dates).
-- Light/dark theme, reduced-motion aware, system cursor (no custom cursor).
+- **ask://anuj** — an AI portfolio assistant in the hero. Grounded in the real
+  data files, it answers questions, returns rich result cards, and navigates
+  the site (scroll targets + external links, all whitelisted). Works without
+  an AI key via a deterministic local engine.
+- Light/dark theme, reduced-motion aware, subtle custom cursor (faint accent
+  ring follower; auto-disabled on touch and reduced motion).
 
 ## Stack
 
@@ -64,6 +69,10 @@ degrades gracefully when keys are missing — sections show honest
 | `NEXT_PUBLIC_GITHUB_USERNAME` | GitHub section | Yes |
 | `GITHUB_TOKEN` | Contribution heatmap + trend (GraphQL, public read PAT) | No |
 | `NEXT_PUBLIC_LEETCODE_USERNAME` | LeetCode stats | No |
+| `AI_API_KEY` | ask://anuj — enables the AI-powered answers | No |
+| `AI_BASE_URL` | OpenAI-compatible endpoint (default `https://api.openai.com/v1`) | No |
+| `AI_MODEL` | Model name (default `gpt-4o-mini`) | No |
+| `AI_TIMEOUT_MS` | AI request timeout (default `15000`) | No |
 | `EMAILJS_SERVICE_ID` / `EMAILJS_TEMPLATE_ID` / `EMAILJS_PUBLIC_KEY` | Contact email delivery | One channel required for the form |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Contact storage + comments + admin | One channel required for the form |
 | `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` | Admin panel at `/admin` | No |
@@ -89,6 +98,25 @@ access token with the `read:user` and `repo` (or `public_repo`) scopes and
 set it as `GITHUB_TOKEN`. Without it the heatmap shows an honest
 "unavailable" card instead of fake data.
 
+### ask://anuj
+
+The hero assistant posts to `POST /api/ask` with `{ message }`. The route
+rate-limits per IP (12/min), validates the input (≤ 400 chars), and answers
+from two grounded sources:
+
+1. **AI mode** — if `AI_API_KEY` is set, an OpenAI-compatible chat completions
+   call returns a strict JSON structure (`{ answer, actions, results }`). The
+   server validates every action against a whitelist and resolves every result
+   id against the real portfolio data files, so the assistant cannot invent
+   links or facts.
+2. **Local mode** — without a key (or when the AI call fails), a deterministic
+   keyword/intent engine answers from the same data files, so the assistant
+   always works.
+
+The model prompt is injected with a prompt-injection guard, and the answer is
+bounded. The knowledge source of truth is `src/data/`. The AI key is
+server-side only and never reaches the browser.
+
 ## Architecture
 
 ```
@@ -97,7 +125,7 @@ src/
   components/   Section components and UI primitives
   content/journal/  MDX journal entries
   data/         All site content + build-log changelog
-  lib/          Types, data-fetching helpers, auth, rate limiting
+  lib/          Types, data-fetching helpers, auth, rate limiting, ask engine
 supabase/
   schema.sql    Backend tables (messages, comments)
 public/

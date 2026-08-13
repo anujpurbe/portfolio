@@ -6,6 +6,15 @@ import type {
 
 const GH_API = "https://api.github.com";
 
+// Repos that aren't representative portfolio work (profile README, an old
+// university project) are excluded from live GitHub data at the data layer.
+// The list is case-insensitive; nothing is hidden via CSS.
+const EXCLUDED_REPOS = ["anujpurbe", "goma-bhusal-portfolio"];
+
+function isExcludedRepo(name: string): boolean {
+  return EXCLUDED_REPOS.includes(name.toLowerCase());
+}
+
 type GitHubUserResponse = {
   login: string;
   name: string | null;
@@ -136,7 +145,9 @@ export async function getGitHubStars(
     if (!res.ok) return null;
     const json: unknown = await res.json();
     if (!isRepoResponse(json)) return null;
-    return json.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+    return json
+      .filter((repo) => !isExcludedRepo(repo.name))
+      .reduce((sum, repo) => sum + repo.stargazers_count, 0);
   } catch {
     return null;
   }
@@ -161,6 +172,7 @@ export async function getGitHubLanguages(
     if (!isRepoResponse(json)) return null;
     const counts = new Map<string, number>();
     for (const repo of json) {
+      if (isExcludedRepo(repo.name)) continue;
       if (repo.language) {
         counts.set(repo.language, (counts.get(repo.language) ?? 0) + 1);
       }
@@ -191,14 +203,16 @@ export async function getGitHubRepos(
     if (!res.ok) return null;
     const json: unknown = await res.json();
     if (!isRepoResponse(json)) return null;
-    return json.map((repo) => ({
-      name: repo.name,
-      description: repo.description,
-      htmlUrl: repo.html_url,
-      language: repo.language,
-      stars: repo.stargazers_count,
-      updatedAt: repo.updated_at,
-    }));
+    return json
+      .filter((repo) => !isExcludedRepo(repo.name))
+      .map((repo) => ({
+        name: repo.name,
+        description: repo.description,
+        htmlUrl: repo.html_url,
+        language: repo.language,
+        stars: repo.stargazers_count,
+        updatedAt: repo.updated_at,
+      }));
   } catch {
     return null;
   }

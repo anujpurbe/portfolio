@@ -3,7 +3,6 @@ export const profile = {
   heroName: "Anuj Purbe",
   heroTagline:
     "I build efficient, well-structured software with a focus on data structures, algorithms, databases, and practical problem solving.",
-  heroSystem: ["PROBLEM", "ALGORITHM", "CODE", "DATA", "RESULT"],
   photo: {
     alt: "Portrait of Anuj Purbe",
   },

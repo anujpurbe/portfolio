@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Magnetic } from "@/components/ui/magnetic";
 import { Reveal } from "@/components/ui/reveal";
 import { HeroNetwork } from "@/components/hero/hero-network";
-import { SystemDiagram } from "@/components/hero/system-diagram";
+import { AskAnuj } from "@/components/hero/ask-anuj";
 import { RotatingWord } from "@/components/hero/rotating-word";
 import { ProfilePhoto } from "@/components/hero/profile-photo";
 import { ParallaxFrame } from "@/components/hero/parallax-frame";
@@ -151,7 +151,7 @@ export function Hero() {
               </div>
             </ParallaxFrame>
             <div className="w-full max-w-md">
-              <SystemDiagram steps={profile.heroSystem} />
+              <AskAnuj />
             </div>
           </div>
         </Reveal>
