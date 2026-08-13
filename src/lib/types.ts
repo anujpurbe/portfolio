@@ -31,6 +31,8 @@ export type Certification = {
   title: string;
   issuer?: string;
   date?: string;
+  description?: string;
+  thumbnail?: string;
   preview?: string;
   file?: string;
   credentialId?: string;
@@ -53,7 +55,6 @@ export type Achievement = {
   context?: string;
   year?: string;
   details?: string;
-  verified: boolean;
   proof?: {
     image?: string;
     file?: string;

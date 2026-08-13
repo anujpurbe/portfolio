@@ -40,7 +40,6 @@ export function Projects() {
             <article className="card group flex h-full flex-col overflow-hidden">
               <a
                 href={`/projects/${project.slug}`}
-                data-cursor="project"
                 className="focus-ring relative block overflow-hidden"
               >
                 <ProjectCover

@@ -38,7 +38,12 @@ export function Hero() {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px] dark:bg-accent/15"
+        className="orb -top-32 left-[8%] h-80 w-80 bg-accent/15 animate-orb-drift dark:bg-accent/20"
+        aria-hidden="true"
+      />
+      <div
+        className="orb top-1/3 right-[4%] h-72 w-72 bg-violet-400/10 animate-orb-drift dark:bg-violet-500/10"
+        style={{ animationDelay: "-6s" }}
         aria-hidden="true"
       />
 
@@ -128,17 +133,24 @@ export function Hero() {
         <Reveal delay={0.2} y={28}>
           <div className="flex flex-col items-center gap-8">
             <ParallaxFrame>
-              <div className="relative">
+              <div className="group relative">
                 <div
-                  className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent/20 to-transparent blur-2xl"
+                  className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-accent/20 to-transparent opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
                   aria-hidden="true"
                 />
-                <div className="relative w-52 sm:w-60">
-                  <ProfilePhoto priority />
+                <div
+                  className="photo-ring photo-ring-anim"
+                  aria-hidden="true"
+                />
+                <div className="relative w-56 animate-float sm:w-72">
+                  <ProfilePhoto
+                    priority
+                    className="transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
                 </div>
               </div>
             </ParallaxFrame>
-            <div className="w-full max-w-md" data-cursor="drag">
+            <div className="w-full max-w-md">
               <SystemDiagram steps={profile.heroSystem} />
             </div>
           </div>

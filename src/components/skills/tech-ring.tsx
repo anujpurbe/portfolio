@@ -267,7 +267,6 @@ export function TechRing({
     <div className="flex flex-col items-center gap-6">
       <div
         ref={ringRef}
-        data-cursor="drag"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

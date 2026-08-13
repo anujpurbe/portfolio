@@ -83,34 +83,34 @@ export function SystemDiagram({ steps }: { steps: string[] }) {
       <style>{[...xFrames, ...yFrames].join("")}</style>
       <div
         aria-hidden="true"
-        className="grid gap-y-2 rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur-sm transition-transform duration-300 ease-out will-change-transform sm:p-5"
+        className="rounded-2xl border border-border bg-surface/60 p-3.5 backdrop-blur-sm transition-transform duration-300 ease-out will-change-transform sm:p-4"
         style={{
           transform:
             "rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))",
         }}
       >
-        <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center">
+        <div className="flex flex-col items-stretch gap-1.5 md:flex-row md:items-center md:gap-2">
           {steps.map((step, i) => {
             const Icon = icons[step] ?? Target;
             const isLast = i === steps.length - 1;
             return (
               <div
                 key={step}
-                className="flex flex-col items-center gap-2 md:flex-1 md:flex-row"
+                className="flex flex-col items-center gap-1.5 md:flex-1 md:flex-row md:gap-2"
               >
                 <div
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 transition-colors hover:ring-1 hover:ring-accent/50 md:w-auto md:flex-1",
+                    "flex min-w-0 w-full items-center justify-center gap-1.5 rounded-lg border px-2 py-2 md:w-auto md:flex-1",
                     colors[i % colors.length],
                   )}
                 >
-                  <Icon className="size-4 shrink-0" strokeWidth={2} />
-                  <span className="font-mono text-xs font-medium tracking-wide">
+                  <Icon className="size-3.5 shrink-0" strokeWidth={2} />
+                  <span className="truncate font-mono text-[10px] font-medium tracking-wide sm:text-[11px]">
                     {step}
                   </span>
                 </div>
                 {!isLast && (
-                  <div className="relative h-6 w-0.5 md:h-0.5 md:w-8 lg:w-12">
+                  <div className="relative h-4 w-0.5 md:h-0.5 md:w-4 lg:w-6">
                     <span className="absolute inset-0 rounded-full bg-border" />
                     <span
                       className={cn(
@@ -126,7 +126,7 @@ export function SystemDiagram({ steps }: { steps: string[] }) {
           })}
         </div>
 
-        <div className="mt-2 border-t border-border pt-3 text-center">
+        <div className="mt-2 border-t border-border pt-2.5 text-center">
           <p className="font-mono text-[11px] tracking-wide text-subtle">
             how I think — dsa first, always
           </p>

@@ -34,7 +34,7 @@ export function Button({
 } & Omit<React.ComponentProps<typeof Link>, "href" | "children">) {
   const external = href.startsWith("http");
   const classes = cn(
-    "focus-ring inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150",
+    "focus-ring btn-lift inline-flex items-center justify-center gap-2 rounded-lg font-medium",
     variantClasses[variant],
     sizeClasses[size],
     className,

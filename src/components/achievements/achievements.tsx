@@ -34,16 +34,9 @@ export function Achievements() {
                   <Icon className="size-5" />
                 </span>
                 <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold leading-6">
-                      {achievement.title}
-                    </h3>
-                    {!achievement.verified && (
-                      <span className="rounded-full border border-border bg-surface px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-subtle">
-                        Verification pending
-                      </span>
-                    )}
-                  </div>
+                  <h3 className="font-semibold leading-6">
+                    {achievement.title}
+                  </h3>
                   <p className="mt-1 text-sm text-subtle">
                     {achievement.context}
                     {achievement.year ? ` · ${achievement.year}` : ""}

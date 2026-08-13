@@ -2,6 +2,7 @@ import Image from "next/image";
 import {
   Activity,
   ArrowUpRight,
+  BarChart3,
   CalendarDays,
   Code2,
   Folder,
@@ -13,6 +14,7 @@ import { site } from "@/data/site";
 import { coding } from "@/data/coding";
 import {
   getContributions,
+  getGitHubLanguages,
   getGitHubRepos,
   getGitHubStars,
   getGitHubUser,
@@ -20,6 +22,7 @@ import {
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { ContributionHeatmap } from "@/components/github/contribution-heatmap";
+import { ContributionTrend } from "@/components/github/contribution-trend";
 
 function formatYear(date: string) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -58,11 +61,12 @@ function UnavailableCard() {
 export async function GithubActivity() {
   const username =
     process.env.NEXT_PUBLIC_GITHUB_USERNAME ?? site.githubUsername;
-  const [user, repos, weeks, stars] = await Promise.all([
+  const [user, repos, weeks, stars, languages] = await Promise.all([
     getGitHubUser(username),
     getGitHubRepos(username),
     getContributions(username, process.env.GITHUB_TOKEN),
     getGitHubStars(username),
+    getGitHubLanguages(username),
   ]);
 
   return (
@@ -146,7 +150,10 @@ export async function GithubActivity() {
           <Reveal>
             <div className="card p-6">
               {weeks && weeks.length > 0 ? (
-                <ContributionHeatmap weeks={weeks} />
+                <>
+                  <ContributionHeatmap weeks={weeks} />
+                  <ContributionTrend weeks={weeks} />
+                </>
               ) : (
                 <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -205,6 +212,29 @@ export async function GithubActivity() {
               </div>
             </div>
           </Reveal>
+
+          {languages && languages.length > 0 && (
+            <Reveal>
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">
+                  <BarChart3 className="size-3.5" /> Languages across repos
+                </h3>
+                <div className="card flex flex-wrap items-center gap-x-6 gap-y-3 p-5">
+                  {languages.map(({ language, count }) => (
+                    <span
+                      key={language}
+                      className="inline-flex items-center gap-2 text-sm"
+                    >
+                      <span className="font-mono text-subtle">{language}</span>
+                      <span className="font-mono text-xs text-subtle">
+                        ×{count}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          )}
 
           {repos && repos.length > 0 && (
             <Reveal>

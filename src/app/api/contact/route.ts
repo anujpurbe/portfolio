@@ -78,7 +78,7 @@ async function storeViaSupabase(
   if (!url || !key) return false;
 
   try {
-    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/contact_messages`, {
+    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/messages`, {
       method: "POST",
       headers: {
         apikey: key,

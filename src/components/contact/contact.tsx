@@ -110,15 +110,15 @@ export function Contact() {
         <Reveal>
           <div className="space-y-4">
             <p className="leading-7 text-muted">
-              The fastest way to reach me is{" "}
+              Open to software engineering internships, projects, and
+              collaborations. For a quick note, email me at{" "}
               <a
                 href={site.socials.email.href}
                 className="focus-ring text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
               >
                 {site.socials.email.handle}
-              </a>
-              . If you&apos;d rather use the form, I usually reply within a day or
-              two.
+              </a>{" "}
+              — or use the form and I&apos;ll reply within a day or two.
             </p>
             <a
               href={site.resume}
@@ -184,6 +184,7 @@ export function Contact() {
                     id="contact-name"
                     name="name"
                     type="text"
+                    required
                     autoComplete="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -215,6 +216,7 @@ export function Contact() {
                     id="contact-email"
                     name="email"
                     type="email"
+                    required
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -245,9 +247,10 @@ export function Contact() {
                   Subject
                 </label>
                 <input
-                  id="contact-subject"
-                  name="subject"
-                  type="text"
+                    id="contact-subject"
+                    name="subject"
+                    type="text"
+                    required
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Software engineering internship"
@@ -282,6 +285,7 @@ export function Contact() {
                   id="contact-message"
                   name="message"
                   rows={5}
+                  required
                   value={message}
                   onChange={(e) =>
                     setMessage(e.target.value.slice(0, MAX_MESSAGE))
@@ -321,7 +325,7 @@ export function Contact() {
                 <button
                   type="submit"
                   disabled={status === "sending"}
-                  className="focus-ring inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className="focus-ring btn-lift inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground disabled:opacity-60"
                 >
                   {status === "sending" ? (
                     <>

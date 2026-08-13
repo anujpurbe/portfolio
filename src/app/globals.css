@@ -59,6 +59,8 @@
   --animate-flow-y: flow-y 2s ease-in-out infinite;
   --animate-dash: dash 1.6s linear infinite;
   --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-orb-drift: orb-drift 14s ease-in-out infinite;
 
   @keyframes flow-x {
     0% {
@@ -107,6 +109,32 @@
     }
     50% {
       opacity: 1;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes orb-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, -6%, 0) scale(1.08);
+    }
+  }
+
+  @keyframes ring-spin {
+    to {
+      transform: rotate(1turn);
     }
   }
 }
@@ -170,26 +198,6 @@
     border-radius: 4px;
   }
 
-  .custom-cursor-active,
-  .custom-cursor-active a,
-  .custom-cursor-active button,
-  .custom-cursor-active [role="button"],
-  .custom-cursor-active summary,
-  .custom-cursor-active input,
-  .custom-cursor-active textarea,
-  .custom-cursor-active select,
-  .custom-cursor-active label {
-    cursor: none !important;
-  }
-
-  .cursor-host {
-    display: none;
-  }
-
-  .custom-cursor-active .cursor-host {
-    display: block;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -234,11 +242,27 @@
   .card-hover {
     transition: border-color 0.2s ease, box-shadow 0.2s ease,
       transform 0.2s ease;
+    will-change: transform;
   }
 
   .card-hover:hover {
     border-color: oklch(0.52 0.2 265 / 0.45);
     box-shadow: var(--shadow-elevated);
+    transform: translateY(-2px);
+  }
+
+  .btn-lift {
+    transition: transform 0.15s ease, box-shadow 0.15s ease,
+      opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .btn-lift:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-lift:active {
+    transform: translateY(0);
   }
 
   .focus-ring {
@@ -293,5 +317,37 @@
   .backdrop-shell {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  .photo-ring {
+    position: absolute;
+    inset: -10px;
+    border-radius: 30px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0%,
+      oklch(0.52 0.2 265 / 0.7) 8%,
+      transparent 26%
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  .group:hover .photo-ring,
+  .photo-ring:focus-within {
+    opacity: 1;
+  }
+
+  .photo-ring-anim {
+    animation: ring-spin 6s linear infinite;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: orb-drift 14s ease-in-out infinite;
   }
 }

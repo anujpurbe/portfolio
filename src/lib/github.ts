@@ -142,6 +142,38 @@ export async function getGitHubStars(
   }
 }
 
+export async function getGitHubLanguages(
+  username: string,
+): Promise<{ language: string; count: number }[] | null> {
+  try {
+    const res = await fetch(
+      `${GH_API}/users/${username}/repos?sort=created&per_page=100&type=owner`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "User-Agent": "anujpurbe-portfolio",
+        },
+        next: { revalidate: 86400 },
+      },
+    );
+    if (!res.ok) return null;
+    const json: unknown = await res.json();
+    if (!isRepoResponse(json)) return null;
+    const counts = new Map<string, number>();
+    for (const repo of json) {
+      if (repo.language) {
+        counts.set(repo.language, (counts.get(repo.language) ?? 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .map(([language, count]) => ({ language, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+  } catch {
+    return null;
+  }
+}
+
 export async function getGitHubRepos(
   username: string,
 ): Promise<GitHubRepo[] | null> {

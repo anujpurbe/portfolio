@@ -14,7 +14,6 @@ export const education: EducationItem[] = [
     location: "Nepal",
     period: "2022 – 2024",
     degree: "Higher Secondary (+2), Computer Science",
-    details: "4.00 GPA — Top 3 Rank.",
     highlight: "4.00 GPA · Top 3 Rank",
     coursework: ["Computer Science", "Mathematics", "Physics"],
   },

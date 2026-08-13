@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Award, BadgeCheck, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { Award, Download, ExternalLink } from "lucide-react";
 import { certifications } from "@/data/certifications";
 import type { Certification } from "@/lib/types";
 import { Section } from "@/components/ui/section";
@@ -22,7 +23,7 @@ export function Certifications() {
       id="certifications"
       eyebrow="Credentials"
       title="Certifications"
-      description="Evidence-backed — click a card to open the original certificate."
+      description="Evidence-backed — open any card to view the original certificate."
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {certifications.map((cert, i) => {
@@ -30,27 +31,67 @@ export function Certifications() {
           return (
             <Reveal key={cert.title} delay={i * 0.06}>
               {viewable ? (
-                <button
-                  type="button"
-                  onClick={() => openCertificate(cert)}
-                  className="card card-hover focus-ring flex h-full w-full flex-col items-start gap-3 p-5 text-left"
-                >
-                  <Award className="size-5 text-accent" />
-                  <span>
-                  <span className="block text-sm font-semibold">
-                    {cert.title}
-                  </span>
-                  {cert.issuer && (
-                    <span className="mt-1 block font-mono text-xs text-subtle">
-                      {cert.issuer}
+                <article className="card card-hover group flex h-full flex-col overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => openCertificate(cert)}
+                    aria-haspopup="dialog"
+                    aria-label={`View ${cert.title} certificate`}
+                    className="focus-ring block w-full text-left"
+                  >
+                    {cert.thumbnail && (
+                      <span className="relative block aspect-[3/2] w-full overflow-hidden border-b border-border bg-surface-2">
+                        <Image
+                          src={cert.thumbnail}
+                          alt={`${cert.title} certificate preview`}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                          className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                        />
+                      </span>
+                    )}
+                    <span className="flex flex-col gap-1.5 px-5 pt-4">
+                      <span className="flex items-start gap-2">
+                        <Award className="mt-0.5 size-4 shrink-0 text-accent" />
+                        <span className="block text-sm font-semibold leading-5">
+                          {cert.title}
+                        </span>
+                      </span>
+                      {(cert.issuer || cert.date) && (
+                        <span className="block font-mono text-xs text-subtle">
+                          {cert.issuer}
+                          {cert.issuer && cert.date ? " · " : ""}
+                          {cert.date}
+                        </span>
+                      )}
+                      {cert.description && (
+                        <span className="mt-1 block text-sm leading-5 text-muted">
+                          {cert.description}
+                        </span>
+                      )}
                     </span>
-                  )}
-                  </span>
-                  <span className="mt-auto flex items-center gap-1.5 rounded-md border border-emerald-500/40 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                    <BadgeCheck className="size-3" />
-                    View certificate
-                  </span>
-                </button>
+                  </button>
+                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-border px-5 py-3">
+                    <button
+                      type="button"
+                      onClick={() => openCertificate(cert)}
+                      aria-haspopup="dialog"
+                      className="focus-ring btn-lift inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground"
+                    >
+                      View certificate
+                    </button>
+                    {cert.file && (
+                      <a
+                        href={cert.file}
+                        download
+                        className="focus-ring btn-lift inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent/50 hover:text-foreground"
+                      >
+                        <Download className="size-3.5" />
+                        Download
+                      </a>
+                    )}
+                  </div>
+                </article>
               ) : (
                 <div className="card flex h-full flex-col items-start gap-3 p-5">
                   <Award className="size-5 text-accent" />

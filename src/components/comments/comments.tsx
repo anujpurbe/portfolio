@@ -150,6 +150,7 @@ export function Comments() {
                   id="comment-name"
                   name="name"
                   type="text"
+                  required
                   autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -178,6 +179,7 @@ export function Comments() {
                   id="comment-message"
                   name="comment"
                   rows={4}
+                  required
                   value={comment}
                   onChange={(e) =>
                     setComment(e.target.value.slice(0, MAX_COMMENT))
@@ -210,7 +212,7 @@ export function Comments() {
                 <button
                   type="submit"
                   disabled={status === "sending"}
-                  className="focus-ring inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className="focus-ring btn-lift inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground disabled:opacity-60"
                 >
                   {status === "sending" ? (
                     <>

@@ -28,6 +28,7 @@ export function CertificateViewer({
 
   useEffect(() => {
     if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -37,6 +38,7 @@ export function CertificateViewer({
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      previous?.focus?.();
     };
   }, [open, onClose]);
 
