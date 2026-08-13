@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -65,12 +66,14 @@ export function Navbar() {
           className="focus-ring flex items-center gap-2 rounded-md font-semibold tracking-tight"
           aria-label="Home"
         >
-          <span className="grid size-7 place-items-center rounded-md bg-accent font-mono text-xs font-bold text-accent-foreground">
-            {site.initials}
-          </span>
-          <span className="hidden text-sm text-foreground sm:inline">
-            {site.name}
-          </span>
+          <Image
+            src={site.logo}
+            alt={site.name}
+            width={1254}
+            height={1254}
+            className="size-7 rounded-lg border border-border/40 object-cover shadow-sm"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">

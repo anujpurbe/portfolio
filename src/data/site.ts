@@ -2,6 +2,7 @@ export const site = {
   name: "Anuj Purbe",
   fullName: "Anuj Purbe",
   initials: "AP",
+  logo: "/logo.png",
   role: "Computer Engineering Undergraduate",
   url: "https://anuj-purbe-portfolio.vercel.app",
   email: "anujpurbe123@gmail.com",
