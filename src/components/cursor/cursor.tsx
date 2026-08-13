@@ -1,12 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 type Mode = "default" | "link" | "project" | "drag";
 
 const LABELS: Partial<Record<Mode, string>> = {
   project: "VIEW",
   drag: "DRAG",
+};
+
+const shapeClass: Record<Mode, string> = {
+  default: "size-10 border-accent/50 bg-accent/[0.06]",
+  link: "size-[3.75rem] border-accent bg-accent/10",
+  project: "size-[4.5rem] border-accent bg-accent/15",
+  drag: "size-[4.5rem] border-accent bg-accent/15",
 };
 
 export function Cursor() {
@@ -45,7 +53,11 @@ export function Cursor() {
         setMode(cursorTarget.dataset.cursor as Mode);
         return;
       }
-      if (el?.closest("a, button, [role='button'], summary, input, textarea, select, label")) {
+      if (
+        el?.closest(
+          "a, button, [role='button'], summary, input, textarea, select, label",
+        )
+      ) {
         setMode("link");
         return;
       }
@@ -80,12 +92,7 @@ export function Cursor() {
     };
   }, []);
 
-  const modeClass =
-    mode === "link"
-      ? "scale-150 border-accent/70"
-      : mode === "project" || mode === "drag"
-        ? "scale-[2.2] border-accent bg-accent/10"
-        : "";
+  const showLabel = mode === "project" || mode === "drag";
 
   return (
     <div
@@ -94,19 +101,25 @@ export function Cursor() {
     >
       <div
         ref={dotRef}
-        className="absolute -top-px -left-px size-2 rounded-full bg-accent"
+        className="absolute -top-px -left-px size-2.5 rounded-full bg-accent shadow-glow"
         style={{ transform: "translate(-100px, -100px)" }}
       />
       <div
         ref={ringRef}
-        className={`absolute top-0 left-0 flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border transition-[border-color,background-color,transform] duration-300 ${modeClass}`}
+        className="absolute top-0 left-0 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
         style={{ transform: "translate(-100px, -100px)" }}
       >
-        {mode === "project" || mode === "drag" ? (
-          <span className="font-mono text-[9px] font-semibold text-accent">
+        <span
+          className={cn(
+            "block rotate-45 rounded-[0.35rem] border transition-[width,height,border-color,background-color] duration-300",
+            shapeClass[mode],
+          )}
+        />
+        {showLabel && (
+          <span className="absolute font-mono text-[10px] font-semibold tracking-widest text-accent">
             {LABELS[mode]}
           </span>
-        ) : null}
+        )}
       </div>
     </div>
   );

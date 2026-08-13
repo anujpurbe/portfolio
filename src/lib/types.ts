@@ -33,7 +33,9 @@ export type Certification = {
   date?: string;
   preview?: string;
   file?: string;
+  credentialId?: string;
   verificationUrl?: string;
+  linkedinUrl?: string;
 };
 
 export type EducationItem = {
@@ -46,25 +48,44 @@ export type EducationItem = {
   highlight?: string;
 };
 
-export type JourneyNode = {
-  label: string;
-  period?: string;
-  title?: string;
-  items?: string[];
-  text?: string;
-  current?: boolean;
-};
-
 export type Achievement = {
   title: string;
   context?: string;
   year?: string;
   details?: string;
+  verified: boolean;
   proof?: {
     image?: string;
     file?: string;
     url?: string;
   };
+};
+
+export type AcademicSemester = {
+  id: string;
+  name: string;
+  period: string;
+  status: "completed" | "upcoming";
+  credits?: number;
+  note?: string;
+  subjects: string[];
+};
+
+export type AcademicDomain = {
+  name: string;
+  items: string[];
+};
+
+export type AcademicJourney = {
+  degree: string;
+  institution: string;
+  campus: string;
+  creditsCompleted: number;
+  semestersCompleted: number;
+  totalSemesters: number;
+  domains: AcademicDomain[];
+  semesters: AcademicSemester[];
+  selectedCoursework: string[];
 };
 
 export type JournalEntryMeta = {

@@ -28,7 +28,7 @@ function validate(
   return errors;
 }
 
-export function Contact({ configured: initiallyConfigured }: { configured: boolean }) {
+export function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -36,7 +36,16 @@ export function Contact({ configured: initiallyConfigured }: { configured: boole
   const [honey, setHoney] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [configured, setConfigured] = useState(initiallyConfigured);
+
+  function openMailto() {
+    const body = `${message}\n\n— ${name} (${email})`;
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.assign(
+      `${site.socials.email.href}?subject=${encodeURIComponent(
+        subject,
+      )}&body=${encodeURIComponent(body)}`,
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,7 +75,12 @@ export function Contact({ configured: initiallyConfigured }: { configured: boole
         configured?: boolean;
       } | null;
       if (!res.ok) {
-        setConfigured(json?.configured ?? true);
+        if (json?.configured === false) {
+          // No backend configured on this deployment — hand off to email.
+          openMailto();
+          setStatus("success");
+          return;
+        }
         throw new Error("send failed");
       }
       setStatus("success");
@@ -156,212 +170,201 @@ export function Contact({ configured: initiallyConfigured }: { configured: boole
         </Reveal>
 
         <Reveal delay={0.1}>
-          {!configured ? (
-            <div className="card flex flex-col items-start gap-3 p-6">
-              <p className="text-sm font-medium">
-                Form isn&apos;t wired up yet
-              </p>
-              <p className="text-sm leading-6 text-muted">
-                EmailJS environment variables aren&apos;t set on this deployment.
-                Until they are, reach me directly at{" "}
-                <a
-                  href={site.socials.email.href}
-                  className="focus-ring text-accent underline decoration-accent/30 underline-offset-4"
-                >
-                  {site.socials.email.handle}
-                </a>
-                .
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} noValidate>
-              <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="contact-name"
-                      className="mb-1.5 block text-sm font-medium"
-                    >
-                      Name
-                    </label>
-                    <input
-                      id="contact-name"
-                      name="name"
-                      type="text"
-                      autoComplete="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Ada Lovelace"
-                      aria-invalid={Boolean(errors.name)}
-                      aria-describedby={
-                        errors.name ? "contact-name-error" : undefined
-                      }
-                      className={inputClass("name")}
-                    />
-                    {errors.name && (
-                      <p
-                        id="contact-name-error"
-                        role="alert"
-                        className="mt-1.5 text-xs text-red-500"
-                      >
-                        {errors.name}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="contact-email"
-                      className="mb-1.5 block text-sm font-medium"
-                    >
-                      Email
-                    </label>
-                    <input
-                      id="contact-email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="ada@example.com"
-                      aria-invalid={Boolean(errors.email)}
-                      aria-describedby={
-                        errors.email ? "contact-email-error" : undefined
-                      }
-                      className={inputClass("email")}
-                    />
-                    {errors.email && (
-                      <p
-                        id="contact-email-error"
-                        role="alert"
-                        className="mt-1.5 text-xs text-red-500"
-                      >
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label
-                    htmlFor="contact-subject"
+                    htmlFor="contact-name"
                     className="mb-1.5 block text-sm font-medium"
                   >
-                    Subject
+                    Name
                   </label>
                   <input
-                    id="contact-subject"
-                    name="subject"
+                    id="contact-name"
+                    name="name"
                     type="text"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Software engineering internship"
-                    aria-invalid={Boolean(errors.subject)}
+                    autoComplete="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ada Lovelace"
+                    aria-invalid={Boolean(errors.name)}
                     aria-describedby={
-                      errors.subject ? "contact-subject-error" : undefined
+                      errors.name ? "contact-name-error" : undefined
                     }
-                    className={inputClass("subject")}
+                    className={inputClass("name")}
                   />
-                  {errors.subject && (
+                  {errors.name && (
                     <p
-                      id="contact-subject-error"
+                      id="contact-name-error"
                       role="alert"
                       className="mt-1.5 text-xs text-red-500"
                     >
-                      {errors.subject}
+                      {errors.name}
                     </p>
                   )}
                 </div>
-
                 <div>
                   <label
-                    htmlFor="contact-message"
-                    className="mb-1.5 flex items-center justify-between text-sm font-medium"
+                    htmlFor="contact-email"
+                    className="mb-1.5 block text-sm font-medium"
                   >
-                    Message
-                    <span className="font-mono text-xs text-subtle">
-                      {message.length}/{MAX_MESSAGE}
-                    </span>
+                    Email
                   </label>
-                  <textarea
-                    id="contact-message"
-                    name="message"
-                    rows={5}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE))}
-                    placeholder="Tell me about the role, project, or idea…"
-                    aria-invalid={Boolean(errors.message)}
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ada@example.com"
+                    aria-invalid={Boolean(errors.email)}
                     aria-describedby={
-                      errors.message ? "contact-message-error" : undefined
+                      errors.email ? "contact-email-error" : undefined
                     }
-                    className={cn(inputClass("message"), "resize-y")}
+                    className={inputClass("email")}
                   />
-                  {errors.message && (
+                  {errors.email && (
                     <p
-                      id="contact-message-error"
+                      id="contact-email-error"
                       role="alert"
                       className="mt-1.5 text-xs text-red-500"
                     >
-                      {errors.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="hidden" aria-hidden="true">
-                  <label htmlFor="contact-website">Website</label>
-                  <input
-                    id="contact-website"
-                    name="website"
-                    type="text"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    value={honey}
-                    onChange={(e) => setHoney(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-4 pt-1">
-                  <button
-                    type="submit"
-                    disabled={status === "sending"}
-                    className="focus-ring inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
-                  >
-                    {status === "sending" ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin" />
-                        Sending…
-                      </>
-                    ) : (
-                      <>
-                        <Send className="size-4" />
-                        Send message
-                      </>
-                    )}
-                  </button>
-
-                  {status === "success" && (
-                    <p
-                      role="status"
-                      className="inline-flex items-center gap-1.5 text-sm text-emerald-500"
-                    >
-                      <CheckCircle2 className="size-4" />
-                      Message sent — thanks!
-                    </p>
-                  )}
-                  {status === "error" && (
-                    <p
-                      role="alert"
-                      className="inline-flex items-center gap-1.5 text-sm text-red-500"
-                    >
-                      <XCircle className="size-4" />
-                      {configured
-                        ? "Something went wrong. Email me directly instead."
-                        : "Form isn't configured yet."}
+                      {errors.email}
                     </p>
                   )}
                 </div>
               </div>
-            </form>
-          )}
+
+              <div>
+                <label
+                  htmlFor="contact-subject"
+                  className="mb-1.5 block text-sm font-medium"
+                >
+                  Subject
+                </label>
+                <input
+                  id="contact-subject"
+                  name="subject"
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Software engineering internship"
+                  aria-invalid={Boolean(errors.subject)}
+                  aria-describedby={
+                    errors.subject ? "contact-subject-error" : undefined
+                  }
+                  className={inputClass("subject")}
+                />
+                {errors.subject && (
+                  <p
+                    id="contact-subject-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-500"
+                  >
+                    {errors.subject}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="contact-message"
+                  className="mb-1.5 flex items-center justify-between text-sm font-medium"
+                >
+                  Message
+                  <span className="font-mono text-xs text-subtle">
+                    {message.length}/{MAX_MESSAGE}
+                  </span>
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  rows={5}
+                  value={message}
+                  onChange={(e) =>
+                    setMessage(e.target.value.slice(0, MAX_MESSAGE))
+                  }
+                  placeholder="Tell me about the role, project, or idea…"
+                  aria-invalid={Boolean(errors.message)}
+                  aria-describedby={
+                    errors.message ? "contact-message-error" : undefined
+                  }
+                  className={cn(inputClass("message"), "resize-y")}
+                />
+                {errors.message && (
+                  <p
+                    id="contact-message-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-500"
+                  >
+                    {errors.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="contact-website">Website</label>
+                <input
+                  id="contact-website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honey}
+                  onChange={(e) => setHoney(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-1">
+                <button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="focus-ring inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                >
+                  {status === "sending" ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="size-4" />
+                      Send message
+                    </>
+                  )}
+                </button>
+
+                {status === "success" && (
+                  <p
+                    role="status"
+                    className="inline-flex items-center gap-1.5 text-sm text-emerald-500"
+                  >
+                    <CheckCircle2 className="size-4" />
+                    Message sent successfully. I&apos;ll get back to you as soon
+                    as I can.
+                  </p>
+                )}
+                {status === "error" && (
+                  <p
+                    role="alert"
+                    className="inline-flex items-center gap-1.5 text-sm text-red-500"
+                  >
+                    <XCircle className="size-4" />
+                    Something went wrong. Please try again or email me{" "}
+                    <a
+                      href={site.socials.email.href}
+                      className="underline decoration-red-500/40 underline-offset-4"
+                    >
+                      directly
+                    </a>
+                    .
+                  </p>
+                )}
+              </div>
+            </div>
+          </form>
         </Reveal>
       </div>
     </Section>

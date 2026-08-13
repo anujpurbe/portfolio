@@ -7,21 +7,14 @@ import { Skills } from "@/components/skills/skills";
 import { Projects } from "@/components/projects/projects";
 import { Achievements } from "@/components/achievements/achievements";
 import { Education } from "@/components/education/education";
+import { AcademicJourney } from "@/components/education/academic-journey";
 import { Certifications } from "@/components/certifications/certifications";
-import { LearningJourney } from "@/components/education/learning-journey";
 import { GithubActivity } from "@/components/github/github-activity";
 import { LeetCodeSection } from "@/components/coding/leetcode-section";
 import { JournalSection } from "@/components/journal/journal-section";
 import { Comments } from "@/components/comments/comments";
 import { Contact } from "@/components/contact/contact";
 import { SectionSkeleton } from "@/components/ui/section-skeleton";
-
-const contactConfigured = Boolean(
-  (process.env.EMAILJS_SERVICE_ID &&
-    process.env.EMAILJS_TEMPLATE_ID &&
-    process.env.EMAILJS_PUBLIC_KEY) ||
-    (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
-);
 
 export default function Home() {
   return (
@@ -34,6 +27,7 @@ export default function Home() {
       <Projects />
       <Achievements />
       <Education />
+      <AcademicJourney />
       <Certifications />
       <Suspense fallback={<SectionSkeleton label="Loading GitHub data…" />}>
         <GithubActivity />
@@ -41,10 +35,9 @@ export default function Home() {
       <Suspense fallback={<SectionSkeleton label="Loading coding stats…" />}>
         <LeetCodeSection />
       </Suspense>
-      <LearningJourney />
       <JournalSection />
       <Comments />
-      <Contact configured={contactConfigured} />
+      <Contact />
     </>
   );
 }

@@ -19,13 +19,13 @@ export function Section({
   align?: "left" | "center";
 }) {
   return (
-    <section id={id} className={cn("scroll-mt-24 py-20 sm:py-28", className)}>
+    <section id={id} className={cn("scroll-mt-24 py-16 sm:py-20", className)}>
       <div className="container-shell">
         {(eyebrow || title) && (
           <Reveal>
             <header
               className={cn(
-                "mb-12 max-w-2xl",
+                "mb-10 max-w-2xl",
                 align === "center" && "mx-auto text-center",
               )}
             >

@@ -38,18 +38,12 @@ export function ProfilePhoto({
           className="absolute -top-16 -right-16 size-56 rounded-full bg-accent/15 blur-3xl"
           aria-hidden="true"
         />
-        <div className="relative">
+        <div className="relative flex flex-1 flex-col justify-end">
           <p className="font-mono text-[11px] uppercase tracking-widest text-subtle">
             portrait
           </p>
-          <p className="mt-2 font-mono text-5xl font-bold tracking-tight">
+          <p className="mt-2 font-mono text-6xl font-bold tracking-tight">
             {site.initials}
-          </p>
-          <p className="mt-2 text-xs text-subtle">
-            Drop your photo at{" "}
-            <code className="rounded bg-surface px-1 py-0.5 font-mono text-[10px]">
-              public/images/profile/anuj-purbe.webp
-            </code>
           </p>
         </div>
       </div>

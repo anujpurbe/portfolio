@@ -50,7 +50,7 @@ const sectionIds = [
   "github",
   "leetcode",
   "certifications",
-  "journey",
+  "academic",
   "comments",
   "contact",
 ];

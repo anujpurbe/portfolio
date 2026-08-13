@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s — ${site.name}`,
   },
   description:
-    "Anuj Purbe is a computer engineering undergraduate at Amrita Vishwa Vidyapeetham who builds efficient, well-structured software grounded in data structures, algorithms, and systems thinking. Open to software engineering internships.",
+    "Anuj Purbe is a computer engineering undergraduate at Amrita Vishwa Vidyapeetham who builds efficient, well-structured software with a focus on data structures, algorithms, databases, and practical problem solving. Open to software engineering internships.",
   keywords: [
     "Anuj Purbe",
     "Computer Engineering",

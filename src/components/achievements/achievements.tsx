@@ -1,5 +1,5 @@
 import { ExternalLink, Image as ImageIcon, Paperclip, Trophy, Users } from "lucide-react";
-import { achievements } from "@/data/profile";
+import { achievements } from "@/data/achievements";
 import type { Achievement } from "@/lib/types";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
@@ -34,9 +34,16 @@ export function Achievements() {
                   <Icon className="size-5" />
                 </span>
                 <div className="flex-1">
-                  <h3 className="font-semibold leading-6">
-                    {achievement.title}
-                  </h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold leading-6">
+                      {achievement.title}
+                    </h3>
+                    {!achievement.verified && (
+                      <span className="rounded-full border border-border bg-surface px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-subtle">
+                        Verification pending
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-1 text-sm text-subtle">
                     {achievement.context}
                     {achievement.year ? ` · ${achievement.year}` : ""}

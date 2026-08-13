@@ -28,9 +28,34 @@ const colors = [
   "text-cyan-300 bg-cyan-400/10 border-cyan-400/20",
 ];
 
+// A single pulse travels left-to-right through the connectors in sequence.
+// Each connector gets its own keyframes so the pulse only moves during its
+// window of the shared cycle (STEP * connectorCount).
+function buildKeyframes(n: number) {
+  const step = 0.45;
+  const total = step * n;
+  const f = 100 / n;
+  const xFrames: string[] = [];
+  const yFrames: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const start = i * f;
+    const fadeIn = start + f * 0.2;
+    const fadeOut = start + f * 0.8;
+    const end = (i + 1) * f;
+    xFrames.push(`@keyframes pulse-x-${i}{0%{left:0;opacity:0}${start}%{left:0;opacity:0}${fadeIn}%{left:0;opacity:1}${fadeOut}%{left:calc(100% - 6px);opacity:1}${end}%{left:calc(100% - 6px);opacity:0}100%{left:calc(100% - 6px);opacity:0}}`);
+    yFrames.push(`@keyframes pulse-y-${i}{0%{top:0;opacity:0}${start}%{top:0;opacity:0}${fadeIn}%{top:0;opacity:1}${fadeOut}%{top:calc(100% - 6px);opacity:1}${end}%{top:calc(100% - 6px);opacity:0}100%{top:calc(100% - 6px);opacity:0}}`);
+  }
+  return {
+    total,
+    xFrames,
+    yFrames,
+  };
+}
+
 export function SystemDiagram({ steps }: { steps: string[] }) {
   const reduceMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
+  const { total, xFrames, yFrames } = buildKeyframes(steps.length);
 
   function onPointerMove(e: React.PointerEvent) {
     if (reduceMotion || !ref.current) return;
@@ -55,6 +80,7 @@ export function SystemDiagram({ steps }: { steps: string[] }) {
       onPointerLeave={onPointerLeave}
       className="[perspective:1200px] select-none"
     >
+      <style>{[...xFrames, ...yFrames].join("")}</style>
       <div
         aria-hidden="true"
         className="grid gap-y-2 rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur-sm transition-transform duration-300 ease-out will-change-transform sm:p-5"
@@ -74,7 +100,7 @@ export function SystemDiagram({ steps }: { steps: string[] }) {
               >
                 <div
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 md:w-auto md:flex-1",
+                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 transition-colors hover:ring-1 hover:ring-accent/50 md:w-auto md:flex-1",
                     colors[i % colors.length],
                   )}
                 >
@@ -90,11 +116,8 @@ export function SystemDiagram({ steps }: { steps: string[] }) {
                       className={cn(
                         "absolute size-1.5 rounded-full bg-accent",
                         !reduceMotion &&
-                          "animate-flow-y md:animate-flow-x",
+                          `animate-[pulse-y-${i}_${total}s_linear_infinite] md:animate-[pulse-x-${i}_${total}s_linear_infinite]`,
                       )}
-                      style={{
-                        animationDuration: `${1.8 + i * 0.35}s`,
-                      }}
                     />
                   </div>
                 )}

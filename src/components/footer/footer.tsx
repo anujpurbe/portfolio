@@ -12,7 +12,7 @@ export function Footer() {
         <div className="flex flex-col items-center gap-1 text-center sm:items-start sm:text-left">
           <p className="text-sm font-medium">{site.fullName}</p>
           <p className="text-xs text-subtle">
-            © {year} Anuj Purbe · Computer Engineering Undergraduate
+            © {year} Anuj Purbe. All rights reserved.
           </p>
         </div>
 

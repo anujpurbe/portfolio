@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Award, BadgeCheck, ExternalLink } from "lucide-react";
-import { certifications } from "@/data/profile";
+import { certifications } from "@/data/certifications";
 import type { Certification } from "@/lib/types";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
@@ -67,6 +67,17 @@ export function Certifications() {
                       className="focus-ring muted-link mt-auto inline-flex items-center gap-1 rounded-md text-xs font-medium"
                     >
                       Verify
+                      <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                  {cert.linkedinUrl && (
+                    <a
+                      href={cert.linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="focus-ring muted-link mt-auto inline-flex items-center gap-1 rounded-md text-xs font-medium"
+                    >
+                      View on LinkedIn
                       <ExternalLink className="size-3" />
                     </a>
                   )}

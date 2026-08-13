@@ -1,4 +1,4 @@
-import { ArrowRight, Download, Eye, Mail } from "lucide-react";
+import { ArrowRight, Eye, Mail } from "lucide-react";
 import { site } from "@/data/site";
 import { profile } from "@/data/profile";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ const socials = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
+    <section className="relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-20">
       <HeroNetwork />
       <div
         className="bg-grid pointer-events-none absolute inset-0"
@@ -88,10 +88,6 @@ export function Hero() {
               <Button href={site.resume} variant="outline">
                 <Eye className="size-4" />
                 View Resume
-              </Button>
-              <Button href={site.resumeDownload} variant="ghost" download>
-                <Download className="size-4" />
-                Download
               </Button>
             </div>
           </Reveal>
