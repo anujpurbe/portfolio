@@ -9,19 +9,22 @@ export const profile = {
   about: [
     {
       heading: "Who I am",
-      text: "I'm a computer engineering undergraduate at Amrita Vishwa Vidyapeetham with a strong foundation in data structures, algorithms, object-oriented programming, and relational databases.",
+      text: "Computer engineering undergraduate at Amrita Vishwa Vidyapeetham, focused on DSA, OOP, and relational databases.",
     },
     {
       heading: "What I build",
-      text: "Most of my work lives in two places: Java-based DSA and algorithm implementations, and SQL-backed database design. I've also shipped full-stack web projects like Hiingers and this portfolio.",
+      text: "Java/DSA implementations, SQL-backed systems, and full-stack apps like Hiingers and this site.",
+      href: "/#projects",
     },
     {
       heading: "What I'm learning",
-      text: "Backend development and system design — and staying consistent with competitive programming through daily problem practice.",
+      text: "Backend development, system design, and daily competitive programming.",
+      href: "/#skills",
     },
     {
       heading: "Where I'm headed",
-      text: "Toward a software engineering internship where I can build production software and learn how real systems are engineered.",
+      text: "A software engineering internship building real production systems.",
+      href: "/#contact",
     },
   ],
   currently: {

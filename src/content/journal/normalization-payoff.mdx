@@ -4,14 +4,14 @@ export const meta = {
   date: "2026-06-30",
   tags: ["databases", "sql", "backend"],
   excerpt:
-    "What designing a normalized relational schema for a mini project actually taught me about writing SQL that doesn't fight you.",
+    "What designing a normalized relational schema for a mini project actually taught me about writing SQL that doesn't fight you — and how it changed my data model.",
 };
 
-Normalization felt like theory until I designed a real relational schema for a database mini project. Now I think about it as *removing ways for data to disagree with itself*.
+Normalization felt like theory until I designed a real relational schema for a [database mini project](/projects/sql-database). Now I think about it as *removing ways for data to disagree with itself*.
 
 ## What I learned the hard way
 
-**Denormalization hides the bug until the bug is expensive.** Early on I stored `student_name` alongside `student_id` in every table that referenced a student. The JOINs were simpler — and updating a name meant remembering to update it everywhere. One forgotten update and reports quietly disagreed.
+**Denormalization hides the bug until the bug is expensive.** Early on I stored `student_name` alongside `student_id` in every table that referenced a student. The JOINs were simpler — and updating a name meant remembering to update it everywhere. One forgotten update and reports quietly disagreed. The bug wasn't in a query; it was in the *shape of the data*.
 
 **JOIN, GROUP BY, and aggregation are only as good as the schema.** Clean up the schema and queries read like English:
 
@@ -23,6 +23,16 @@ HAVING COUNT(*) > 3;
 ```
 
 That's not clever SQL. It's SQL that's *allowed* to be simple because the schema already did the hard work.
+
+## The schema behind the query
+
+For my project I modeled a small ordering system across five tables — `users`, `orders`, `order_items`, `products`, `payments` — normalized to third normal form. The payoff showed up the moment I wrote aggregation queries: because every fact lived in exactly one place, a `GROUP BY` over orders never had to worry about duplicated rows inflating a count, and a payment never referenced a product that had since been renamed. The database enforced the invariants, so my queries didn't have to.
+
+## What changed
+
+Since this project I read every schema I touch through the same lens: **where can this data disagree with itself?** That question now comes before writing a single query.
+
+You can walk through the normalized schema interactively on the [SQL database project page](/projects/sql-database) — the schema explorer lets you trace a foreign key end to end.
 
 ## The takeaway
 

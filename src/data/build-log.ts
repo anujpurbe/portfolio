@@ -2,13 +2,11 @@
 // repository and its deployment timeline. Nothing here is invented — hashes
 // and dates come from `git log`, deployment facts from Vercel.
 export type BuildLogCategory =
-  | "Init"
   | "Architecture"
   | "UI"
   | "Features"
   | "Data"
   | "Polish"
-  | "Assets"
   | "Ops"
   | "Deploy";
 
@@ -28,20 +26,6 @@ export const buildLog: BuildLogEntry[] = [
     category: "Deploy",
     title: "Production deployment",
     note: "First production deploy to Vercel — live at anuj-purbe-portfolio.vercel.app with all routes verified 200.",
-  },
-  {
-    date: "2026-08-13",
-    category: "Ops",
-    title: "Untrack certificate source folder",
-    note: "Certificate originals stay on disk but leave version control — everything public lives under /public.",
-    hash: "c417583",
-  },
-  {
-    date: "2026-08-13",
-    category: "Assets",
-    title: "Profile photo, resume, and certificates",
-    note: "Add the profile picture (webp), updated resume, and eight certificate PDFs wired into the viewer.",
-    hash: "37718c2",
   },
   {
     date: "2026-08-13",
@@ -66,13 +50,6 @@ export const buildLog: BuildLogEntry[] = [
   },
   {
     date: "2026-08-13",
-    category: "UI",
-    title: "Custom logo in the header",
-    note: "Replace the plain text brand with a custom logo mark.",
-    hash: "a8e5aea",
-  },
-  {
-    date: "2026-08-13",
     category: "Data",
     title: "Live data + production fixes",
     note: "Interactive demos, live GitHub/LeetCode data with honest fallbacks, and production hardening.",
@@ -84,13 +61,6 @@ export const buildLog: BuildLogEntry[] = [
     title: "Build the portfolio site",
     note: "Structure the app: content model, sections, theming, and responsive layout on Next.js + Tailwind v4.",
     hash: "6fb854b",
-  },
-  {
-    date: "2026-08-12",
-    category: "Init",
-    title: "Initialize from Create Next App",
-    note: "Bootstrap the project — the first commit in this repository.",
-    hash: "27794d7",
   },
 ];
 

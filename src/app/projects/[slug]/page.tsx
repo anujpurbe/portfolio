@@ -5,8 +5,10 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowUpRight,
+  BarChart3,
   Code2,
   GitBranch,
+  Layers,
   Lightbulb,
   Milestone,
   Target,
@@ -49,12 +51,16 @@ export async function generateMetadata({
 const detailSections = [
   { key: "problem", label: "The problem", icon: Target },
   { key: "approach", label: "The approach", icon: Code2 },
+  { key: "stackWhy", label: "Stack & why", icon: Layers },
+  { key: "metrics", label: "Metrics", icon: BarChart3 },
   { key: "architecture", label: "Architecture", icon: Milestone },
   { key: "challenges", label: "Trickiest parts", icon: AlertTriangle },
   { key: "solutions", label: "How I solved them", icon: Wrench },
   { key: "results", label: "Results", icon: Lightbulb },
   { key: "lessons", label: "What I learned", icon: Lightbulb },
 ] as const;
+
+type DetailKey = (typeof detailSections)[number]["key"];
 
 const statusLabel: Record<string, string> = {
   completed: "Completed",
@@ -97,6 +103,22 @@ export default async function ProjectPage({ params }: PageProps) {
             <p className="mt-4 max-w-2xl leading-7 text-muted">
               {project.description}
             </p>
+            {(project.role || project.timeline) && (
+              <dl className="mt-4 space-y-1 font-mono text-xs text-subtle">
+                {project.role && (
+                  <div>
+                    <dt className="inline">Role · </dt>
+                    <dd className="inline">{project.role}</dd>
+                  </div>
+                )}
+                {project.timeline && (
+                  <div>
+                    <dt className="inline">Timeline · </dt>
+                    <dd className="inline">{project.timeline}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
             <div className="mt-6 flex flex-wrap gap-2">
               {project.technologies.map((tech) => (
                 <Badge key={tech}>{tech}</Badge>
@@ -147,9 +169,49 @@ export default async function ProjectPage({ params }: PageProps) {
           </Reveal>
         )}
 
+        {project.media?.screenshots &&
+          project.media.screenshots.length > 0 && (
+            <Reveal delay={0.1}>
+              <div className="mt-12">
+                <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-subtle">
+                  Screenshots
+                </h2>
+                <div className="grid gap-4">
+                  {project.media.screenshots.map((src) => (
+                    <div
+                      key={src}
+                      className="overflow-hidden rounded-xl border border-border"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={`${project.title} screenshot`}
+                        className="w-full"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          )}
+
+        {project.statusNote && (
+          <Reveal delay={0.1}>
+            <div className="card mt-12 border-l-4 border-l-accent p-6">
+              <p className="font-mono text-xs uppercase tracking-widest text-subtle">
+                Status
+              </p>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                {project.statusNote}
+              </p>
+            </div>
+          </Reveal>
+        )}
+
         <div className="mt-12 space-y-6">
           {detailSections.map(({ key, label, icon: Icon }, i) => {
-            const value = project[key];
+            const value = project[key as DetailKey];
             if (!value) return null;
             return (
               <Reveal key={key} delay={i * 0.05}>
@@ -158,7 +220,15 @@ export default async function ProjectPage({ params }: PageProps) {
                     <Icon className="size-3.5 text-accent" />
                     {label}
                   </h2>
-                  <p className="mt-3 leading-7 text-muted">{value}</p>
+                  {Array.isArray(value) ? (
+                    <ul className="mt-3 list-disc space-y-2 pl-4 leading-7 text-muted">
+                      {value.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 leading-7 text-muted">{value}</p>
+                  )}
                 </section>
               </Reveal>
             );

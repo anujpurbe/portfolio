@@ -13,8 +13,8 @@ export function JournalSection() {
     <Section
       id="journal"
       eyebrow="Journal"
-      title="Build log"
-      description="The precise changelog of how this site shipped — real commits, real dates — plus the dated entries on what I'm learning and building."
+      title="Engineering log"
+      description="The precise changelog of how this site shipped — real commits, real dates — plus the dated entries on what I'm learning and building. New entries land roughly every two weeks."
     >
       <Reveal>
         <BuildLog />

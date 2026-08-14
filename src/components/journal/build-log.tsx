@@ -3,13 +3,11 @@ import { buildLog, commitUrl, type BuildLogCategory } from "@/data/build-log";
 import { cn } from "@/lib/utils";
 
 const categoryStyles: Record<BuildLogCategory, string> = {
-  Init: "bg-surface text-subtle border-border",
   Architecture: "text-sky-300 bg-sky-400/10 border-sky-400/20",
   UI: "text-violet-300 bg-violet-400/10 border-violet-400/20",
   Features: "text-amber-300 bg-amber-400/10 border-amber-400/20",
   Data: "text-emerald-300 bg-emerald-400/10 border-emerald-400/20",
   Polish: "text-cyan-300 bg-cyan-400/10 border-cyan-400/20",
-  Assets: "text-rose-300 bg-rose-400/10 border-rose-400/20",
   Ops: "text-teal-300 bg-teal-400/10 border-teal-400/20",
   Deploy: "text-accent bg-accent-soft border-accent/30",
 };

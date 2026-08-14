@@ -8,7 +8,7 @@ export const site = {
   email: "anujpurbe123@gmail.com",
   github: "https://github.com/anujpurbe",
   githubUsername: "anujpurbe",
-  linkedin: "https://linkedin.com/in/anujpurbe",
+  linkedin: "https://www.linkedin.com/in/anuj-purbe",
   resume: "/resume/Anuj-Purbe-Resume.pdf",
   resumeDownload: "/resume/Anuj-Purbe-Resume.pdf?download=1",
   tagline:
@@ -54,8 +54,8 @@ export const site = {
     },
     linkedin: {
       label: "LinkedIn",
-      href: "https://linkedin.com/in/anujpurbe",
-      handle: "in/anujpurbe",
+      href: "https://www.linkedin.com/in/anuj-purbe",
+      handle: "in/anuj-purbe",
     },
     email: {
       label: "Email",

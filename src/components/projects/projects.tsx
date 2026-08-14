@@ -8,8 +8,14 @@ import { DsaVisualization } from "@/components/projects/visualizations/dsa-visua
 import { DatabaseVisualization } from "@/components/projects/visualizations/database-visualization";
 import { cn } from "@/lib/utils";
 
-const fieldLabels: Record<"approach" | "results" | "lessons", string> = {
+const fieldLabels: Record<
+  "problem" | "approach" | "stackWhy" | "metrics" | "results" | "lessons",
+  string
+> = {
+  problem: "Problem",
   approach: "Approach",
+  stackWhy: "Stack & why",
+  metrics: "Metrics",
   results: "Results",
   lessons: "Lesson",
 };
@@ -74,6 +80,24 @@ export function Projects() {
                     {project.title}
                   </a>
                 </h3>
+
+                {(project.role || project.timeline) && (
+                  <dl className="mt-3 space-y-0.5 font-mono text-xs text-subtle">
+                    {project.role && (
+                      <div>
+                        <dt className="inline">Role · </dt>
+                        <dd className="inline">{project.role}</dd>
+                      </div>
+                    )}
+                    {project.timeline && (
+                      <div>
+                        <dt className="inline">Timeline · </dt>
+                        <dd className="inline">{project.timeline}</dd>
+                      </div>
+                    )}
+                  </dl>
+                )}
+
                 <p className="mt-3 leading-7 text-muted">
                   {project.description}
                 </p>
@@ -95,24 +119,45 @@ export function Projects() {
                     </span>
                   </summary>
                   <div className="mt-4 space-y-4 border-l border-border pl-4">
-                    {(["approach", "results", "lessons"] as const).map(
-                      (field) => {
-                        const value = project[field];
-                        if (!value) return null;
-                        return (
-                          <div key={field}>
-                            <p className="font-mono text-xs uppercase tracking-widest text-subtle">
-                              {fieldLabels[field]}
-                            </p>
+                    {(
+                      [
+                        "problem",
+                        "approach",
+                        "stackWhy",
+                        "metrics",
+                        "results",
+                        "lessons",
+                      ] as const
+                    ).map((field) => {
+                      const value = project[field];
+                      if (!value) return null;
+                      return (
+                        <div key={field}>
+                          <p className="font-mono text-xs uppercase tracking-widest text-subtle">
+                            {fieldLabels[field]}
+                          </p>
+                          {Array.isArray(value) ? (
+                            <ul className="mt-1 list-disc space-y-1 pl-4 text-sm leading-6 text-muted">
+                              {value.map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          ) : (
                             <p className="mt-1 text-sm leading-6 text-muted">
                               {value}
                             </p>
-                          </div>
-                        );
-                      },
-                    )}
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </details>
+
+                {project.statusNote && (
+                  <p className="mt-4 border-l border-accent/40 pl-3 text-sm leading-6 text-muted">
+                    {project.statusNote}
+                  </p>
+                )}
 
                 <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-border pt-5">
                   {project.github && (

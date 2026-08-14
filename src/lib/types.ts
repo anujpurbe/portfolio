@@ -16,6 +16,11 @@ export type Project = {
   demo?: string;
   status: ProjectStatus;
   featured: boolean;
+  role?: string;
+  timeline?: string;
+  statusNote?: string;
+  stackWhy?: string[];
+  metrics?: string[];
   problem?: string;
   approach?: string;
   architecture?: string;

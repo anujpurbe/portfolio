@@ -13,21 +13,28 @@ export const projects: Project[] = [
     status: "in-progress",
     featured: true,
     problem:
-      "During emergencies, hospitals can't reallocate scarce resources (ORs, ICU beds, staff) fast enough, and decisions are hard to justify afterward.",
+      "During mass-casualty events, hospitals have to reallocate scarce resources — ORs, ICU beds, staff, equipment — under time pressure, usually through phone calls and manual coordination. Decisions are slow and hard to audit after the fact.",
     approach:
-      "Every resource is an autonomous agent that bids on incoming patient cases using a transparent multi-criteria scoring function; a fairness-aware coordinator resolves rounds with greedy-augmenting matching and anti-starvation aging.",
+      "Every resource is modeled as an autonomous agent that bids on incoming patient cases using a transparent multi-criteria scoring function. A fairness-aware coordinator resolves each bidding round using greedy-augmenting matching with anti-starvation aging, so no case gets perpetually outbid.",
     architecture:
       "Python/FastAPI backend (uvicorn) with a real-time WebSocket feed, React frontend, Docker Compose orchestration, and a dependency graph that detects when a reallocation would destabilize other resources.",
+    stackWhy: [
+      "FastAPI — async-friendly for handling concurrent bidding rounds over WebSocket",
+      "WebSocket — real-time bid updates instead of polling, since negotiation rounds need to resolve in seconds",
+      "React + TypeScript — frontend for visualizing live negotiation state",
+      "Docker — consistent local/deploy environment for the multi-service setup",
+    ],
     challenges:
       "Balancing fairness and speed across negotiation rounds, and making every allocation fully explainable end to end.",
     solutions:
       "A transparent scoring breakdown for every decision, dependency-graph safeguards, and a live bid-by-bid WebSocket feed so nothing is a black box.",
     results:
-      "Live demo deployed on Vercel with a working multi-agent negotiation loop and per-decision explainability.",
+      "Live demo deployed on Vercel with a working multi-agent negotiation loop and per-decision explainability (every allocation decision shows the scoring breakdown that produced it).",
     lessons:
-      "Explainability isn't a feature — it's the contract users trust.",
+      "Explainability isn't a feature — it's the contract users trust. A hospital coordinator won't act on a black-box allocation during an emergency; showing why an agent won a bid is what makes the system usable, not just functional.",
     media: {
       cover: "/projects/hiingers/cover.webp",
+      screenshots: ["/projects/hiingers/screenshot-1.png"],
     },
   },
   {
@@ -42,11 +49,14 @@ export const projects: Project[] = [
     status: "completed",
     featured: true,
     problem:
-      "Conventional batteries cap out on energy density and lifespan — the research goal is a safer, longer-lived storage concept.",
+      "Battery degradation and safety are usually explained in dense academic papers that aren't accessible to someone trying to understand why next-gen battery materials matter, not just that they exist.",
     approach:
-      "Explored advanced-materials and nanotech directions, and presented the concept as an interactive research site with clear engineering arguments.",
+      "Researched advanced-materials and nanotechnology directions for higher energy density and safer power systems, then built an interactive site to present the concept with clear engineering arguments rather than a static writeup — using data visualizations to walk through degradation curves and capacity fade over charge cycles.",
     architecture:
       "A self-contained static web experience built with plain HTML, CSS, and JavaScript, deployed via GitHub Pages.",
+    stackWhy: [
+      "HTML/CSS/JavaScript — kept deliberately framework-free to keep the research site lightweight and fast to load on GitHub Pages",
+    ],
     challenges:
       "Turning a research concept into a web presentation that stays rigorous without drowning in jargon.",
     solutions:
@@ -54,9 +64,10 @@ export const projects: Project[] = [
     results:
       "A published, navigable research concept site — live on GitHub Pages.",
     lessons:
-      "Presenting an idea clearly is an engineering skill too.",
+      "Presenting an idea clearly is an engineering skill too — a correct technical argument that's hard to follow doesn't move anyone, including reviewers.",
     media: {
       cover: "/projects/atomic-endurance/cover.webp",
+      screenshots: ["/projects/atomic-endurance/screenshot-1.png"],
     },
   },
   {
@@ -71,11 +82,15 @@ export const projects: Project[] = [
     status: "completed",
     featured: true,
     problem:
-      "Build a full ordering flow — menu → cart → checkout — the way real food platforms do.",
+      "Wanted to understand the full technical shape of a real ordering flow — auth, cart state, checkout — rather than a static product listing page, using Swiggy/Zomato as the interaction model.",
     approach:
-      "Implemented a Swiggy-style cart with increment/decrement controls, a floating cart bar, and a dedicated cart page, backed by Firebase authentication and hosting.",
+      "Built a Swiggy-style cart with increment/decrement controls, a floating cart bar that persists across pages, and a dedicated cart page — backed by Firebase for authentication and hosting, with dark mode and PWA support for installability.",
     architecture:
       "HTML/CSS/JS front end with a localStorage-backed cart system and Firebase Auth; deployable as an installable PWA via Firebase Hosting.",
+    stackWhy: [
+      "Firebase Auth — fastest path to real user accounts without standing up a custom backend",
+      "PWA — installable, offline-capable experience without a native app build",
+    ],
     challenges:
       "Keeping cart state consistent across navigation and across sessions.",
     solutions:
@@ -83,9 +98,10 @@ export const projects: Project[] = [
     results:
       "A live, installable ordering site on GitHub Pages with full menu → cart → checkout flow.",
     lessons:
-      "The cart is the heart of an ordering app — every design decision orbits it.",
+      "The cart is the heart of an ordering app — every design decision, from navigation to page transitions, ends up orbiting cart state, because it's the one piece of data that has to stay consistent everywhere.",
     media: {
       cover: "/projects/foodiehub/cover.webp",
+      screenshots: ["/projects/foodiehub/screenshot-1.png"],
     },
   },
   {
@@ -98,12 +114,21 @@ export const projects: Project[] = [
     github: "https://github.com/anujpurbe/portfolio",
     status: "completed",
     featured: true,
+    role: "Solo — design, build, content, and deployment",
+    timeline: "Aug 2026 – present (actively maintained)",
+    statusNote: "Actively maintained — new sections and journal entries ship regularly.",
     problem:
-      "A portfolio that demonstrates engineering judgment — proof over claims — and stays fast and accessible.",
+      "Wanted a portfolio that demonstrated engineering thinking, not just a list of finished projects — a site where the interactive elements themselves prove the underlying skills (DSA, database design) instead of just describing them.",
     approach:
-      "Data-driven sections, live GitHub/LeetCode stats with honest fallbacks, interactive visualizations, and a full build log written up in the journal.",
+      "Data-driven sections built from a centralized content model, live GitHub/LeetCode stats with honest fallbacks when the APIs are unavailable, interactive visualizations (binary search stepper, normalized schema explorer, spinning skills ring), and a full engineering log documenting real commits and dates.",
     architecture:
       "App Router + RSC sections, server-side data fetching with caching, Supabase-backed contact/comments with graceful degradation, and Motion for animation — all reduced-motion aware.",
+    stackWhy: [
+      "Next.js + TypeScript — file-based routing for project/journal pages plus type safety across the content model",
+      "Tailwind CSS v4 — fast iteration on visual design without a separate CSS architecture",
+      "Motion — the animation library driving the count-up stats and ring interactions",
+      "Supabase — backing the comments system and admin moderation panel",
+    ],
     challenges:
       "Fighting Vercel's static-build misdetection that shipped only /public — every route returned 404.",
     solutions:
@@ -114,6 +139,7 @@ export const projects: Project[] = [
       "Deployment config is part of the code — verify what actually shipped, not just what built.",
     media: {
       cover: "/projects/portfolio/cover.webp",
+      screenshots: ["/projects/portfolio/screenshot-1.png"],
     },
   },
   {
@@ -123,23 +149,30 @@ export const projects: Project[] = [
       "Implemented stacks, queues, linked lists, trees, and recursion-based algorithms in Java; solved 100+ algorithmic problems with a focus on optimization and complexity analysis.",
     category: "Computer Science · Data Structures & Algorithms",
     technologies: ["Java", "OOP"],
-    github: "https://github.com/anujpurbe",
+    github: "https://github.com/anujpurbe/C/tree/main/DSA-1",
     status: "completed",
     featured: true,
+    role: "Solo",
     problem:
-      "Deep, transferable fluency in data structures — the foundation of every efficient system.",
+      "Wanted a structured, from-scratch understanding of core data structures rather than relying on built-in library implementations — and a disciplined habit of analyzing complexity before optimizing.",
     approach:
-      "Implemented core data structures from scratch in Java and practiced pattern-based problem solving, always documenting time and space complexity.",
+      "Implemented stacks, queues, linked lists, trees, and recursion-based algorithms from scratch in Java. For each, documented time and space complexity before and after optimization, and solved 100+ problems applying pattern-based problem solving (two pointers, sliding window, DFS/BFS, etc.).",
     architecture:
       "A growing library of standalone Java implementations: stacks, queues, linked lists, trees, and recursion patterns. Each implementation is small, tested, and annotated with complexity.",
+    stackWhy: [
+      "Java — strict typing and manual collection handling forces a more explicit understanding of what a data structure is actually doing, versus a higher-level language that abstracts it away",
+    ],
+    metrics: [
+      "100+ algorithmic problems solved",
+      "Core structures implemented from scratch: stacks, queues, linked lists, trees, recursion",
+    ],
     results:
       "100+ algorithmic problems solved, with implementations spanning stacks, queues, linked lists, trees, and recursion.",
     lessons:
-      "Optimization is only meaningful after correctness — profile first, optimize second.",
+      "Optimization is only meaningful after correctness — profile first, optimize second. A fast solution that's wrong is worse than a slow one that's right, because it costs more time to debug later.",
     visualization: "dsa",
     media: {
       cover: "/projects/dsa/cover.webp",
-      screenshots: ["/projects/dsa/screenshot-1.webp"],
     },
   },
   {
@@ -149,23 +182,29 @@ export const projects: Project[] = [
       "Designed a normalized relational schema and wrote SQL queries using JOIN, GROUP BY, and aggregation; improved query efficiency through structured data modeling.",
     category: "Backend · Databases",
     technologies: ["MySQL", "SQL"],
-    github: "https://github.com/anujpurbe",
     status: "completed",
     featured: true,
+    role: "Solo",
     problem:
-      "Prove that I can turn an ambiguous real-world problem into a clean, normalized data model.",
+      "Needed hands-on practice designing a schema that holds up under real query patterns — joins, aggregation, grouping — rather than just learning SQL syntax in isolation.",
     approach:
-      "Designed a normalized relational schema, then wrote and refined SQL queries that exercise JOIN, GROUP BY, and aggregation semantics.",
+      "Designed a normalized (3NF) relational schema across users, orders, order_items, products, and payments, then wrote and refined SQL queries exercising JOIN, GROUP BY, and aggregation semantics against it.",
     architecture:
-      "A normalized schema (users, orders, products, payments) with clear foreign keys, plus a query set demonstrating JOIN, GROUP BY, and aggregation semantics.",
+      "A normalized schema (users, orders, order_items, products, payments) with clear foreign keys, plus a query set demonstrating JOIN, GROUP BY, and aggregation semantics.",
+    stackWhy: [
+      "MySQL — widely-used relational engine, good fit for practicing standard SQL without vendor-specific syntax detours",
+    ],
+    metrics: [
+      "5-table 3NF schema (users, orders, order_items, products, payments)",
+      "Query set exercising JOIN, GROUP BY, and aggregation",
+    ],
     results:
-      "A working relational schema and query set, with structured data modeling that measurably simplified query logic.",
+      "A working relational schema and query set, with structured data modeling that measurably simplified query logic (see the normalization journal post for the specific before/after).",
     lessons:
-      "Schema design decisions are the difference between a query that reads cleanly and one that fights you.",
+      "Schema design decisions are the difference between a query that reads cleanly and one that fights you — most SQL pain is a modeling problem wearing a syntax costume.",
     visualization: "database",
     media: {
       cover: "/projects/database/cover.webp",
-      screenshots: ["/projects/database/screenshot-1.webp"],
     },
   },
 ];

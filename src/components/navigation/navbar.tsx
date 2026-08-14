@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   BookOpen,
-  FileText,
   Home,
   Mail,
   Menu,
@@ -19,7 +18,6 @@ import {
 } from "lucide-react";
 import { site } from "@/data/site";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { GithubIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 const navIcons: Record<string, { icon: typeof Home; label: string }> = {
@@ -116,7 +114,10 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+        <nav
+          className="hidden items-center gap-1 lg:flex"
+          aria-label="Primary"
+        >
           {site.nav.map((item) => {
             const meta = navIcons[item.label];
             const Icon = meta?.icon ?? Home;
@@ -158,24 +159,6 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1.5">
-          <a
-            href={site.socials.github.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-            className="focus-ring grid size-9 place-items-center rounded-md text-muted transition-colors hover:text-foreground"
-          >
-            <GithubIcon className="size-4" />
-          </a>
-          <a
-            href={site.resume}
-            download
-            aria-label="Download resume"
-            className="focus-ring hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm text-muted transition-colors hover:text-foreground sm:flex"
-          >
-            <FileText className="size-3.5" />
-            Resume
-          </a>
           <Link
             href="/#contact"
             className="focus-ring hidden items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 lg:inline-flex"
@@ -236,21 +219,6 @@ export function Navbar() {
                 );
               })}
               <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-border px-2 pt-3 pb-1">
-                <a
-                  href={site.socials.github.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-muted hover:text-foreground"
-                >
-                  <GithubIcon className="size-4" /> GitHub
-                </a>
-                <a
-                  href={site.resume}
-                  download
-                  className="flex items-center gap-2 text-sm text-muted hover:text-foreground"
-                >
-                  <FileText className="size-4" /> Resume
-                </a>
                 <Link
                   href="/#contact"
                   onClick={() => setOpen(false)}

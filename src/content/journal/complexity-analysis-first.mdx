@@ -15,8 +15,14 @@ When I started competitive programming I made the classic mistake: trying to wri
 2. **Read the constraints like they're a spec.** `n ≤ 10⁵` is a message: your `O(n²)` isn't going to pass, so what's the `O(n log n)` structure the problem is hinting at?
 3. **Name the complexity out loud.** Before I finish any solution I write down time and space complexity. It turns "this feels right" into something I can defend.
 
+## Where this shows up in my code
+
+Every implementation in my [DSA problem set](/projects/dsa-algorithms) carries a complexity annotation, not as decoration but as a habit. When I revisit a problem months later, the line that says `O(n)` and the line that says `O(n²)` tell me exactly where the optimization budget should go — and which version I'm allowed to use for which constraints. That annotation is what made the problem set useful as a reference, not just as a collection of finished files.
+
 ## What changed
 
 The 100+ problems I've solved aren't just reps — they've made complexity analysis instinctive. When I look at a piece of Java code now, I don't just see what it does. I see what it costs.
 
 This is exactly why my portfolio's hero diagram starts with `ALGORITHM` and ends at `RESULT`: the whole point of an algorithm is that it's the cheapest correct path to the result.
+
+If you want to see the habit in action, the [binary search visualizer](/projects/dsa-algorithms) on the DSA project page steps through each probe with its cost highlighted — the `O(log n)` win is the punchline.

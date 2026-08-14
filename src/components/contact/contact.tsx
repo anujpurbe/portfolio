@@ -104,14 +104,46 @@ export function Contact() {
       id="contact"
       eyebrow="Contact"
       title="Let's talk"
-      description="Questions, internships, or a problem worth solving together — my inbox is open."
+      description="Open to software engineering internships for Summer 2027 — plus projects and collaborations worth building together."
     >
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <Reveal>
           <div className="space-y-4">
             <p className="leading-7 text-muted">
-              Open to software engineering internships, projects, and
-              collaborations. For a quick note, email me at{" "}
+              I&apos;m currently available for internships starting Summer 2027
+              (May 2027 onwards). If the timing doesn&apos;t line up, I&apos;m
+              still happy to talk projects and collaborations.
+            </p>
+            <dl className="card divide-y divide-border overflow-hidden">
+              <div className="flex items-start justify-between gap-4 px-5 py-4">
+                <dt className="font-mono text-xs uppercase tracking-widest text-subtle">
+                  Open to
+                </dt>
+                <dd className="text-right text-sm leading-6 text-muted">
+                  Software engineering internships, full-stack and backend
+                  roles, DSA-focused technical interviews.
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4 px-5 py-4">
+                <dt className="font-mono text-xs uppercase tracking-widest text-subtle">
+                  Best for
+                </dt>
+                <dd className="text-right text-sm leading-6 text-muted">
+                  Teams that value clean schema design, explainable algorithms,
+                  and honest engineering documentation.
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4 px-5 py-4">
+                <dt className="font-mono text-xs uppercase tracking-widest text-subtle">
+                  Response time
+                </dt>
+                <dd className="text-right text-sm text-muted">
+                  Within 1–2 business days.
+                </dd>
+              </div>
+            </dl>
+            <p className="leading-7 text-muted">
+              For a quick note, email me at{" "}
               <a
                 href={site.socials.email.href}
                 className="focus-ring text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
