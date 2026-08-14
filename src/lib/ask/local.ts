@@ -9,6 +9,7 @@ import { stats } from "@/data/stats";
 import type { Project } from "@/lib/types";
 import type {
   AskAction,
+  AskHistoryMessage,
   AskResponse,
   AskResult,
 } from "./types";
@@ -226,6 +227,100 @@ function fallbackResponse(): AskResponse {
   };
 }
 
+function greetingResponse(): AskResponse {
+  return {
+    answer:
+      "Hey! 👋 I'm Anuj's portfolio assistant. I can help you explore his projects, skills, education, certificates, GitHub activity, and more. What would you like to know?",
+    actions: [
+      scroll("projects", "Projects"),
+      scroll("skills", "Skills"),
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
+function identityResponse(): AskResponse {
+  return {
+    answer:
+      "I'm ask://anuj — the AI assistant for Anuj Purbe's engineering portfolio. I can answer questions about his work, projects, skills, education, and certificates, and help you navigate the site.",
+    actions: [
+      scroll("projects", "Projects"),
+      scroll("about", "About Anuj"),
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
+function capabilitiesResponse(): AskResponse {
+  return {
+    answer:
+      "I can help you explore Anuj's projects, skills, education, certificates, GitHub activity, and current learning. You can also ask me to take you directly to a section — try \"show projects\", \"show skills\", or \"show certificates\".",
+    actions: [
+      scroll("projects", "Projects"),
+      scroll("skills", "Skills"),
+      scroll("certifications", "Certificates"),
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
+function statusResponse(): AskResponse {
+  return {
+    answer: `Doing great! I've got ${stats.projects} projects, ${stats.certificates} verified certificates, and ${stats.problemsSolved}+ solved problems to tell you about. What would you like to dig into?`,
+    actions: [
+      scroll("projects", "Projects"),
+      scroll("skills", "Skills"),
+      scroll("achievements", "Achievements"),
+    ],
+  };
+}
+
+function thanksResponse(): AskResponse {
+  return {
+    answer:
+      "You're welcome! Happy to help — anything else you'd like to know about Anuj's work?",
+    actions: [
+      scroll("projects", "Projects"),
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
+function goodbyeResponse(): AskResponse {
+  return {
+    answer:
+      "Goodbye! Thanks for visiting Anuj's portfolio — feel free to come back anytime.",
+    actions: [scroll("projects", "Projects")],
+  };
+}
+
+function interestingResponse(): AskResponse {
+  const facts = [
+    `Anuj has solved ${stats.problemsSolved} algorithmic problems and maintains a ${stats.cgpa} CGPA.`,
+    `Anuj built a multi-agent AI system (Hiingers) that negotiates hospital resource allocation in real time.`,
+    `Anuj holds ${stats.certificates} verified certificates — each one has its original PDF on this site.`,
+    "Anuj designed a 3NF-normalized relational schema with five tables for his database mini project — normalization made his GROUP BY queries read like English.",
+  ];
+  const fact = facts[Math.floor(Math.random() * facts.length)];
+  return {
+    answer: `Here's something interesting: ${fact} Want another fact?`,
+    actions: [scroll("stats", "Stats"), scroll("projects", "Projects")],
+  };
+}
+
+function exploreResponse(): AskResponse {
+  return {
+    answer:
+      "Great place to start: the hero explains what Anuj does, then look at his featured projects, the skills he's building with, and his academic journey. I can also answer specific questions — just ask!",
+    actions: [
+      scroll("projects", "Projects"),
+      scroll("skills", "Skills"),
+      scroll("education", "Education"),
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
 function keywordProjects(q: string): Project[] | null {
   const tokens = q.split(" ").filter((t) => t.length >= 3 && !STOPWORDS.has(t));
   const matches = projects.filter((p) => {
@@ -235,8 +330,53 @@ function keywordProjects(q: string): Project[] | null {
   return matches.length > 0 ? matches : null;
 }
 
-export function answerQuestion(raw: string): AskResponse {
+function findProjectInText(text: string): Project | null {
+  const lower = text.toLowerCase();
+  const named = projects.find(
+    (p) => lower.includes(p.slug.replace(/-/g, " ")) || lower.includes(p.title.toLowerCase()),
+  );
+  if (named) return named;
+  const match = keywordProjects(norm(text));
+  return match && match.length === 1 ? match[0] : null;
+}
+
+function anaphoraResponse(q: string, prevUser: string): AskResponse | null {
+  const referencesIt = /(^|\s)(it|that|this|that one|this one|the project|that project)(\s|$)/.test(q) ||
+    /for it|in it|used|built with|stack|technolog/.test(q);
+  if (!referencesIt) return null;
+  const prev = findProjectInText(prevUser);
+  if (!prev) return null;
+
+  const isTechQuestion = /technolog|stack|built with|used|tool|language/.test(q);
+  if (isTechQuestion) {
+    return {
+      answer: `${prev.title} uses ${prev.technologies.join(", ")}.`,
+      actions: [{ label: "View project", type: "link", href: `/projects/${prev.slug}` }],
+      results: [projectResult(prev)],
+    };
+  }
+
+  const isAboutQuestion = /about|explain|tell|what is|describe|overview/.test(q);
+  if (isAboutQuestion) {
+    return {
+      answer: prev.description,
+      actions: [{ label: "View project", type: "link", href: `/projects/${prev.slug}` }],
+      results: [projectResult(prev)],
+    };
+  }
+
+  return null;
+}
+
+export function answerQuestion(
+  raw: string,
+  history: AskHistoryMessage[] = [],
+): AskResponse {
   const q = norm(raw);
+  const prevUser = [...history]
+    .reverse()
+    .find((m) => m.role === "user")?.text ?? "";
+
   if (!q) {
     return {
       answer:
@@ -246,6 +386,58 @@ export function answerQuestion(raw: string): AskResponse {
         scroll("skills", "Skills"),
         scroll("contact", "Contact"),
       ],
+    };
+  }
+
+  if (has(q, "hi", "hello", "hey", "yo", "sup", "good morning", "good afternoon", "good evening", "howdy", "hiya")) {
+    return greetingResponse();
+  }
+
+  if (has(q, "who are you", "what are you", "introduce yourself", "your name", "are you anuj")) {
+    return identityResponse();
+  }
+
+  if (has(q, "what can you do", "what do you do", "how can you help", "help", "how do i use", "what should i ask")) {
+    return capabilitiesResponse();
+  }
+
+  if (has(q, "how are you", "how's it going", "how are things", "what's up", "how do you feel", "are you ok", "you good")) {
+    return statusResponse();
+  }
+
+  if (has(q, "thanks", "thank you", "thankyou", "thx", "appreciate", "grateful")) {
+    return thanksResponse();
+  }
+
+  if (has(q, "bye", "goodbye", "good bye", "see you", "take care", "gtg", "farewell")) {
+    return goodbyeResponse();
+  }
+
+  if (has(q, "something interesting", "interesting", "fun fact", "something cool", "impress me", "tell me a fact", "favorite fact")) {
+    return interestingResponse();
+  }
+
+  if (has(q, "help me explore", "what should i look at", "where should i start", "explore", "guide me", "recommend", "suggest", "where do i go", "what do you recommend")) {
+    return exploreResponse();
+  }
+
+  const anaphora = anaphoraResponse(q, prevUser);
+  if (anaphora) return anaphora;
+
+  const mentioned = findProjectInText(q);
+  if (mentioned && !has(q, "projects", "project", "list", "all", "show")) {
+    const isTech = /technolog|stack|built with|used|tool|language/.test(q);
+    if (isTech) {
+      return {
+        answer: `${mentioned.title} uses ${mentioned.technologies.join(", ")}.`,
+        actions: [{ label: "View project", type: "link", href: `/projects/${mentioned.slug}` }],
+        results: [projectResult(mentioned)],
+      };
+    }
+    return {
+      answer: mentioned.description,
+      actions: [{ label: "View project", type: "link", href: `/projects/${mentioned.slug}` }],
+      results: [projectResult(mentioned)],
     };
   }
 

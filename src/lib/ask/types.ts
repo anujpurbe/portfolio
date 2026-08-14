@@ -17,6 +17,9 @@ export type AskResult = {
   meta?: string;
   href?: string;
   download?: string;
+  technologies?: string[];
+  github?: string;
+  demo?: string;
 };
 
 export type AskResponse = {
@@ -24,6 +27,12 @@ export type AskResponse = {
   actions?: AskAction[];
   results?: AskResult[];
   source?: "ai" | "local";
+  notice?: string;
+};
+
+export type AskHistoryMessage = {
+  role: "user" | "assistant";
+  text: string;
 };
 
 export type Message = {
@@ -31,4 +40,5 @@ export type Message = {
   text: string;
   actions?: AskAction[];
   results?: AskResult[];
+  notice?: string;
 };

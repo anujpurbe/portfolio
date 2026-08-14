@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUp, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowUp, ArrowUpRight, RotateCcw, Sparkles } from "lucide-react";
 import type {
   AskAction,
+  AskHistoryMessage,
   AskResult,
   Message,
 } from "@/lib/ask/types";
@@ -24,6 +25,7 @@ const CHIPS = [
 const OFFLINE_ACTIONS: AskAction[] = [
   { label: "Projects", type: "scroll", target: "projects" },
   { label: "Skills", type: "scroll", target: "skills" },
+  { label: "Education", type: "scroll", target: "education" },
   { label: "Contact", type: "scroll", target: "contact" },
 ];
 
@@ -80,26 +82,72 @@ function ResultCard({ result }: { result: AskResult }) {
   const router = useRouter();
   if (result.type === "project") {
     return (
-      <button
-        type="button"
-        onClick={() => result.href && router.push(result.href)}
-        className="focus-ring group w-full rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-accent/40"
-      >
-        <p className="text-sm font-medium text-foreground">{result.title}</p>
-        {result.meta && (
-          <p className="mt-0.5 font-mono text-[11px] uppercase tracking-wider text-subtle">
-            {result.meta}
+      <div className="w-full rounded-lg border border-border bg-card p-3 text-left">
+        <button
+          type="button"
+          onClick={() => result.href && router.push(result.href)}
+          className="focus-ring group block w-full rounded-md text-left"
+        >
+          <p className="text-sm font-medium text-foreground group-hover:text-accent">
+            {result.title}
           </p>
+          {result.meta && (
+            <p className="mt-0.5 font-mono text-[11px] uppercase tracking-wider text-subtle">
+              {result.meta}
+            </p>
+          )}
+          {result.description && (
+            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
+              {result.description}
+            </p>
+          )}
+        </button>
+        {result.technologies && result.technologies.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {result.technologies.slice(0, 6).map((tech) => (
+              <span
+                key={tech}
+                className="rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
         )}
-        {result.description && (
-          <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
-            {result.description}
-          </p>
-        )}
-        <p className="mt-1.5 font-mono text-[11px] text-accent">
-          View project →
-        </p>
-      </button>
+        <div className="mt-2.5 flex flex-wrap gap-2">
+          {result.href && (
+            <button
+              type="button"
+              onClick={() => result.href && router.push(result.href)}
+              className="focus-ring inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] text-accent transition-colors hover:border-accent/50"
+            >
+              Case study
+              <ArrowUpRight className="size-3" />
+            </button>
+          )}
+          {result.github && (
+            <a
+              href={result.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="focus-ring inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] text-muted transition-colors hover:border-accent/50 hover:text-foreground"
+            >
+              GitHub
+            </a>
+          )}
+          {result.demo && (
+            <a
+              href={result.demo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="focus-ring inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] text-muted transition-colors hover:border-accent/50 hover:text-foreground"
+            >
+              Live demo
+              <ArrowUpRight className="size-3" />
+            </a>
+          )}
+        </div>
+      </div>
     );
   }
   if (result.type === "certificate") {
@@ -158,14 +206,27 @@ function ResultCard({ result }: { result: AskResult }) {
 function MessageBubble({ message }: { message: Message }) {
   if (message.role === "user") {
     return (
-      <p className="whitespace-pre-wrap font-mono text-sm leading-6 text-muted">
-        <span className="text-accent">you › </span>
-        {message.text}
-      </p>
+      <div className="flex justify-end">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm leading-6 text-foreground">
+          {message.text}
+        </p>
+      </div>
     );
   }
   return (
     <div className="space-y-2 rounded-lg border border-border bg-surface-2/60 p-3">
+      <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-accent">
+        <Sparkles className="size-3" aria-hidden="true" />
+        ask://anuj
+      </p>
+      {message.notice && (
+        <p
+          role="status"
+          className="rounded-md border border-amber-400/30 bg-amber-400/10 px-2.5 py-1.5 text-xs leading-5 text-amber-300"
+        >
+          {message.notice}
+        </p>
+      )}
       <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
         {message.text}
       </p>
@@ -194,7 +255,7 @@ function ThinkingIndicator() {
       role="status"
       aria-live="polite"
     >
-      <span className="font-mono text-xs text-muted">ask://anuj is thinking</span>
+      <span className="font-mono text-xs text-muted">ask://anuj is thinking…</span>
       <span className="flex gap-1" aria-hidden="true">
         <span className="typing-dot size-1.5 rounded-full bg-accent" />
         <span className="typing-dot size-1.5 rounded-full bg-accent" style={{ animationDelay: "0.15s" }} />
@@ -218,19 +279,20 @@ export function AskAnuj() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
-  async function ask(text: string) {
+  async function ask(text: string, history: AskHistoryMessage[]) {
     setStatus("thinking");
     setError(null);
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history }),
       });
       const json = (await res.json()) as {
         answer?: string;
         actions?: AskAction[];
         results?: AskResult[];
+        notice?: string;
         error?: string;
       };
       if (!res.ok) {
@@ -243,6 +305,7 @@ export function AskAnuj() {
           text: json.answer ?? "",
           actions: json.actions,
           results: json.results,
+          notice: json.notice,
         },
       ]);
       setStatus("idle");
@@ -251,7 +314,7 @@ export function AskAnuj() {
         ...m,
         {
           role: "assistant",
-          text: "ask://anuj is temporarily offline. You can still explore the portfolio directly:",
+          text: "I couldn't reach the portfolio assistant. You can still explore directly:",
           actions: OFFLINE_ACTIONS,
         },
       ]);
@@ -268,9 +331,12 @@ export function AskAnuj() {
       return;
     }
     lastQuestionRef.current = text;
+    const history = messages
+      .slice(-8)
+      .map((m) => ({ role: m.role, text: m.text } satisfies AskHistoryMessage));
     setInput("");
     setMessages((m) => [...m, { role: "user", text }]);
-    await ask(text);
+    await ask(text, history);
   }
 
   function reset() {
@@ -285,7 +351,10 @@ export function AskAnuj() {
     const last = lastQuestionRef.current;
     if (last && status === "error") {
       setMessages((m) => m.slice(0, -1));
-      void ask(last);
+      const history = messages
+        .slice(-8)
+        .map((m) => ({ role: m.role, text: m.text } satisfies AskHistoryMessage));
+      void ask(last, history);
     } else {
       reset();
     }
@@ -358,7 +427,7 @@ export function AskAnuj() {
         </form>
 
         <div
-          className="flex gap-2 overflow-x-auto pb-1"
+          className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           role="list"
           aria-label="Suggested questions"
         >
