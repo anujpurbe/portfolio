@@ -50,6 +50,13 @@ function has(q: string, ...words: string[]): boolean {
   return words.some((w) => q.includes(w));
 }
 
+function hasWord(q: string, ...phrases: string[]): boolean {
+  return phrases.some((p) => {
+    const escaped = p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`).test(q);
+  });
+}
+
 const scroll = (target: string, label: string): AskAction => ({
   label,
   type: "scroll",
@@ -389,35 +396,37 @@ export function answerQuestion(
     };
   }
 
-  if (has(q, "hi", "hello", "hey", "yo", "sup", "good morning", "good afternoon", "good evening", "howdy", "hiya")) {
+  if (hasWord(q, "hi", "hello", "hey", "yo", "sup", "good morning", "good afternoon", "good evening", "howdy", "hiya")) {
     return greetingResponse();
   }
 
-  if (has(q, "who are you", "what are you", "introduce yourself", "your name", "are you anuj")) {
+  if (hasWord(q, "who are you", "what are you", "introduce yourself", "your name", "are you anuj")) {
     return identityResponse();
   }
 
-  if (has(q, "what can you do", "what do you do", "how can you help", "help", "how do i use", "what should i ask")) {
+  if (hasWord(q, "help me explore", "what should i look at", "where should i start", "explore", "guide me", "recommend", "suggest", "where do i go", "what do you recommend")) {
+    return exploreResponse();
+  }
+
+  if (hasWord(q, "what can you do", "what do you do", "how can you help", "help", "how do i use", "what should i ask")) {
     return capabilitiesResponse();
   }
 
-  if (has(q, "how are you", "how's it going", "how are things", "what's up", "how do you feel", "are you ok", "you good")) {
+  if (hasWord(q, "how are you", "how's it going", "how are things", "what's up", "how do you feel", "are you ok", "you good")) {
     return statusResponse();
   }
 
-  if (has(q, "thanks", "thank you", "thankyou", "thx", "appreciate", "grateful")) {
+  if (hasWord(q, "thanks", "thank you", "thankyou", "thx", "appreciate", "grateful")) {
     return thanksResponse();
   }
 
-  if (has(q, "bye", "goodbye", "good bye", "see you", "take care", "gtg", "farewell")) {
+  if (hasWord(q, "bye", "goodbye", "good bye", "see you", "take care", "gtg", "farewell")) {
     return goodbyeResponse();
   }
 
-  if (has(q, "something interesting", "interesting", "fun fact", "something cool", "impress me", "tell me a fact", "favorite fact")) {
+  if (hasWord(q, "something interesting", "interesting", "fun fact", "something cool", "impress me", "tell me a fact", "favorite fact")) {
     return interestingResponse();
-  }
-
-  if (has(q, "help me explore", "what should i look at", "where should i start", "explore", "guide me", "recommend", "suggest", "where do i go", "what do you recommend")) {
+  }  if (hasWord(q, "help me explore", "what should i look at", "where should i start", "explore", "guide me", "recommend", "suggest", "where do i go", "what do you recommend")) {
     return exploreResponse();
   }
 
@@ -463,7 +472,7 @@ export function answerQuestion(
     return internshipResponse();
   }
 
-  if (has(q, "learn", "learning", "studying", "currently", "now", "latest", "working on", "building", "up to", "exploring")) {
+  if (has(q, "learn", "learning", "currently", "now", "latest", "working on", "building", "up to", "exploring")) {
     return learningResponse();
   }
 
