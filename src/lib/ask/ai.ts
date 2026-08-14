@@ -12,11 +12,11 @@ import type {
 import { SCROLL_TARGETS } from "./local";
 
 const API_KEY = process.env.AI_API_KEY;
-const BASE_URL = (process.env.AI_BASE_URL ?? "https://api.openai.com/v1").replace(
-  /\/$/,
-  "",
-);
-const MODEL = process.env.AI_MODEL ?? "gpt-4o-mini";
+const BASE_URL = (
+  process.env.AI_BASE_URL ??
+  "https://generativelanguage.googleapis.com/v1beta/openai"
+).replace(/\/$/, "");
+const MODEL = process.env.AI_MODEL ?? "gemini-3.6-flash";
 const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS ?? 15000);
 
 const RESUME_PATH = site.resume;
