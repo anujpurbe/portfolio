@@ -433,23 +433,6 @@ export function answerQuestion(
   const anaphora = anaphoraResponse(q, prevUser);
   if (anaphora) return anaphora;
 
-  const mentioned = findProjectInText(q);
-  if (mentioned && !has(q, "projects", "project", "list", "all", "show")) {
-    const isTech = /technolog|stack|built with|used|tool|language/.test(q);
-    if (isTech) {
-      return {
-        answer: `${mentioned.title} uses ${mentioned.technologies.join(", ")}.`,
-        actions: [{ label: "View project", type: "link", href: `/projects/${mentioned.slug}` }],
-        results: [projectResult(mentioned)],
-      };
-    }
-    return {
-      answer: mentioned.description,
-      actions: [{ label: "View project", type: "link", href: `/projects/${mentioned.slug}` }],
-      results: [projectResult(mentioned)],
-    };
-  }
-
   if (has(q, "certificate", "certificates", "certification", "certifications", "cert", "certs", "credential", "credentials")) {
     return allCertificates();
   }
@@ -470,6 +453,23 @@ export function answerQuestion(
     has(q, "intern", "internship", "hire", "hiring", "recruit", "open to", "full time", "job")
   ) {
     return internshipResponse();
+  }
+
+  const mentioned = findProjectInText(q);
+  if (mentioned && !has(q, "projects", "project", "list", "all", "show")) {
+    const isTech = /technolog|stack|built with|used|tool|language/.test(q);
+    if (isTech) {
+      return {
+        answer: `${mentioned.title} uses ${mentioned.technologies.join(", ")}.`,
+        actions: [{ label: "View project", type: "link", href: `/projects/${mentioned.slug}` }],
+        results: [projectResult(mentioned)],
+      };
+    }
+    return {
+      answer: mentioned.description,
+      actions: [{ label: "View project", type: "link", href: `/projects/${mentioned.slug}` }],
+      results: [projectResult(mentioned)],
+    };
   }
 
   if (has(q, "learn", "learning", "currently", "now", "latest", "working on", "building", "up to", "exploring")) {
