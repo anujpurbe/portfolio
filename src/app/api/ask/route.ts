@@ -11,7 +11,7 @@ const RATE_LIMIT_PER_MINUTE = 12;
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  if (rateLimited(ip, RATE_LIMIT_PER_MINUTE, 60_000)) {
+  if (rateLimited(ip, RATE_LIMIT_PER_MINUTE, 60_000, "ask")) {
     return NextResponse.json(
       {
         error: "Too many requests. Wait a moment and try again.",

@@ -103,7 +103,8 @@ async function storeViaSupabase(
 }
 
 export async function POST(request: Request) {
-  if (rateLimited(clientIp(request))) {
+  const ip = clientIp(request);
+  if (rateLimited(ip, 5, 60 * 60 * 1000, "contact")) {
     return NextResponse.json(
       { error: "Too many messages. Try again later." },
       { status: 429 },
@@ -129,7 +130,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const ip = clientIp(request);
   const [emailOk, stored] = await Promise.all([
     deliverViaEmail(body),
     storeViaSupabase(body, request, ip),

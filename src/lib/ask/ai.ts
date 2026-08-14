@@ -24,7 +24,7 @@ const CERT_FILES = new Set(certifications.map((c) => c.file));
 
 const ALLOWED_EXTERNAL: RegExp[] = [
   /^https:\/\/github\.com\/anujpurbe/,
-  /^https:\/\/www\.linkedin\.com\/in\/anujpurbe/,
+  /^https:\/\/(?:www\.)?linkedin\.com\/in\/anujpurbe/,
   /^https:\/\/leetcode\.com\/u\/anujpurbe/,
   /^mailto:anujpurbe123@gmail\.com$/,
 ];

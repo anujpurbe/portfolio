@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, rateLimited } from "@/lib/rate-limit";
 import {
   adminCookieName,
   adminSessionToken,
@@ -7,7 +8,17 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const LOGIN_LIMIT = 5;
+const LOGIN_WINDOW_MS = 60 * 60 * 1000;
+
 export async function POST(request: Request) {
+  if (rateLimited(clientIp(request), LOGIN_LIMIT, LOGIN_WINDOW_MS, "admin-login")) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      { status: 429 },
+    );
+  }
+
   const body: unknown = await request.json().catch(() => null);
   const password =
     typeof body === "object" && body !== null
