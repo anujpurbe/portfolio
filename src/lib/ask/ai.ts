@@ -17,7 +17,7 @@ const BASE_URL = (
   "https://generativelanguage.googleapis.com/v1beta/openai"
 ).replace(/\/$/, "");
 const MODEL = process.env.AI_MODEL ?? "gemini-3.6-flash";
-const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS ?? 15000);
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS ?? 30000);
 
 const RESUME_PATH = site.resume;
 const CERT_FILES = new Set(certifications.map((c) => c.file));
@@ -178,28 +178,38 @@ export async function askAI(
   knowledge: string,
 ): Promise<AskResponse | null> {
   if (!isAIConfigured()) return null;
-  const res = await fetch(`${BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      temperature: 0.3,
-      max_tokens: 600,
-      messages: [
-        {
-          role: "system",
-          content: `${SYSTEM_PROMPT}\n\n${knowledge}`,
-        },
-        { role: "user", content: message },
-      ],
-    }),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        temperature: 0.3,
+        max_tokens: 600,
+        messages: [
+          {
+            role: "system",
+            content: `${SYSTEM_PROMPT}\n\n${knowledge}`,
+          },
+          { role: "user", content: message },
+        ],
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      cache: "no-store",
+    });
+  } catch (error) {
+    console.error("ask://anuj AI request error:", (error as Error)?.name, (error as Error)?.message);
+    return null;
+  }
+  if (!res.ok) {
+    const body = (await res.text()).slice(0, 300);
+    console.error(`ask://anuj AI request failed: HTTP ${res.status} ${body}`);
+    return null;
+  }
   const json: unknown = await res.json();
   const content =
     json &&

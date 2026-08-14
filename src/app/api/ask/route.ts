@@ -48,8 +48,8 @@ export async function POST(request: Request) {
       if (ai) {
         return NextResponse.json({ ...ai, source: "ai" });
       }
-    } catch {
-      // fall through to the deterministic engine on AI failure
+    } catch (error) {
+      console.error("ask://anuj fallback to local:", (error as Error)?.message);
     }
   }
 
