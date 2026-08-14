@@ -27,13 +27,21 @@ const components: MDXComponents = {
       </Link>
     );
   },
-  h2: ({ children }) => (
-    <h2 className="mt-12 mb-4 scroll-mt-28 text-2xl font-semibold tracking-tight">
+  h2: ({ children, id, ...props }) => (
+    <h2
+      id={id}
+      className="mt-12 mb-4 scroll-mt-28 text-2xl font-semibold tracking-tight text-balance"
+      {...props}
+    >
       {children}
     </h2>
   ),
-  h3: ({ children }) => (
-    <h3 className="mt-8 mb-3 scroll-mt-28 text-xl font-semibold tracking-tight">
+  h3: ({ children, id, ...props }) => (
+    <h3
+      id={id}
+      className="mt-8 mb-3 scroll-mt-28 text-xl font-semibold tracking-tight"
+      {...props}
+    >
       {children}
     </h3>
   ),
@@ -56,11 +64,22 @@ const components: MDXComponents = {
       {children}
     </blockquote>
   ),
-  code: ({ children }) => (
-    <code className="rounded bg-card px-1.5 py-0.5 font-mono text-[0.85em] text-accent">
-      {children}
-    </code>
-  ),
+  code: ({ children, className }) => {
+    const isBlock =
+      typeof className === "string" && className.includes("language-");
+    if (isBlock) {
+      return (
+        <code className="block font-mono text-[0.875em] leading-6">
+          {children}
+        </code>
+      );
+    }
+    return (
+      <code className="rounded bg-card px-1.5 py-0.5 font-mono text-[0.85em] text-accent">
+        {children}
+      </code>
+    );
+  },
   pre: ({ children }) => (
     <pre className="my-6 overflow-x-auto rounded-xl border border-border bg-surface p-4 font-mono text-sm leading-6">
       {children}

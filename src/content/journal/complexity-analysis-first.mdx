@@ -2,27 +2,43 @@ export const meta = {
   title: "Why complexity analysis changed how I solve problems",
   slug: "complexity-analysis-first",
   date: "2026-07-28",
-  tags: ["dsa", "competitive-programming"],
+  tags: ["dsa", "algorithms", "problem-solving"],
+  category: "DSA",
+  relatedProject: "dsa-algorithms",
   excerpt:
-    "The single most useful habit from 100+ solved problems: write the naive solution first, then ask what the constraints actually require.",
+    "Complexity analysis went from an afterthought to the first thing I do — how constraints, brute force, and explicit O(n) reasoning changed the way I write code.",
 };
 
-When I started competitive programming I made the classic mistake: trying to write the optimal solution immediately, every single time. I'd burn an hour staring at a problem, then realize a straightforward approach would have been the correct start.
 
-## The habit that stuck
+<h2 id="context">Context</h2>
 
-1. **Write the brute force first.** If it runs in `O(n²)` and the constraints allow it, ship it.
-2. **Read the constraints like they're a spec.** `n ≤ 10⁵` is a message: your `O(n²)` isn't going to pass, so what's the `O(n log n)` structure the problem is hinting at?
-3. **Name the complexity out loud.** Before I finish any solution I write down time and space complexity. It turns "this feels right" into something I can defend.
+When I started competitive programming, my instinct was to jump straight to the optimal solution. I'd spend a long time staring at a problem trying to be clever, then realize a straightforward approach would have gotten me to a working answer much faster.
 
-## Where this shows up in my code
+<h2 id="the-old-habit">The old habit</h2>
 
-Every implementation in my [DSA problem set](/projects/dsa-algorithms) carries a complexity annotation, not as decoration but as a habit. When I revisit a problem months later, the line that says `O(n)` and the line that says `O(n²)` tell me exactly where the optimization budget should go — and which version I'm allowed to use for which constraints. That annotation is what made the problem set useful as a reference, not just as a collection of finished files.
+The pattern was: understand the problem, reach for the first data structure that felt right, write the code, and only think about performance if it timed out. That worked for small inputs. It fell apart when the input scale mattered — the difference between "works on my test case" and "passes within the constraint".
 
-## What changed
+<h2 id="constraints-as-a-specification">Constraints as a specification</h2>
 
-The 100+ problems I've solved aren't just reps — they've made complexity analysis instinctive. When I look at a piece of Java code now, I don't just see what it does. I see what it costs.
+The constraints at the bottom of a problem statement aren't a warning; they're a specification. If `n ≤ 10⁵`, your `O(n²)` loop over pairs isn't going to pass — so what `O(n log n)` structure is the problem hinting at? Reading constraints first tells you which complexity class you're allowed to be in before you write a line of code.
 
-This is exactly why my portfolio's hero diagram starts with `ALGORITHM` and ends at `RESULT`: the whole point of an algorithm is that it's the cheapest correct path to the result.
+<h2 id="the-habit-that-stuck">The habit that stuck</h2>
 
-If you want to see the habit in action, the [binary search visualizer](/projects/dsa-algorithms) on the DSA project page steps through each probe with its cost highlighted — the `O(log n)` win is the punchline.
+1. **Write the brute force first.** If it runs in `O(n²)` and the constraints allow it, ship it. Correctness before optimization.
+2. **Name the bottleneck.** Once the naive solution runs, ask where the time actually goes — usually a nested loop or a repeated scan that a hash map, binary search, or sorted order would eliminate.
+3. **Pick the structure that matches the target.** `O(n log n)` invites sorting or a balanced structure; `O(log n)` invites binary search; `O(1)` lookups invite a hash map. The constraint gives you the target; the data structure is the mechanism.
+4. **Write the complexity down.** Before I finish any solution, I note time and space complexity. It turns "this feels right" into something I can defend against the constraint.
+
+<h2 id="where-this-shows-up-in-my-code">Where this shows up in my code</h2>
+
+Every implementation in my [DSA problem set](/projects/dsa-algorithms) carries a complexity annotation — not as decoration, but as a habit. When I revisit a problem months later, the line that says `O(n)` and the line that says `O(n²)` tell me exactly where the optimization budget should go, and which version I'm allowed to use for which constraints. That annotation is what made the problem set useful as a reference rather than a pile of finished files.
+
+The [binary search visualizer](/projects/dsa-algorithms) on the DSA project page is the same idea made interactive: each probe is stepped through with its cost highlighted, so the `O(log n)` win is visible rather than asserted.
+
+<h2 id="what-changed">What changed</h2>
+
+I stopped treating complexity analysis as a label to add after the code and started treating it as the first question. The habit carried over from competitive programming into how I read and write code generally: when I look at a piece of Java now, I don't just see what it does — I see what it costs.
+
+<h2 id="practical-takeaway">Practical takeaway</h2>
+
+Write the naive solution first, name its complexity, then read the constraints to decide whether the naive solution is good enough. If it isn't, the constraint gives you the target class — and the target class tells you which data structure to reach for. Complexity analysis isn't a performance ritual; it's how you decide where to spend effort before you spend it.

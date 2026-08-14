@@ -3,17 +3,28 @@ export const meta = {
   slug: "normalization-payoff",
   date: "2026-06-30",
   tags: ["databases", "sql", "backend"],
+  category: "Databases",
+  relatedProject: "sql-database",
   excerpt:
-    "What designing a normalized relational schema for a mini project actually taught me about writing SQL that doesn't fight you — and how it changed my data model.",
+    "Designing a normalized relational schema for the database mini project taught me that most SQL pain is a modeling problem wearing a syntax costume.",
 };
 
-Normalization felt like theory until I designed a real relational schema for a [database mini project](/projects/sql-database). Now I think about it as *removing ways for data to disagree with itself*.
 
-## What I learned the hard way
+<h2 id="context">Context</h2>
 
-**Denormalization hides the bug until the bug is expensive.** Early on I stored `student_name` alongside `student_id` in every table that referenced a student. The JOINs were simpler — and updating a name meant remembering to update it everywhere. One forgotten update and reports quietly disagreed. The bug wasn't in a query; it was in the *shape of the data*.
+For the [Relational Database Mini Project](/projects/sql-database) I had to design a schema and then write real queries against it — joins, grouping, aggregation. I expected the hard part to be SQL syntax. The hard part turned out to be deciding how the data should be shaped in the first place.
 
-**JOIN, GROUP BY, and aggregation are only as good as the schema.** Clean up the schema and queries read like English:
+<h2 id="the-problem">The problem: data that disagrees with itself</h2>
+
+The classic failure mode is storing the same fact in more than one place. The moment a value — a name, a price, an address — lives in two tables, you have created two sources of truth. An update touches one copy and the other quietly drifts, and the report disagrees with the detail view. The bug isn't in any query; it's in the shape of the data. This is what database design calls an update anomaly.
+
+<h2 id="the-approach">The approach: normalize first</h2>
+
+Normalization is the process of removing those redundancies: split the data so every fact lives in exactly one place, and link facts back together with foreign keys. For the project I modeled a small ordering system across five tables — `users`, `orders`, `order_items`, `products`, `payments` — normalized to third normal form. The [schema explorer](/projects/sql-database) on the project page lets you trace each foreign key end to end.
+
+<h2 id="why-the-schema-makes-the-queries-simpler">Why the schema makes the queries simpler</h2>
+
+JOIN, GROUP BY, and aggregation are only as good as the schema they run against. Clean up the schema and the queries read like English:
 
 ```sql
 SELECT student_id, COUNT(*) AS enrollments
@@ -22,18 +33,16 @@ GROUP BY student_id
 HAVING COUNT(*) > 3;
 ```
 
-That's not clever SQL. It's SQL that's *allowed* to be simple because the schema already did the hard work.
+That's not clever SQL. It's SQL that's *allowed* to be simple because the schema already did the hard work. In a denormalized schema the same query would have to guard against duplicated rows inflating the count, or against stale copies of a value that has since been renamed.
 
-## The schema behind the query
+<h2 id="what-changed">What changed</h2>
 
-For my project I modeled a small ordering system across five tables — `users`, `orders`, `order_items`, `products`, `payments` — normalized to third normal form. The payoff showed up the moment I wrote aggregation queries: because every fact lived in exactly one place, a `GROUP BY` over orders never had to worry about duplicated rows inflating a count, and a payment never referenced a product that had since been renamed. The database enforced the invariants, so my queries didn't have to.
+Since this project I read every schema through the same lens: **where can this data disagree with itself?** That question now comes before writing a single query. Normalization stopped being a theory to apply and became the default shape I reach for when modeling data.
 
-## What changed
+<h2 id="what-i-learned">What I learned</h2>
 
-Since this project I read every schema I touch through the same lens: **where can this data disagree with itself?** That question now comes before writing a single query.
+A normalized schema is a design decision that pays compound interest: every future query is simpler, and every future bug is more likely to be caught by the database instead of the developer.
 
-You can walk through the normalized schema interactively on the [SQL database project page](/projects/sql-database) — the schema explorer lets you trace a foreign key end to end.
+<h2 id="practical-takeaway">Practical takeaway</h2>
 
-## The takeaway
-
-A normalized schema is a design decision that pays compound interest: every future query is simpler, every future bug is more likely to be caught by the database instead of the developer. That's the mindset I carry into backend work now.
+Before you write a JOIN, look at the schema. If the same value appears in two tables, you don't have a query problem — you have a data-modeling problem. Fix the shape of the data first, and the SQL follows.

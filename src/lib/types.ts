@@ -98,8 +98,11 @@ export type JournalEntryMeta = {
   title: string;
   slug: string;
   date: string;
+  updated?: string;
   tags: string[];
   excerpt: string;
+  category: string;
+  relatedProject?: string;
   readingTime?: string;
 };
 
