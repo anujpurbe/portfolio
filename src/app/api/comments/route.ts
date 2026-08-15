@@ -104,7 +104,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  if (rateLimited(ip, 4, 60 * 60 * 1000, "comments")) {
+  if (await rateLimited(ip, 4, 60 * 60 * 1000, "comments")) {
     return NextResponse.json(
       { error: "Too many comments. Try again later." },
       { status: 429 },

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminSession } from "@/lib/admin";
+import { isAdminSession, isSameOrigin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +56,9 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
   if (!isAdminSession(request)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }

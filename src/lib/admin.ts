@@ -26,6 +26,19 @@ export function adminSessionToken() {
   return tokenFor(expected);
 }
 
+export function isSameOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host.toLowerCase();
+  } catch {
+    return false;
+  }
+  const host = (request.headers.get("host") ?? "").toLowerCase();
+  return originHost === host;
+}
+
 export function isAdminSession(request: Request) {
   const expected = process.env.ADMIN_PASSWORD;
   if (!expected) return false;

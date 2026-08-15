@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
 import { site } from "@/data/site";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -7,7 +7,7 @@ import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer/footer";
 import "./globals.css";
 
-const Cursor = dynamic(() =>
+const Cursor = dynamicImport(() =>
   import("@/components/cursor/cursor").then((m) => m.Cursor),
 );
 
@@ -61,6 +61,8 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
+
+export const dynamic = "force-dynamic";
 
 export const viewport: Viewport = {
   themeColor: [

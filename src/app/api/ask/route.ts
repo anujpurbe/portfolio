@@ -36,7 +36,7 @@ const DEGRADED_FALLBACK_ACTIONS = [
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  if (rateLimited(ip, RATE_LIMIT_PER_MINUTE, 60_000, "ask")) {
+  if (await rateLimited(ip, RATE_LIMIT_PER_MINUTE, 60_000, "ask")) {
     return NextResponse.json(
       {
         error: "Too many requests. Wait a moment and try again.",

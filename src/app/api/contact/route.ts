@@ -104,7 +104,7 @@ async function storeViaSupabase(
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  if (rateLimited(ip, 5, 60 * 60 * 1000, "contact")) {
+  if (await rateLimited(ip, 5, 60 * 60 * 1000, "contact")) {
     return NextResponse.json(
       { error: "Too many messages. Try again later." },
       { status: 429 },

@@ -3,6 +3,7 @@ import { clientIp, rateLimited } from "@/lib/rate-limit";
 import {
   adminCookieName,
   adminSessionToken,
+  isSameOrigin,
   validAdminPassword,
 } from "@/lib/admin";
 
@@ -12,7 +13,10 @@ const LOGIN_LIMIT = 5;
 const LOGIN_WINDOW_MS = 60 * 60 * 1000;
 
 export async function POST(request: Request) {
-  if (rateLimited(clientIp(request), LOGIN_LIMIT, LOGIN_WINDOW_MS, "admin-login")) {
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+  if (await rateLimited(clientIp(request), LOGIN_LIMIT, LOGIN_WINDOW_MS, "admin-login")) {
     return NextResponse.json(
       { error: "Too many attempts. Try again later." },
       { status: 429 },
