@@ -15,4 +15,17 @@ export const achievements: Achievement[] = [
     context: "School Event · Lead Organizer",
     details: "Planned and ran a school-wide talent show with 900+ attendees.",
   },
+  {
+    title: "Scout — 2 Years of Service",
+    context: "Scout & Guide Movement",
+    details:
+      "Two years of active scouting: coordinated community events, managed small teams, and worked directly with local communities — building teamwork, responsibility, and dependable service.",
+  },
+  {
+    title: "System Siege — Hackathon Participant",
+    context: "GeeksforGeeks Campus Body · Amrita Vishwa Vidyapeetham",
+    details:
+      "Participated in the System Siege hackathon organized by the GFG Campus Body at Amrita, held 16–17 July 2026.",
+    year: "2026",
+  },
 ];

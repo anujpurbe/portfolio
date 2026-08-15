@@ -9,7 +9,7 @@ import { AskAnuj } from "@/components/hero/ask-anuj";
 import { RotatingWord } from "@/components/hero/rotating-word";
 import { ProfilePhoto } from "@/components/hero/profile-photo";
 import { ParallaxFrame } from "@/components/hero/parallax-frame";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
+import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 const verbs = ["BUILD", "SOLVE", "DESIGN", "LEARN", "CREATE"];
@@ -26,6 +26,12 @@ const socials = [
     href: site.socials.linkedin.href,
     external: true,
     icon: LinkedinIcon,
+  },
+  {
+    label: "Instagram",
+    href: site.socials.instagram.href,
+    external: true,
+    icon: InstagramIcon,
   },
 ];
 
@@ -47,7 +53,7 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="container-shell relative grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="container-shell relative grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
         <div>
           <Reveal>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1.5 shadow-sm">

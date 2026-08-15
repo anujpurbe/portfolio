@@ -35,17 +35,8 @@ export function Contact() {
   const [message, setMessage] = useState("");
   const [honey, setHoney] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const [configured, setConfigured] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function openMailto() {
-    const body = `${message}\n\n— ${name} (${email})`;
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.assign(
-      `${site.socials.email.href}?subject=${encodeURIComponent(
-        subject,
-      )}&body=${encodeURIComponent(body)}`,
-    );
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -76,14 +67,14 @@ export function Contact() {
       } | null;
       if (!res.ok) {
         if (json?.configured === false) {
-          // No backend configured on this deployment — hand off to email.
-          openMailto();
-          setStatus("success");
+          setConfigured(false);
+          setStatus("error");
           return;
         }
         throw new Error("send failed");
       }
       setStatus("success");
+      setConfigured(true);
       setName("");
       setEmail("");
       setSubject("");
@@ -188,6 +179,21 @@ export function Contact() {
                     className="muted-link text-sm"
                   >
                     {site.socials.linkedin.handle}
+                  </a>
+                </dd>
+              </div>
+              <div className="flex items-center justify-between px-5 py-4">
+                <dt className="font-mono text-xs uppercase tracking-widest text-subtle">
+                  Instagram
+                </dt>
+                <dd>
+                  <a
+                    href={site.socials.instagram.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="muted-link text-sm"
+                  >
+                    {site.socials.instagram.handle}
                   </a>
                 </dd>
               </div>
@@ -388,14 +394,29 @@ export function Contact() {
                     className="inline-flex items-center gap-1.5 text-sm text-red-500"
                   >
                     <XCircle className="size-4" />
-                    Something went wrong. Please try again or email me{" "}
-                    <a
-                      href={site.socials.email.href}
-                      className="underline decoration-red-500/40 underline-offset-4"
-                    >
-                      directly
-                    </a>
-                    .
+                    {configured ? (
+                      <>
+                        Something went wrong. Please try again or email me{" "}
+                        <a
+                          href={site.socials.email.href}
+                          className="underline decoration-red-500/40 underline-offset-4"
+                        >
+                          directly
+                        </a>
+                        .
+                      </>
+                    ) : (
+                      <>
+                        The contact form isn&apos;t connected yet — email me{" "}
+                        <a
+                          href={site.socials.email.href}
+                          className="underline decoration-red-500/40 underline-offset-4"
+                        >
+                          directly
+                        </a>{" "}
+                        and I&apos;ll get back to you.
+                      </>
+                    )}
                   </p>
                 )}
               </div>

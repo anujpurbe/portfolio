@@ -4,7 +4,6 @@ import { getAllEntries } from "@/lib/journal";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { JournalEntryCard } from "@/components/journal/entry-card";
-import { BuildLog } from "@/components/journal/build-log";
 
 export function JournalSection() {
   const entries = getAllEntries().slice(0, 3);
@@ -13,13 +12,9 @@ export function JournalSection() {
     <Section
       id="journal"
       eyebrow="Journal"
-      title="Engineering log"
-      description="The precise changelog of how this site shipped — real commits, real dates — plus the dated entries on what I'm learning and building. New entries land roughly every two weeks."
+      title="Notes & lessons"
+      description="Dated entries on what I'm learning and building — engineering notes, technical lessons, and project decisions. New entries land roughly every two weeks."
     >
-      <Reveal>
-        <BuildLog />
-      </Reveal>
-
       {entries.length > 0 && (
         <Reveal>
           <h3 className="mt-12 mb-4 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">

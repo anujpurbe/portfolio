@@ -2,20 +2,14 @@ import Image from "next/image";
 import {
   Activity,
   ArrowUpRight,
-  BarChart3,
   CalendarDays,
-  Code2,
   Folder,
-  GitFork,
   Star,
   Users,
 } from "lucide-react";
 import { site } from "@/data/site";
-import { coding } from "@/data/coding";
 import {
   getContributions,
-  getGitHubLanguages,
-  getGitHubRepos,
   getGitHubStars,
   getGitHubUser,
 } from "@/lib/github";
@@ -61,12 +55,10 @@ function UnavailableCard() {
 export async function GithubActivity() {
   const username =
     process.env.NEXT_PUBLIC_GITHUB_USERNAME ?? site.githubUsername;
-  const [user, repos, weeks, stars, languages] = await Promise.all([
+  const [user, weeks, stars] = await Promise.all([
     getGitHubUser(username),
-    getGitHubRepos(username),
     getContributions(username, process.env.GITHUB_TOKEN),
     getGitHubStars(username),
-    getGitHubLanguages(username),
   ]);
 
   return (
@@ -178,100 +170,6 @@ export async function GithubActivity() {
               )}
             </div>
           </Reveal>
-
-          <Reveal>
-            <div>
-              <h3 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">
-                <GitFork className="size-3.5" /> Featured repositories
-              </h3>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {coding.featuredRepos.map((repo) => (
-                  <a
-                    key={repo.name}
-                    href={repo.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="card card-hover focus-ring flex items-start gap-3 p-4"
-                  >
-                    <Star className="mt-0.5 size-4 shrink-0 text-accent" />
-                    <span className="min-w-0">
-                      <span className="block truncate font-mono text-sm font-medium">
-                        {repo.name}
-                      </span>
-                      {repo.description && (
-                        <span className="mt-1 line-clamp-2 block text-sm leading-5 text-muted">
-                          {repo.description}
-                        </span>
-                      )}
-                      <span className="mt-2 block font-mono text-xs text-subtle">
-                        {repo.language ?? "—"}
-                      </span>
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-
-          {languages && languages.length > 0 && (
-            <Reveal>
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">
-                  <BarChart3 className="size-3.5" /> Languages across repos
-                </h3>
-                <div className="card flex flex-wrap items-center gap-x-6 gap-y-3 p-5">
-                  {languages.map(({ language, count }) => (
-                    <span
-                      key={language}
-                      className="inline-flex items-center gap-2 text-sm"
-                    >
-                      <span className="font-mono text-subtle">{language}</span>
-                      <span className="font-mono text-xs text-subtle">
-                        ×{count}
-                      </span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          )}
-
-          {repos && repos.length > 0 && (
-            <Reveal>
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-subtle">
-                  <Code2 className="size-3.5" /> Recently updated
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {repos.map((repo) => (
-                    <a
-                      key={repo.name}
-                      href={repo.htmlUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="card card-hover focus-ring flex items-start gap-3 p-4"
-                    >
-                      <Folder className="mt-0.5 size-4 shrink-0 text-accent" />
-                      <span className="min-w-0">
-                        <span className="block truncate font-mono text-sm font-medium">
-                          {repo.name}
-                        </span>
-                        {repo.description && (
-                          <span className="mt-1 line-clamp-2 block text-sm leading-5 text-muted">
-                            {repo.description}
-                          </span>
-                        )}
-                        <span className="mt-2 block font-mono text-xs text-subtle">
-                          {repo.language ?? "—"} · updated{" "}
-                          {formatYear(repo.updatedAt)}
-                        </span>
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          )}
         </div>
       )}
     </Section>

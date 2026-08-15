@@ -18,8 +18,6 @@ import { projects } from "@/data/projects";
 import { ProjectCover } from "@/components/projects/project-cover";
 import { Badge } from "@/components/ui/badge";
 import { Reveal } from "@/components/ui/reveal";
-import { DsaVisualization } from "@/components/projects/visualizations/dsa-visualization";
-import { DatabaseVisualization } from "@/components/projects/visualizations/database-visualization";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -151,23 +149,6 @@ export default async function ProjectPage({ params }: PageProps) {
             </div>
           </header>
         </Reveal>
-
-        {project.visualization && (
-          <Reveal delay={0.1}>
-            <div className="card mt-12 p-6">
-              <p className="mb-4 font-mono text-xs uppercase tracking-widest text-subtle">
-                Run it — interactive
-              </p>
-              <div className="min-h-72">
-                {project.visualization === "dsa" ? (
-                  <DsaVisualization />
-                ) : (
-                  <DatabaseVisualization />
-                )}
-              </div>
-            </div>
-          </Reveal>
-        )}
 
         {project.media?.screenshots &&
           project.media.screenshots.length > 0 && (

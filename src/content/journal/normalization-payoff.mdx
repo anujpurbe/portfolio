@@ -20,7 +20,7 @@ The classic failure mode is storing the same fact in more than one place. The mo
 
 <h2 id="the-approach">The approach: normalize first</h2>
 
-Normalization is the process of removing those redundancies: split the data so every fact lives in exactly one place, and link facts back together with foreign keys. For the project I modeled a small ordering system across five tables — `users`, `orders`, `order_items`, `products`, `payments` — normalized to third normal form. The [schema explorer](/projects/sql-database) on the project page lets you trace each foreign key end to end.
+Normalization is the process of removing those redundancies: split the data so every fact lives in exactly one place, and link facts back together with foreign keys. For the project I modeled a small ordering system across five tables — `users`, `orders`, `order_items`, `products`, `payments` — normalized to third normal form.
 
 <h2 id="why-the-schema-makes-the-queries-simpler">Why the schema makes the queries simpler</h2>
 

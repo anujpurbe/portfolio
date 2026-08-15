@@ -44,6 +44,11 @@ export const profile = {
         tech: "FastAPI · React · WebSocket · Docker",
         href: "/projects/hiingers",
       },
+      {
+        label: "FoodieHub",
+        tech: "JavaScript · Firebase · PWA",
+        href: "/projects/foodiehub",
+      },
     ],
     exploring: [
       { label: "Competitive Programming", tech: "daily problem practice" },

@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { Mail, FileText } from "lucide-react";
 import { site } from "@/data/site";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
+import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/ui/icons";
 
 const year = new Date().getFullYear();
 
@@ -36,6 +35,15 @@ export function Footer() {
             <LinkedinIcon className="size-4" />
           </a>
           <a
+            href={site.socials.instagram.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="focus-ring grid size-9 place-items-center rounded-md text-muted transition-colors hover:text-foreground"
+          >
+            <InstagramIcon className="size-4" />
+          </a>
+          <a
             href={site.socials.email.href}
             aria-label="Email"
             className="focus-ring grid size-9 place-items-center rounded-md text-muted transition-colors hover:text-foreground"
@@ -53,12 +61,9 @@ export function Footer() {
           </a>
         </nav>
 
-        <Link
-          href="/journal"
-          className="focus-ring rounded-md text-xs text-subtle transition-colors hover:text-muted"
-        >
-          Built in public · Journal
-        </Link>
+        <p className="rounded-md text-xs text-subtle">
+          Designed &amp; built by Anuj Purbe
+        </p>
       </div>
     </footer>
   );

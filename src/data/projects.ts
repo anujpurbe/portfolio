@@ -108,7 +108,7 @@ export const projects: Project[] = [
     title: "This Portfolio",
     slug: "portfolio",
     description:
-      "The site you're on — a premium, animated engineering portfolio built in public: Next.js, TypeScript, Tailwind CSS v4, Motion, with live GitHub/LeetCode data and interactive technical demos.",
+      "The site you're on — a premium, animated engineering portfolio built in public: Next.js, TypeScript, Tailwind CSS v4, Motion, with live GitHub/LeetCode data, a dated journal, and moderated comments.",
     category: "Full Stack · Engineering Portfolio",
     technologies: ["Next.js", "TypeScript", "React", "Tailwind CSS", "Motion"],
     github: "https://github.com/anujpurbe/portfolio",
@@ -120,7 +120,7 @@ export const projects: Project[] = [
     problem:
       "Wanted a portfolio that demonstrated engineering thinking, not just a list of finished projects — a site where the interactive elements themselves prove the underlying skills (DSA, database design) instead of just describing them.",
     approach:
-      "Data-driven sections built from a centralized content model, live GitHub/LeetCode stats with honest fallbacks when the APIs are unavailable, interactive visualizations (binary search stepper, normalized schema explorer, spinning skills ring), and a full engineering log documenting real commits and dates.",
+      "Data-driven sections built from a centralized content model, live GitHub/LeetCode stats with honest fallbacks when the APIs are unavailable, a dated journal documenting decisions and lessons as they happen, and a moderated comments section backed by Supabase.",
     architecture:
       "App Router + RSC sections, server-side data fetching with caching, Supabase-backed contact/comments with graceful degradation, and Motion for animation — all reduced-motion aware.",
     stackWhy: [

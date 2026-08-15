@@ -1,12 +1,9 @@
-import { ArrowUpRight, Code2, GitBranch, MousePointer2 } from "lucide-react";
+import { ArrowUpRight, Code2, GitBranch } from "lucide-react";
 import { projects } from "@/data/projects";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { Badge } from "@/components/ui/badge";
 import { ProjectCover } from "@/components/projects/project-cover";
-import { DsaVisualization } from "@/components/projects/visualizations/dsa-visualization";
-import { DatabaseVisualization } from "@/components/projects/visualizations/database-visualization";
-import { cn } from "@/lib/utils";
 
 const fieldLabels: Record<
   "problem" | "approach" | "stackWhy" | "metrics" | "results" | "lessons",
@@ -25,12 +22,9 @@ const statusLabel: Record<string, string> = {
   "in-progress": "In progress",
 };
 
-const vizProjects = projects.filter((project) => project.visualization);
-
-function ProjectDemo({ slug }: { slug: string }) {
-  if (slug === "dsa-algorithms") return <DsaVisualization />;
-  return <DatabaseVisualization />;
-}
+const visibleProjects = projects.filter(
+  (project) => project.slug !== "dsa-algorithms" && project.slug !== "sql-database",
+);
 
 export function Projects() {
   return (
@@ -41,7 +35,7 @@ export function Projects() {
       description="Quality over padding — these are the strongest things I've built so far, with evidence, not claims."
     >
       <div className="grid gap-6 lg:grid-cols-2">
-        {projects.map((project, i) => (
+        {visibleProjects.map((project, i) => (
           <Reveal key={project.slug} delay={i * 0.1}>
             <article className="card group flex h-full flex-col overflow-hidden">
               <a
@@ -67,7 +61,7 @@ export function Projects() {
                 <div className="mb-3 flex items-center justify-between gap-4">
                   <span className="font-mono text-xs text-subtle">
                     {String(i + 1).padStart(2, "0")} /{" "}
-                    {String(projects.length).padStart(2, "0")}
+                    {String(visibleProjects.length).padStart(2, "0")}
                   </span>
                   <Badge>{project.category}</Badge>
                 </div>
@@ -196,35 +190,6 @@ export function Projects() {
           </Reveal>
         ))}
       </div>
-
-      {vizProjects.length > 0 && (
-        <>
-          <Reveal delay={0.1}>
-            <div className="mt-10 flex flex-wrap items-center gap-2 text-subtle">
-              <MousePointer2 className="size-4" />
-              <p className="font-mono text-xs uppercase tracking-widest">
-                Engineering previews — run the ideas behind these projects
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="mt-5 grid gap-6 lg:grid-cols-2">
-            {vizProjects.map((project, i) => (
-              <Reveal key={`${project.slug}-demo`} delay={i * 0.08}>
-                <div className="card flex h-full flex-col p-6">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h3 className="text-sm font-semibold">{project.title}</h3>
-                    <Badge className="text-[10px]">interactive</Badge>
-                  </div>
-                  <div className={cn("min-h-72 flex-1")}>
-                    <ProjectDemo slug={project.slug} />
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </>
-      )}
     </Section>
   );
 }

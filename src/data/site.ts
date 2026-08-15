@@ -57,6 +57,11 @@ export const site = {
       href: "https://www.linkedin.com/in/anuj-purbe",
       handle: "in/anuj-purbe",
     },
+    instagram: {
+      label: "Instagram",
+      href: "https://www.instagram.com/anujpurbe/",
+      handle: "anujpurbe",
+    },
     email: {
       label: "Email",
       href: "mailto:anujpurbe123@gmail.com",

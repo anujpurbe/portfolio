@@ -23,7 +23,7 @@ export default function JournalPage() {
               Journal
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-              Engineering log
+              Journal
             </h1>
             <p className="mt-4 leading-7 text-muted">
               Engineering notes, technical lessons, project decisions, and

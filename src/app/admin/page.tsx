@@ -8,6 +8,8 @@ import {
   Lock,
   MessageSquare,
   RefreshCw,
+  Trash2,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +27,7 @@ type Comment = {
   id: string;
   name: string;
   comment: string;
-  status: "pending" | "approved";
+  status: "pending" | "approved" | "rejected";
   created_at: string;
 };
 
@@ -142,6 +144,20 @@ export default function AdminPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ table, id, status }),
+      });
+      if (res.ok) await load();
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function deleteRow(table: "messages" | "comments", id: string) {
+    setBusy(id);
+    try {
+      const res = await fetch("/api/admin/data", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ table, id }),
       });
       if (res.ok) await load();
     } finally {
@@ -349,7 +365,9 @@ export default function AdminPage() {
                       "rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider",
                       comment.status === "approved"
                         ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
-                        : "border-amber-500/40 bg-amber-500/10 text-amber-500",
+                        : comment.status === "rejected"
+                          ? "border-red-500/40 bg-red-500/10 text-red-500"
+                          : "border-amber-500/40 bg-amber-500/10 text-amber-500",
                     )}
                   >
                     {comment.status}
@@ -359,7 +377,17 @@ export default function AdminPage() {
                   {comment.comment}
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  {comment.status === "pending" ? (
+                  {comment.status === "approved" ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateStatus("comments", comment.id, "pending")
+                      }
+                      className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted hover:text-foreground"
+                    >
+                      Unpublish
+                    </button>
+                  ) : (
                     <button
                       type="button"
                       onClick={() =>
@@ -370,17 +398,27 @@ export default function AdminPage() {
                       <CheckCircle2 className="size-3.5" />
                       Approve
                     </button>
-                  ) : (
+                  )}
+                  {comment.status !== "rejected" && (
                     <button
                       type="button"
                       onClick={() =>
-                        updateStatus("comments", comment.id, "pending")
+                        updateStatus("comments", comment.id, "rejected")
                       }
-                      className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted hover:text-foreground"
+                      className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-red-500/40 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-500/10"
                     >
-                      Unpublish
+                      <XCircle className="size-3.5" />
+                      Reject
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => deleteRow("comments", comment.id)}
+                    className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-red-500/50 hover:text-red-500"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Delete
+                  </button>
                   {busy === comment.id && (
                     <Loader2 className="size-4 animate-spin text-subtle" />
                   )}

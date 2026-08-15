@@ -16,7 +16,14 @@ function supabase() {
   };
 }
 
-const VALID_STATUS = new Set(["new", "read", "replied", "pending", "approved"]);
+const VALID_STATUS = new Set([
+  "new",
+  "read",
+  "replied",
+  "pending",
+  "approved",
+  "rejected",
+]);
 const VALID_TABLES = new Set(["messages", "comments"]);
 
 export async function GET(request: Request) {
@@ -107,6 +114,58 @@ export async function PATCH(request: Request) {
   } catch {
     return NextResponse.json(
       { error: "Update failed." },
+      { status: 502 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+  if (!isAdminSession(request)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+  if (!configured()) {
+    return NextResponse.json({ configured: false });
+  }
+
+  const body: unknown = await request.json().catch(() => null);
+  const payload =
+    typeof body === "object" && body !== null
+      ? (body as Record<string, unknown>)
+      : null;
+  const table = payload?.table;
+  const id = payload?.id;
+
+  if (
+    typeof table !== "string" ||
+    !VALID_TABLES.has(table) ||
+    typeof id !== "string"
+  ) {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  const { url, key } = supabase();
+  try {
+    const res = await fetch(`${url}/${table}?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        Prefer: "return=minimal",
+      },
+    });
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: "Delete failed." },
+        { status: 502 },
+      );
+    }
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Delete failed." },
       { status: 502 },
     );
   }
