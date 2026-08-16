@@ -93,7 +93,7 @@ async function deliverViaEmail(body: ContactPayload) {
           status: res.status,
           body: text.slice(0, 300),
           publicKey: publicKey,
-          privateKeyPrefix: privateKey.slice(0, 4) + "…",
+          privateKeyPrefix: (privateKey ?? "").slice(0, 4) + "…",
           privateKeyLength: privateKey?.length ?? 0,
         }),
       );
