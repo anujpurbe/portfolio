@@ -21,17 +21,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteDescription =
+  "The personal CSE portfolio of Anuj Purbe — a computer engineering undergraduate at Amrita Vishwa Vidyapeetham building efficient, well-structured software with a focus on data structures, algorithms, and databases. Open to software engineering internships.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — ${site.role}`,
+    default: `${site.name} | CSE Portfolio`,
     template: `%s — ${site.name}`,
   },
   alternates: {
     canonical: "/",
   },
-  description:
-    "Anuj Purbe is a computer engineering undergraduate at Amrita Vishwa Vidyapeetham who builds efficient, well-structured software with a focus on data structures, algorithms, databases, and practical problem solving. Open to software engineering internships.",
+  description: siteDescription,
   keywords: [
     "Anuj Purbe",
     "Computer Engineering",
@@ -49,15 +51,17 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: site.url,
     siteName: site.name,
-    title: `${site.name} — ${site.role}`,
-    description: site.tagline,
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: site.name }],
+    title: `${site.name} | CSE Portfolio`,
+    description: siteDescription,
+    images: [
+      { url: "/og-image.png", width: 1200, height: 630, alt: site.name },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} — ${site.role}`,
-    description: site.tagline,
-    images: ["/opengraph-image"],
+    title: `${site.name} | CSE Portfolio`,
+    description: siteDescription,
+    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
 };
