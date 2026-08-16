@@ -147,7 +147,7 @@ export const academicJourney: AcademicJourney = {
         { name: "Embedded Systems", code: "23CSE304", credits: 4 },
         { name: "Professional Elective II", credits: 3 },
         { name: "Life Skills for Engineers III", code: "23LSE301", credits: 2 },
-        { name: "Live-in-Labs III", code: "23LIV390", credits: "[3]" },
+        { name: "Live-in-Labs III", code: "23LIV390", credits: 3 },
         { name: "Environmental Science", code: "23ENV300", credits: "P/F" },
       ],
     },
@@ -166,7 +166,7 @@ export const academicJourney: AcademicJourney = {
         { name: "Compiler Design", code: "23CSE314", credits: 4 },
         { name: "Project — Phase I", code: "23CSE399", credits: 3 },
         { name: "Life Skills for Engineers IV", code: "23LSE311", credits: 2 },
-        { name: "Live-in-Labs III", code: "23LIV490", credits: "[3]" },
+        { name: "Live-in-Labs IV", code: "23LIV490", credits: 3 },
       ],
     },
     {
