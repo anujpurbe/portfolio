@@ -27,5 +27,9 @@ export const achievements: Achievement[] = [
     details:
       "Participated in the System Siege hackathon organized by the GFG Campus Body at Amrita, held 16–17 July 2026.",
     year: "2026",
+    proof: {
+      image: "/certificates/thumbs/hackathon.jpg",
+      file: "/certificates/hackathon.pdf",
+    },
   },
 ];

@@ -6,6 +6,7 @@ export const education: EducationItem[] = [
     location: "Chennai, India",
     period: "2024 – Present",
     degree: "B.Tech, Computer Engineering",
+    highlight: "8.60 CGPA",
     details:
       "B.Tech Computer Engineering — currently in Semester III, working toward the full eight-semester degree.",
   },
