@@ -5,14 +5,14 @@ export const dynamic = "force-dynamic";
 
 function configured() {
   return Boolean(
-    process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY,
   );
 }
 
 function supabase() {
   return {
     url: `${(process.env.SUPABASE_URL ?? "").replace(/\/$/, "")}/rest/v1`,
-    key: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    key: process.env.SUPABASE_SECRET_KEY ?? "",
   };
 }
 
@@ -24,7 +24,7 @@ const VALID_STATUS = new Set([
   "approved",
   "rejected",
 ]);
-const VALID_TABLES = new Set(["messages", "comments"]);
+const VALID_TABLES = new Set(["contact_messages", "comments"]);
 
 export async function GET(request: Request) {
   if (!isAdminSession(request)) {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
   try {
     const [messagesRes, commentsRes] = await Promise.all([
-      fetch(`${url}/messages?order=created_at.desc&limit=100`, { headers }),
+      fetch(`${url}/contact_messages?order=created_at.desc&limit=100`, { headers }),
       fetch(
         `${url}/comments?order=created_at.desc&limit=200`,
         { headers },

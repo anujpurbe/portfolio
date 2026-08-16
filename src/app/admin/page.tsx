@@ -90,7 +90,7 @@ export default function AdminPage() {
   const [data, setData] = useState<Data | null>(null);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [tab, setTab] = useState<"messages" | "comments">("messages");
+  const [tab, setTab] = useState<"contact_messages" | "comments">("contact_messages");
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -134,7 +134,7 @@ export default function AdminPage() {
   }
 
   async function updateStatus(
-    table: "messages" | "comments",
+    table: "contact_messages" | "comments",
     id: string,
     status: string,
   ) {
@@ -151,7 +151,7 @@ export default function AdminPage() {
     }
   }
 
-  async function deleteRow(table: "messages" | "comments", id: string) {
+  async function deleteRow(table: "contact_messages" | "comments", id: string) {
     setBusy(id);
     try {
       const res = await fetch("/api/admin/data", {
@@ -226,9 +226,9 @@ export default function AdminPage() {
               </code>{" "}
               and{" "}
               <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs">
-                SUPABASE_SERVICE_ROLE_KEY
+                SUPABASE_SECRET_KEY
               </code>{" "}
-              with <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs">messages</code> and{" "}
+              with <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs">contact_messages</code> and{" "}
               <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs">comments</code>{" "}
               tables to use it.
             </p>
@@ -259,10 +259,10 @@ export default function AdminPage() {
             <div className="flex gap-1 rounded-lg border border-border p-1">
               <button
                 type="button"
-                onClick={() => setTab("messages")}
+                onClick={() => setTab("contact_messages")}
                 className={cn(
                   "focus-ring inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium",
-                  tab === "messages"
+                  tab === "contact_messages"
                     ? "bg-accent-soft text-accent"
                     : "text-muted hover:text-foreground",
                 )}
@@ -297,7 +297,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {tab === "messages" ? (
+        {tab === "contact_messages" ? (
           messages.length === 0 ? (
             <div className="card p-6">
               <p className="text-sm text-muted">No messages yet.</p>
@@ -333,7 +333,7 @@ export default function AdminPage() {
                         label={messageStatus[status]}
                         active={message.status === status}
                         onClick={() =>
-                          updateStatus("messages", message.id, status)
+                          updateStatus("contact_messages", message.id, status)
                         }
                       />
                     ))}

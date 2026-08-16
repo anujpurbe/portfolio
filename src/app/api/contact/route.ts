@@ -74,11 +74,11 @@ async function storeViaSupabase(
   ip: string,
 ) {
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) return false;
 
   try {
-    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/messages`, {
+    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/contact_messages`, {
       method: "POST",
       headers: {
         apikey: key,
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
       process.env.EMAILJS_SERVICE_ID &&
         process.env.EMAILJS_TEMPLATE_ID &&
         process.env.EMAILJS_PUBLIC_KEY,
-    ) || Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+    ) || Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
 
   if (!anyConfigured) {
     return NextResponse.json(

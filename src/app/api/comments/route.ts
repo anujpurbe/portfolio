@@ -31,14 +31,14 @@ function isValid(body: CommentPayload) {
 
 function configured() {
   return Boolean(
-    process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY,
   );
 }
 
 function supabase() {
   return {
     url: `${(process.env.SUPABASE_URL ?? "").replace(/\/$/, "")}/rest/v1`,
-    key: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    key: process.env.SUPABASE_SECRET_KEY ?? "",
   };
 }
 
