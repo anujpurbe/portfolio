@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  AlertTriangle,
   CheckCircle2,
   Inbox,
   Loader2,
@@ -92,6 +93,8 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("");
   const [tab, setTab] = useState<"contact_messages" | "comments">("contact_messages");
   const [busy, setBusy] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Message | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -112,6 +115,15 @@ export default function AdminPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (!pendingDelete) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setPendingDelete(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [pendingDelete]);
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -159,9 +171,24 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ table, id }),
       });
-      if (res.ok) await load();
+      if (!res.ok) return false;
+      await load();
+      return true;
+    } catch {
+      return false;
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    setDeleteError("");
+    const ok = await deleteRow("contact_messages", pendingDelete.id);
+    if (ok) {
+      setPendingDelete(null);
+    } else {
+      setDeleteError("Couldn't delete the message. Please try again.");
     }
   }
 
@@ -337,6 +364,17 @@ export default function AdminPage() {
                         }
                       />
                     ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteError("");
+                        setPendingDelete(message);
+                      }}
+                      className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-red-500/50 hover:text-red-500"
+                    >
+                      <Trash2 className="size-3.5" />
+                      Delete
+                    </button>
                     {busy === message.id && (
                       <Loader2 className="size-4 animate-spin text-subtle" />
                     )}
@@ -425,6 +463,67 @@ export default function AdminPage() {
                 </div>
               </article>
             ))}
+          </div>
+        )}
+
+        {pendingDelete && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-message-title"
+            onClick={() => setPendingDelete(null)}
+          >
+            <div
+              className="card w-full max-w-sm p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-red-500/10">
+                  <AlertTriangle className="size-4 text-red-500" />
+                </div>
+                <div>
+                  <h2 id="delete-message-title" className="font-semibold">
+                    Delete this message?
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-muted">
+                    Delete this message permanently? This action cannot be
+                    undone.
+                  </p>
+                </div>
+              </div>
+              <p className="mt-4 truncate rounded-md bg-surface px-3 py-2 font-mono text-xs text-subtle">
+                {pendingDelete.subject}
+              </p>
+              {deleteError && (
+                <p role="alert" className="mt-3 text-xs text-red-500">
+                  {deleteError}
+                </p>
+              )}
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPendingDelete(null)}
+                  disabled={busy === pendingDelete.id}
+                  className="focus-ring rounded-md border border-border px-3 py-1.5 text-sm font-medium text-muted hover:text-foreground"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={busy === pendingDelete.id}
+                  className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-red-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-60"
+                >
+                  {busy === pendingDelete.id ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-3.5" />
+                  )}
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
