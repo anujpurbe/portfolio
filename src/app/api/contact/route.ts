@@ -93,7 +93,7 @@ async function deliverViaEmail(body: ContactPayload) {
           status: res.status,
           body: text.slice(0, 300),
           privateKeyProvided: Boolean(privateKey),
-          privateKeyLength: privateKey.length,
+          privateKeyLength: privateKey?.length ?? 0,
         }),
       );
       return false;
