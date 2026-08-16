@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   CheckCircle2,
   Inbox,
   Loader2,
   Lock,
+  LogOut,
   MessageSquare,
   RefreshCw,
   Trash2,
@@ -86,6 +88,7 @@ function formatDate(value: string) {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(false);
   const [data, setData] = useState<Data | null>(null);
@@ -95,6 +98,7 @@ export default function AdminPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Message | null>(null);
   const [deleteError, setDeleteError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -192,6 +196,20 @@ export default function AdminPage() {
     }
   }
 
+  async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // Still clear the client session below even if the request fails.
+    }
+    setAuthed(false);
+    setData(null);
+    setPendingDelete(null);
+    router.push("/admin");
+  }
+
   if (loading) {
     return (
       <main className="pt-32 pb-20 sm:pt-40">
@@ -274,7 +292,7 @@ export default function AdminPage() {
       <div className="container-shell max-w-4xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={load}
@@ -282,6 +300,19 @@ export default function AdminPage() {
             >
               <RefreshCw className="size-3.5" />
               Refresh
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="focus-ring inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 px-3 py-1.5 text-sm font-medium text-red-500 hover:bg-red-500/10 disabled:opacity-60"
+            >
+              {loggingOut ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <LogOut className="size-3.5" />
+              )}
+              Logout
             </button>
             <div className="flex gap-1 rounded-lg border border-border p-1">
               <button
