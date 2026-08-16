@@ -49,7 +49,7 @@ async function deliverViaEmail(body: ContactPayload) {
   const templateId = process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
   const toEmail = process.env.EMAILJS_TO_EMAIL;
-  const privateKey = process.env.EMAILJS_PRIVATE_KEY;
+  const privateKey = process.env.EMAILJS_PRIVATE_KEY?.trim();
   if (!serviceId || !templateId || !publicKey || !toEmail) {
     console.error(
       "[contact] email not configured",
@@ -93,6 +93,7 @@ async function deliverViaEmail(body: ContactPayload) {
           status: res.status,
           body: text.slice(0, 300),
           privateKeyProvided: Boolean(privateKey),
+          privateKeyLength: privateKey.length,
         }),
       );
       return false;
