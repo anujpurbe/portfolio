@@ -40,11 +40,16 @@ function isValid(body: ContactPayload) {
   );
 }
 
+// The visitor's submitted email is used only as the Reply-To address. EmailJS
+// supports `reply_to` as a safe Reply-To override; the From address is always
+// the email service's sender, so nothing is spoofed. The email is never
+// treated as verified.
 async function deliverViaEmail(body: ContactPayload) {
   const serviceId = process.env.EMAILJS_SERVICE_ID;
   const templateId = process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
-  if (!serviceId || !templateId || !publicKey) return false;
+  const toEmail = process.env.EMAILJS_TO_EMAIL;
+  if (!serviceId || !templateId || !publicKey || !toEmail) return false;
 
   try {
     const res = await fetch(EMAILJS_URL, {
@@ -55,10 +60,15 @@ async function deliverViaEmail(body: ContactPayload) {
         template_id: templateId,
         user_id: publicKey,
         template_params: {
+          to_email: toEmail,
           from_name: body.from_name,
           reply_to: body.reply_to,
           subject: body.subject,
           message: body.message,
+          submitted_at: new Date().toLocaleString("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
         },
       }),
     });
@@ -72,10 +82,10 @@ async function storeViaSupabase(
   body: ContactPayload,
   request: Request,
   ip: string,
-) {
+): Promise<string | null> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
-  if (!url || !key) return false;
+  if (!url || !key) return null;
 
   try {
     const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/contact_messages`, {
@@ -84,7 +94,7 @@ async function storeViaSupabase(
         apikey: key,
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
-        Prefer: "return=minimal",
+        Prefer: "return=representation",
       },
       body: JSON.stringify({
         name: body.from_name.trim(),
@@ -96,9 +106,35 @@ async function storeViaSupabase(
         user_agent: request.headers.get("user-agent")?.slice(0, 500) ?? null,
       }),
     });
-    return res.ok;
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<{ id: string }>;
+    return rows[0]?.id ?? null;
   } catch {
-    return false;
+    return null;
+  }
+}
+
+async function setEmailStatus(id: string, status: "pending" | "sent" | "failed") {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(
+      `${url.replace(/\/$/, "")}/rest/v1/contact_messages?id=eq.${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({ email_status: status }),
+      },
+    );
+  } catch {
+    // Best-effort only; the message is already stored and the failure is
+    // surfaced through the admin panel's email_status flag.
   }
 }
 
@@ -130,32 +166,34 @@ export async function POST(request: Request) {
     );
   }
 
-  const [emailOk, stored] = await Promise.all([
-    deliverViaEmail(body),
-    storeViaSupabase(body, request, ip),
-  ]);
-
-  const anyDelivered = emailOk || stored;
-  const anyConfigured =
-    Boolean(
-      process.env.EMAILJS_SERVICE_ID &&
-        process.env.EMAILJS_TEMPLATE_ID &&
-        process.env.EMAILJS_PUBLIC_KEY,
-    ) || Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
-
-  if (!anyConfigured) {
+  // 1. Persist first — the message must be stored before anything else.
+  const rowId = await storeViaSupabase(body, request, ip);
+  if (!rowId) {
     return NextResponse.json(
-      { error: "Contact form is not configured.", configured: false },
-      { status: 503 },
-    );
-  }
-
-  if (!anyDelivered) {
-    return NextResponse.json(
-      { error: "Message could not be delivered." },
+      { error: "Message couldn't be stored right now." },
       { status: 502 },
     );
   }
 
+  // 2. Notify the portfolio owner.
+  const emailOk = await deliverViaEmail(body);
+  if (!emailOk) {
+    console.error(
+      "[contact] email notification failed",
+      JSON.stringify({
+        rowId,
+        name: body.from_name,
+        email: body.reply_to,
+        subject: body.subject,
+      }),
+    );
+  }
+
+  // 3. Mark the outcome so the admin panel can flag delivery failures.
+  await setEmailStatus(rowId, emailOk ? "sent" : "failed");
+
+  // 4. The message is securely stored, so the visitor gets a success response
+  // regardless of the email outcome. Provider errors and keys are never
+  // exposed to the client.
   return NextResponse.json({ ok: true });
 }

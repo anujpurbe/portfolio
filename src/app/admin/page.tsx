@@ -23,6 +23,7 @@ type Message = {
   subject: string;
   message: string;
   status: "new" | "read" | "replied";
+  email_status?: "pending" | "sent" | "failed";
   created_at: string;
 };
 
@@ -48,6 +49,12 @@ const messageStatusClass: Record<Message["status"], string> = {
   new: "border-accent/50 bg-accent-soft text-accent",
   read: "border-border text-muted",
   replied: "border-emerald-500/40 bg-emerald-500/10 text-emerald-500",
+};
+
+const emailStatusClass: Record<NonNullable<Message["email_status"]>, string> = {
+  pending: "border-border text-muted",
+  sent: "border-emerald-500/40 bg-emerald-500/10 text-emerald-500",
+  failed: "border-red-500/40 bg-red-500/10 text-red-500",
 };
 
 function StatusButton({
@@ -372,14 +379,35 @@ export default function AdminPage() {
                         {formatDate(message.created_at)}
                       </p>
                     </div>
-                    <span
-                      className={cn(
-                        "rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider",
-                        messageStatusClass[message.status],
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={cn(
+                          "rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider",
+                          messageStatusClass[message.status],
+                        )}
+                      >
+                        {messageStatus[message.status]}
+                      </span>
+                      {message.email_status && (
+                        <span
+                          title={
+                            message.email_status === "failed"
+                              ? "The email notification could not be sent. The message is still stored."
+                              : undefined
+                          }
+                          className={cn(
+                            "rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider",
+                            emailStatusClass[message.email_status],
+                          )}
+                        >
+                          {message.email_status === "sent"
+                            ? "Email sent"
+                            : message.email_status === "failed"
+                              ? "Email failed"
+                              : "Email pending"}
+                        </span>
                       )}
-                    >
-                      {messageStatus[message.status]}
-                    </span>
+                    </div>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-muted">
                     {message.message}
