@@ -92,9 +92,6 @@ async function deliverViaEmail(body: ContactPayload) {
         JSON.stringify({
           status: res.status,
           body: text.slice(0, 300),
-          publicKey: publicKey,
-          privateKeyPrefix: (privateKey ?? "").slice(0, 4) + "…",
-          privateKeyLength: privateKey?.length ?? 0,
         }),
       );
       return false;
