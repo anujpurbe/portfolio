@@ -195,51 +195,42 @@ function CourseworkModal({
           </button>
         </div>
 
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={semester.id}
-            className="overflow-y-auto px-5 py-5 sm:px-7"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
-            <p className="flex items-center gap-1.5 font-mono text-xs text-subtle">
-              <Icon className="size-3.5" aria-hidden="true" />
-              {creditsLine(semester)}
+        <div className="overflow-y-auto px-5 py-5 sm:px-7">
+          <p className="flex items-center gap-1.5 font-mono text-xs text-subtle">
+            <Icon className="size-3.5" aria-hidden="true" />
+            {creditsLine(semester)}
+          </p>
+          {semester.note && (
+            <p
+              id={descId}
+              className="mt-3 max-w-2xl text-sm leading-6 text-muted"
+            >
+              {semester.note}
             </p>
-            {semester.note && (
-              <p
-                id={descId}
-                className="mt-3 max-w-2xl text-sm leading-6 text-muted"
-              >
-                {semester.note}
-              </p>
-            )}
+          )}
 
-            <h3 className="mt-6 mb-3 font-mono text-xs uppercase tracking-widest text-subtle">
-              Coursework
-            </h3>
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {semester.subjects.map((subject, i) => (
-                <SubjectCard
-                  key={`${semester.id}-${subject.code ?? subject.name}-${i}`}
-                  subject={subject}
-                />
-              ))}
-            </ul>
+          <h3 className="mt-6 mb-3 font-mono text-xs uppercase tracking-widest text-subtle">
+            Coursework
+          </h3>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {semester.subjects.map((subject, i) => (
+              <SubjectCard
+                key={`${semester.id}-${subject.code ?? subject.name}-${i}`}
+                subject={subject}
+              />
+            ))}
+          </ul>
 
-            <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-4">
-              <p className="font-mono text-xs text-subtle">
-                {semester.subjects.length} subject
-                {semester.subjects.length === 1 ? "" : "s"}
-              </p>
-              <p className="font-mono text-sm font-semibold text-foreground">
-                {semester.credits ?? ""} Total Credits
-              </p>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+          <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-4">
+            <p className="font-mono text-xs text-subtle">
+              {semester.subjects.length} subject
+              {semester.subjects.length === 1 ? "" : "s"}
+            </p>
+            <p className="font-mono text-sm font-semibold text-foreground">
+              {semester.credits ?? ""} Total Credits
+            </p>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );
