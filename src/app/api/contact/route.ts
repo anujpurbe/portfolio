@@ -49,7 +49,18 @@ async function deliverViaEmail(body: ContactPayload) {
   const templateId = process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
   const toEmail = process.env.EMAILJS_TO_EMAIL;
-  if (!serviceId || !templateId || !publicKey || !toEmail) return false;
+  if (!serviceId || !templateId || !publicKey || !toEmail) {
+    console.error(
+      "[contact] email not configured",
+      JSON.stringify({
+        serviceId: Boolean(serviceId),
+        templateId: Boolean(templateId),
+        publicKey: Boolean(publicKey),
+        toEmail: Boolean(toEmail),
+      }),
+    );
+    return false;
+  }
 
   try {
     const res = await fetch(EMAILJS_URL, {
@@ -72,8 +83,20 @@ async function deliverViaEmail(body: ContactPayload) {
         },
       }),
     });
-    return res.ok;
-  } catch {
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(
+        "[contact] emailjs error",
+        JSON.stringify({ status: res.status, body: text.slice(0, 300) }),
+      );
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(
+      "[contact] emailjs network error",
+      err instanceof Error ? err.message : String(err),
+    );
     return false;
   }
 }
