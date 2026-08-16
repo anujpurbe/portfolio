@@ -62,7 +62,7 @@ export function Footer() {
         </nav>
 
         <p className="rounded-md text-xs text-subtle">
-          Designed &amp; built by Anuj Purbe
+          Engineering, learning, and building with purpose.
         </p>
       </div>
     </footer>

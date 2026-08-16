@@ -16,16 +16,16 @@ export const achievements: Achievement[] = [
     details: "Planned and ran a school-wide talent show with 900+ attendees.",
   },
   {
-    title: "Scout — 2 Years of Service",
+    title: "Two Years of Scout Service",
     context: "Scout & Guide Movement",
     details:
-      "Two years of active scouting: coordinated community events, managed small teams, and worked directly with local communities — building teamwork, responsibility, and dependable service.",
+      "Completed two years of active scouting, contributing to community activities, helping coordinate events, working with teams, and developing responsibility, leadership, and service-oriented skills.",
   },
   {
-    title: "System Siege — Hackathon Participant",
-    context: "GeeksforGeeks Campus Body · Amrita Vishwa Vidyapeetham",
+    title: "System Siege — 24-Hour Hackathon",
+    context: "Geeks For Geeks Campus Body · Amrita Vishwa Vidyapeetham",
     details:
-      "Participated in the System Siege hackathon organized by the GFG Campus Body at Amrita, held 16–17 July 2026.",
+      "Participated in System Siege, a 24-hour hackathon organized by the Geeks For Geeks Campus Body at Amrita, held on 16–17 July 2026. Recognized for enthusiastic participation, active involvement, and commitment throughout the event.",
     year: "2026",
     proof: {
       image: "/certificates/thumbs/hackathon.jpg",

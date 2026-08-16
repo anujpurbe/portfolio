@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ChevronDown, Clock } from "lucide-react";
+import { CheckCircle2, ChevronDown, Clock, GraduationCap } from "lucide-react";
 import { academicJourney } from "@/data/education";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
@@ -21,16 +21,11 @@ function SemesterCard({
 
   return (
     <Reveal delay={index * 0.04}>
-      <div className="card p-5">
+      <div className="card flex h-full flex-col p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold">{semester.name}</h3>
-              {semester.credits != null && (
-                <span className="rounded-full border border-border bg-surface px-2 py-0.5 font-mono text-[10px] text-subtle">
-                  {semester.credits} credits
-                </span>
-              )}
             </div>
             <p className="mt-0.5 font-mono text-xs text-subtle">
               {semester.period}
@@ -52,6 +47,12 @@ function SemesterCard({
             {completed ? "Completed" : "Upcoming"}
           </span>
         </div>
+
+        <p className="mt-3 font-mono text-xs text-subtle">
+          {semester.sgpa
+            ? `SGPA ${semester.sgpa} · ${semester.credits ?? ""} Credits`
+            : `${semester.credits ?? ""} Credits · SGPA —`}
+        </p>
 
         {semester.note && (
           <p className="mt-3 text-sm leading-6 text-muted">{semester.note}</p>
@@ -75,13 +76,20 @@ function SemesterCard({
             </button>
             {open && (
               <ul className="mt-3 grid gap-1.5 sm:grid-cols-2">
-                {semester.subjects.map((subject) => (
+                {semester.subjects.map((subject, i) => (
                   <li
-                    key={subject}
-                    className="flex items-start gap-2 rounded-md border border-border bg-surface/40 px-3 py-2 text-sm text-foreground"
+                    key={`${subject.name}-${i}`}
+                    className="flex flex-col gap-0.5 rounded-md border border-border bg-surface/40 px-3 py-2"
                   >
-                    <span className="mt-1.5 size-1 shrink-0 rounded-full bg-accent" />
-                    {subject}
+                    <span className="text-sm text-foreground">
+                      {subject.name}
+                    </span>
+                    <span className="flex flex-wrap items-center gap-x-2 font-mono text-[11px] text-subtle">
+                      {subject.code && <span>{subject.code}</span>}
+                      {subject.credits != null && (
+                        <span>{subject.credits} cr</span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -90,6 +98,55 @@ function SemesterCard({
         )}
       </div>
     </Reveal>
+  );
+}
+
+function AcademicSummary() {
+  const completed = academicJourney.semesters.filter(
+    (s) => s.status === "completed",
+  );
+  return (
+    <div className="card mt-10 p-6 sm:p-8">
+      <h3 className="flex items-center gap-2 font-semibold">
+        <GraduationCap className="size-4 text-accent" aria-hidden="true" />
+        Academic summary
+      </h3>
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {completed.map((semester) => (
+          <div key={semester.id}>
+            <p className="font-mono text-[11px] uppercase tracking-widest text-subtle">
+              {semester.name} SGPA
+            </p>
+            <p className="mt-1 text-lg font-semibold">
+              {semester.sgpa ?? "—"}
+              <span className="ml-1 font-mono text-xs font-normal text-subtle">
+                {semester.sgpa ? "" : "pending"}
+              </span>
+            </p>
+          </div>
+        ))}
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-subtle">
+            Total program credits
+          </p>
+          <p className="mt-1 text-lg font-semibold">
+            {academicJourney.programCredits}
+          </p>
+        </div>
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-subtle">
+            Program duration
+          </p>
+          <p className="mt-1 text-lg font-semibold">
+            {academicJourney.totalSemesters} semesters
+          </p>
+        </div>
+      </div>
+      <p className="mt-4 text-sm leading-6 text-subtle">
+        Semester III is complete; its SGPA is pending the official result.
+        Cumulative CGPA is only shown once the official value is available.
+      </p>
+    </div>
   );
 }
 
@@ -177,21 +234,7 @@ export function AcademicJourney() {
       </div>
 
       <Reveal delay={0.1}>
-        <div className="mt-10">
-          <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">
-            Selected coursework
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {academicJourney.selectedCoursework.map((course) => (
-              <span
-                key={course}
-                className="rounded-md border border-border bg-surface/60 px-3 py-1.5 text-sm text-foreground"
-              >
-                {course}
-              </span>
-            ))}
-          </div>
-        </div>
+        <AcademicSummary />
       </Reveal>
     </Section>
   );

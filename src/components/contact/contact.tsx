@@ -274,6 +274,10 @@ export function Contact() {
                       {errors.email}
                     </p>
                   )}
+                  <p className="mt-1.5 text-xs text-subtle">
+                    You control what you enter — it&apos;s used only as the
+                    Reply-To on my notification email.
+                  </p>
                 </div>
               </div>
 

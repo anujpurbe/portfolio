@@ -67,14 +67,21 @@ export type Achievement = {
   };
 };
 
+export type AcademicSubject = {
+  name: string;
+  code?: string;
+  credits?: number | string;
+};
+
 export type AcademicSemester = {
   id: string;
   name: string;
   period: string;
   status: "completed" | "upcoming";
+  sgpa?: string;
   credits?: number;
   note?: string;
-  subjects: string[];
+  subjects: AcademicSubject[];
 };
 
 export type AcademicDomain = {
@@ -89,6 +96,7 @@ export type AcademicJourney = {
   creditsCompleted: number;
   semestersCompleted: number;
   totalSemesters: number;
+  programCredits: number;
   domains: AcademicDomain[];
   semesters: AcademicSemester[];
   selectedCoursework: string[];
