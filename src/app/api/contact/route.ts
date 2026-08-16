@@ -89,7 +89,11 @@ async function deliverViaEmail(body: ContactPayload) {
       const text = await res.text().catch(() => "");
       console.error(
         "[contact] emailjs error",
-        JSON.stringify({ status: res.status, body: text.slice(0, 300) }),
+        JSON.stringify({
+          status: res.status,
+          body: text.slice(0, 300),
+          privateKeyProvided: Boolean(privateKey),
+        }),
       );
       return false;
     }
