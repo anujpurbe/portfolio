@@ -37,7 +37,7 @@ const socials = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-20">
+    <section className="relative overflow-hidden pt-24 pb-10 sm:pt-36 sm:pb-20">
       <HeroNetwork />
       <div
         className="bg-grid pointer-events-none absolute inset-0"
@@ -53,8 +53,8 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="container-shell relative grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-        <div className="translate-y-6 lg:translate-y-12">
+      <div className="container-shell relative grid items-center gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-12">
+        <div className="lg:translate-y-12">
           <Reveal>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1.5 shadow-sm">
               <span
@@ -137,7 +137,7 @@ export function Hero() {
         </div>
 
         <Reveal delay={0.2} y={28}>
-          <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-7 lg:gap-8">
             <ParallaxFrame>
               <div className="group relative">
                 <div
