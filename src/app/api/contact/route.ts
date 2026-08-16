@@ -49,6 +49,7 @@ async function deliverViaEmail(body: ContactPayload) {
   const templateId = process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
   const toEmail = process.env.EMAILJS_TO_EMAIL;
+  const privateKey = process.env.EMAILJS_PRIVATE_KEY;
   if (!serviceId || !templateId || !publicKey || !toEmail) {
     console.error(
       "[contact] email not configured",
@@ -70,6 +71,7 @@ async function deliverViaEmail(body: ContactPayload) {
         service_id: serviceId,
         template_id: templateId,
         user_id: publicKey,
+        accessToken: privateKey || undefined,
         template_params: {
           to_email: toEmail,
           from_name: body.from_name,
