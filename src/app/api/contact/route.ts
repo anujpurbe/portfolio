@@ -147,7 +147,7 @@ async function setEmailStatus(id: string, status: "pending" | "sent" | "failed")
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) return;
   try {
-    await fetch(
+    const res = await fetch(
       `${url.replace(/\/$/, "")}/rest/v1/contact_messages?id=eq.${encodeURIComponent(id)}`,
       {
         method: "PATCH",
@@ -160,6 +160,17 @@ async function setEmailStatus(id: string, status: "pending" | "sent" | "failed")
         body: JSON.stringify({ email_status: status }),
       },
     );
+    if (!res.ok) {
+      console.error(
+        "[contact] email status update failed",
+        JSON.stringify({
+          rowId: id,
+          status,
+          dbStatus: res.status,
+          dbBody: (await res.text().catch(() => "")).slice(0, 300),
+        }),
+      );
+    }
   } catch {
     // Best-effort only; the message is already stored and the failure is
     // surfaced through the admin panel's email_status flag.
