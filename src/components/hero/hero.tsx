@@ -54,7 +54,7 @@ export function Hero() {
       />
 
       <div className="container-shell relative grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-        <div>
+        <div className="translate-y-6 lg:translate-y-12">
           <Reveal>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1.5 shadow-sm">
               <span
