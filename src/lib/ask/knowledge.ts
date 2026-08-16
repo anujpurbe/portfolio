@@ -67,7 +67,7 @@ ${profile.about.map((a) => `  - ${a.heading}: ${a.text}`).join("\n")}
 
 EDUCATION
 ${educationLines}
-- Academic journey: ${academicJourney.degree} at ${academicJourney.institution}, ${academicJourney.campus}. ${academicJourney.semestersCompleted} of ${academicJourney.totalSemesters} semesters completed. Credits completed: ${academicJourney.creditsCompleted}.
+- Academic journey: ${academicJourney.degree} at ${academicJourney.institution}, ${academicJourney.campus}. Currently in Semester ${academicJourney.currentSemester} of ${academicJourney.totalSemesters}. ${academicJourney.semestersCompleted} of ${academicJourney.totalSemesters} semesters completed. Credits completed: ${academicJourney.creditsCompleted}.
 - Selected coursework: ${academicJourney.selectedCoursework.join(", ")}.
 
 SKILLS

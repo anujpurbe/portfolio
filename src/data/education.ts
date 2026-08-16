@@ -8,7 +8,7 @@ export const education: EducationItem[] = [
     degree: "B.Tech, Computer Engineering",
     highlight: "8.60 CGPA",
     details:
-      "B.Tech Computer Engineering — Semester III completed, working toward the full eight-semester degree.",
+      "B.Tech Computer Engineering — currently pursuing Semester III, working toward the full eight-semester degree.",
   },
   {
     institution: "Nightingale International School",
@@ -27,8 +27,9 @@ export const academicJourney: AcademicJourney = {
   degree: "B.Tech Computer Engineering",
   institution: "Amrita Vishwa Vidyapeetham",
   campus: "Chennai, India",
-  creditsCompleted: 64,
-  semestersCompleted: 3,
+  creditsCompleted: 42,
+  semestersCompleted: 2,
+  currentSemester: 3,
   totalSemesters: 8,
   programCredits: 162,
   domains: [
@@ -99,9 +100,9 @@ export const academicJourney: AcademicJourney = {
       id: "sem-3",
       name: "Semester III",
       period: "2026",
-      status: "completed",
+      status: "in-progress",
       credits: 22,
-      note: "Core computer engineering coursework.",
+      note: "Currently in progress.",
       subjects: [
         { name: "Optimization Techniques", code: "23MAT206", credits: 4 },
         { name: "Digital Electronics", code: "23CSE205", credits: 3 },

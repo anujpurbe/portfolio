@@ -161,7 +161,7 @@ function githubResponse(): AskResponse {
 function educationResponse(): AskResponse {
   const school = education[1];
   return {
-    answer: `Anuj is studying ${academicJourney.degree} at ${academicJourney.institution}, currently in Semester ${academicJourney.semestersCompleted} of ${academicJourney.totalSemesters}.${school ? ` Earlier he completed higher secondary at ${school.institution}${school.highlight ? ` with ${school.highlight.toLowerCase()}` : ""}.` : ""}`,
+    answer: `Anuj is studying ${academicJourney.degree} at ${academicJourney.institution}, currently in Semester ${academicJourney.currentSemester} of ${academicJourney.totalSemesters}.${school ? ` Earlier he completed higher secondary at ${school.institution}${school.highlight ? ` with ${school.highlight.toLowerCase()}` : ""}.` : ""}`,
     actions: [
       scroll("education", "View education"),
       scroll("academic", "Academic journey"),

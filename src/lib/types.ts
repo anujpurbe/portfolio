@@ -77,7 +77,7 @@ export type AcademicSemester = {
   id: string;
   name: string;
   period: string;
-  status: "completed" | "upcoming";
+  status: "completed" | "in-progress" | "upcoming";
   sgpa?: string;
   credits?: number;
   note?: string;
@@ -95,6 +95,7 @@ export type AcademicJourney = {
   campus: string;
   creditsCompleted: number;
   semestersCompleted: number;
+  currentSemester: number;
   totalSemesters: number;
   programCredits: number;
   domains: AcademicDomain[];

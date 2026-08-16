@@ -17,6 +17,7 @@ function SemesterCard({
 }) {
   const [open, setOpen] = useState(false);
   const completed = semester.status === "completed";
+  const inProgress = semester.status === "in-progress";
   const hasSubjects = semester.subjects.length > 0;
 
   return (
@@ -36,7 +37,9 @@ function SemesterCard({
               "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest",
               completed
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                : "bg-surface text-subtle",
+                : inProgress
+                  ? "bg-amber-400/10 text-amber-600 dark:text-amber-400"
+                  : "bg-surface text-subtle",
             )}
           >
             {completed ? (
@@ -44,7 +47,7 @@ function SemesterCard({
             ) : (
               <Clock className="size-3" />
             )}
-            {completed ? "Completed" : "Upcoming"}
+            {completed ? "Completed" : inProgress ? "In progress" : "Upcoming"}
           </span>
         </div>
 
@@ -143,7 +146,7 @@ function AcademicSummary() {
         </div>
       </div>
       <p className="mt-4 text-sm leading-6 text-subtle">
-        Semester III is complete; its SGPA is pending the official result.
+        Semester III is in progress; its SGPA is pending the official result.
         Cumulative CGPA is only shown once the official value is available.
       </p>
     </div>
