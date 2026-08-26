@@ -195,7 +195,7 @@ export async function askAI(
     { role: "user", content: message },
   ];
 
-  const fallbackModels = ["gemini-3.6-flash", "gemini-3.7-flash", "gemini-2.5-flash"];
+  const fallbackModels = ["gemini-3.6-flash", "gemini-3.7-flash"];
   const models = [provider.model, ...fallbackModels.filter((m) => m !== provider.model)];
 
   for (const model of models) {
