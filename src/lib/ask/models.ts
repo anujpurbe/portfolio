@@ -13,7 +13,7 @@ const geminiProvider: ModelProvider = {
   ).replace(/\/$/, ""),
   apiKey: process.env.AI_API_KEY ?? "",
   model: process.env.AI_MODEL ?? "gemini-3.6-flash",
-  timeoutMs: Number(process.env.AI_TIMEOUT_MS ?? 30000),
+  timeoutMs: Number(process.env.AI_TIMEOUT_MS ?? 45000),
 };
 
 const grokProvider: ModelProvider | null = process.env.GROK_API_KEY
