@@ -384,13 +384,30 @@ export function AskAnuj() {
         }
       }
 
+      let displayText = accumulatedText;
+      try {
+        const cleaned = accumulatedText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+        const start = cleaned.indexOf("{");
+        const end = cleaned.lastIndexOf("}");
+        if (start !== -1 && end > start) {
+          const obj = JSON.parse(cleaned.slice(start, end + 1));
+          if (typeof obj.answer === "string" && obj.answer.trim()) {
+            displayText = obj.answer.trim();
+            if (obj.actions && !finalActions) finalActions = obj.actions;
+            if (obj.results && !finalResults) finalResults = obj.results;
+          }
+        }
+      } catch {
+        // Not JSON — use accumulated text as-is
+      }
+
       setMessages((m) => {
         const updated = [...m];
         const last = updated[updated.length - 1];
         if (last?.role === "assistant") {
           updated[updated.length - 1] = {
             ...last,
-            text: accumulatedText,
+            text: displayText,
             actions: finalActions,
             results: finalResults,
           };
