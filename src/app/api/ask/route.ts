@@ -83,12 +83,14 @@ export async function POST(request: Request) {
 
   if (aiConfigured) {
     try {
+      console.log("[ask-route] Calling askAI with message:", trimmed.slice(0, 50));
       const ai = await askAI(trimmed, knowledge, history);
+      console.log("[ask-route] askAI returned:", ai ? "success" : "null");
       if (ai) {
         return NextResponse.json({ ...ai, source: "ai" });
       }
     } catch (error) {
-      console.error("[ask] fallback to local:", (error as Error)?.message);
+      console.error("[ask-route] askAI error:", (error as Error)?.message);
     }
   }
 

@@ -198,6 +198,8 @@ export async function askAI(
     { role: "user", content: message },
   ];
 
+  console.log(`[ask] Provider: ${provider.name}, model: ${provider.model}, baseURL: ${provider.baseURL}, keyLen: ${provider.apiKey.length}`);
+
   const MAX_ITERATIONS = 3;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
@@ -221,16 +223,18 @@ export async function askAI(
       });
     } catch (error) {
       console.error(
-        "[ask] AI request: failure",
+        "[ask] AI fetch error:",
         (error as Error)?.name,
         (error as Error)?.message,
       );
       return null;
     }
 
+    console.log(`[ask] Response status: ${res.status}`);
+
     if (!res.ok) {
-      const body = (await res.text()).slice(0, 300);
-      console.error(`[ask] AI request: failure — HTTP ${res.status} ${body}`);
+      const body = await res.text();
+      console.error(`[ask] HTTP ${res.status}: ${body.slice(0, 500)}`);
       return null;
     }
 
