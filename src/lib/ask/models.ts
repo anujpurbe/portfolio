@@ -12,7 +12,7 @@ const geminiProvider: ModelProvider = {
     process.env.AI_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai"
   ).replace(/\/$/, ""),
   apiKey: process.env.AI_API_KEY ?? "",
-  model: process.env.AI_MODEL ?? "gemini-3.6-flash",
+  model: process.env.AI_MODEL ?? "gemini-2.5-flash",
   timeoutMs: Number(process.env.AI_TIMEOUT_MS ?? 30000),
 };
 
