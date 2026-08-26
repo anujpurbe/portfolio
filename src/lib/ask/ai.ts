@@ -181,10 +181,7 @@ export async function askAI(
   const provider = providerName ? getProvider(providerName) : getDefaultProvider();
   if (!provider || !provider.apiKey) return null;
 
-  console.log(`[ask] AI provider: ${provider.name}`);
   const tools = getToolDefinitions();
-  const toolNames = tools.map((t) => t.function.name);
-  console.log("[ask] Available tools:", toolNames.join(", "));
 
   const messages: { role: string; content: string; tool_calls?: GeminiToolCall[]; tool_call_id?: string }[] = [
     {
@@ -198,8 +195,23 @@ export async function askAI(
     { role: "user", content: message },
   ];
 
-  console.log(`[ask] Provider: ${provider.name}, model: ${provider.model}, baseURL: ${provider.baseURL}, keyLen: ${provider.apiKey.length}`);
+  const fallbackModels = ["gemini-2.5-flash", "gemini-3.7-flash", "gemini-1.5-flash"];
+  const models = [provider.model, ...fallbackModels.filter((m) => m !== provider.model)];
 
+  for (const model of models) {
+    const result = await tryWithModel(provider, model, messages, tools);
+    if (result) return result;
+  }
+
+  return null;
+}
+
+async function tryWithModel(
+  provider: { baseURL: string; apiKey: string; timeoutMs: number },
+  model: string,
+  messages: { role: string; content: string; tool_calls?: GeminiToolCall[]; tool_call_id?: string }[],
+  tools: ReturnType<typeof getToolDefinitions>,
+): Promise<AskResponse | null> {
   const MAX_ITERATIONS = 3;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
@@ -212,7 +224,7 @@ export async function askAI(
           Authorization: `Bearer ${provider.apiKey}`,
         },
         body: JSON.stringify({
-          model: provider.model,
+          model,
           temperature: 0.3,
           max_tokens: 600,
           messages,
@@ -222,20 +234,18 @@ export async function askAI(
         cache: "no-store",
       });
     } catch (error) {
-      console.error(
-        "[ask] AI fetch error:",
-        (error as Error)?.name,
-        (error as Error)?.message,
-      );
-      return null;
+      console.error(`[ask] ${model} fetch error:`, (error as Error)?.message);
+      break;
     }
-
-    console.log(`[ask] Response status: ${res.status}`);
 
     if (!res.ok) {
       const body = await res.text();
-      console.error(`[ask] HTTP ${res.status}: ${body.slice(0, 500)}`);
-      return null;
+      console.error(`[ask] ${model} HTTP ${res.status}: ${body.slice(0, 200)}`);
+      if (res.status === 503 || res.status === 429) {
+        await new Promise((r) => setTimeout(r, 1000 * (iteration + 1)));
+        continue;
+      }
+      break;
     }
 
     const json: unknown = await res.json();
