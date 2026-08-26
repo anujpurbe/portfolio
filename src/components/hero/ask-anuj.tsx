@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ArrowUp, ArrowUpRight, RotateCcw, Sparkles } from "lucide-react";
 import type {
   AskAction,
@@ -227,9 +229,9 @@ function MessageBubble({ message }: { message: Message }) {
           {message.notice}
         </p>
       )}
-      <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
-        {message.text}
-      </p>
+      <div className="ask-markdown text-sm leading-6 text-foreground">
+        <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+      </div>
       {message.actions && message.actions.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {message.actions.map((a, i) => (
@@ -279,7 +281,144 @@ export function AskAnuj() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
-  async function ask(text: string, history: AskHistoryMessage[]) {
+  async function askStream(text: string, history: AskHistoryMessage[]) {
+    setStatus("thinking");
+    setError(null);
+    const assistantIndex = messages.length + 1;
+
+    setMessages((m) => [
+      ...m,
+      { role: "assistant", text: "", actions: undefined, results: undefined },
+    ]);
+
+    try {
+      const res = await fetch("/api/ask/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error ?? "offline");
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No stream");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedText = "";
+      let finalActions: AskAction[] | undefined;
+      let finalResults: AskResult[] | undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            const eventType = line.slice(7).trim();
+            const nextLine = lines[lines.indexOf(line) + 1];
+            if (!nextLine?.startsWith("data: ")) continue;
+
+            const dataStr = nextLine.slice(6).trim();
+            let data: unknown;
+            try { data = JSON.parse(dataStr); } catch { continue; }
+            const d = data as Record<string, unknown>;
+
+            if (eventType === "text" && typeof d.delta === "string") {
+              accumulatedText += d.delta;
+              setMessages((m) => {
+                const updated = [...m];
+                const last = updated[updated.length - 1];
+                if (last?.role === "assistant") {
+                  updated[updated.length - 1] = { ...last, text: accumulatedText };
+                }
+                return updated;
+              });
+            }
+
+            if (eventType === "actions" && Array.isArray(d.actions)) {
+              finalActions = d.actions as AskAction[];
+            }
+
+            if (eventType === "results" && Array.isArray(d.results)) {
+              finalResults = d.results as AskResult[];
+            }
+
+            if (eventType === "tool_call" && typeof d.name === "string") {
+              const toolLabel = typeof d.args === "object" && d.args !== null
+                ? `${d.name}(${JSON.stringify(d.args).slice(0, 40)}...)`
+                : d.name;
+              accumulatedText += `\n\n_Using tool: ${toolLabel}_\n`;
+              setMessages((m) => {
+                const updated = [...m];
+                const last = updated[updated.length - 1];
+                if (last?.role === "assistant") {
+                  updated[updated.length - 1] = { ...last, text: accumulatedText };
+                }
+                return updated;
+              });
+            }
+
+            if (eventType === "tool_result" && typeof d.result === "string") {
+              accumulatedText += `\n_Tool result: ${d.result.slice(0, 100)}_\n`;
+              setMessages((m) => {
+                const updated = [...m];
+                const last = updated[updated.length - 1];
+                if (last?.role === "assistant") {
+                  updated[updated.length - 1] = { ...last, text: accumulatedText };
+                }
+                return updated;
+              });
+            }
+
+            if (eventType === "error" && typeof d.message === "string") {
+              throw new Error(d.message);
+            }
+          }
+        }
+      }
+
+      setMessages((m) => {
+        const updated = [...m];
+        const last = updated[updated.length - 1];
+        if (last?.role === "assistant") {
+          updated[updated.length - 1] = {
+            ...last,
+            text: accumulatedText,
+            actions: finalActions,
+            results: finalResults,
+          };
+        }
+        return updated;
+      });
+      setStatus("idle");
+    } catch {
+      setMessages((m) => {
+        const withoutEmpty = m.filter(
+          (msg) => !(msg.role === "assistant" && msg.text === ""),
+        );
+        return [
+          ...withoutEmpty,
+          {
+            role: "assistant",
+            text: "I couldn't reach the portfolio assistant. You can still explore directly:",
+            actions: OFFLINE_ACTIONS,
+          },
+        ];
+      });
+      setError("Connection failed — your question wasn't answered.");
+      setStatus("error");
+    }
+  }
+
+  async function askFallback(text: string, history: AskHistoryMessage[]) {
     setStatus("thinking");
     setError(null);
     try {
@@ -295,9 +434,7 @@ export function AskAnuj() {
         notice?: string;
         error?: string;
       };
-      if (!res.ok) {
-        throw new Error(json.error ?? "offline");
-      }
+      if (!res.ok) throw new Error(json.error ?? "offline");
       setMessages((m) => [
         ...m,
         {
@@ -336,7 +473,7 @@ export function AskAnuj() {
       .map((m) => ({ role: m.role, text: m.text } satisfies AskHistoryMessage));
     setInput("");
     setMessages((m) => [...m, { role: "user", text }]);
-    await ask(text, history);
+    await askStream(text, history);
   }
 
   function reset() {
@@ -354,7 +491,7 @@ export function AskAnuj() {
       const history = messages
         .slice(-8)
         .map((m) => ({ role: m.role, text: m.text } satisfies AskHistoryMessage));
-      void ask(last, history);
+      void askFallback(last, history);
     } else {
       reset();
     }

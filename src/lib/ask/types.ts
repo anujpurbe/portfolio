@@ -42,3 +42,12 @@ export type Message = {
   results?: AskResult[];
   notice?: string;
 };
+
+export type GeminiToolCall = {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
+  };
+};

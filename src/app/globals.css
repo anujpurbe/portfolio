@@ -447,3 +447,75 @@
 .cursor-ring-active {
   box-shadow: 0 0 18px -4px color-mix(in oklab, var(--accent) 70%, transparent);
 }
+
+/* ask://anuj markdown response styles */
+.ask-markdown p {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+.ask-markdown p:last-child {
+  margin-bottom: 0;
+}
+.ask-markdown strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.ask-markdown code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+}
+.ask-markdown pre {
+  margin: 0.5em 0;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--background) 80%, var(--surface));
+  border: 1px solid var(--border);
+  padding: 0.75em 1em;
+}
+.ask-markdown pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.8em;
+  line-height: 1.6;
+}
+.ask-markdown ul,
+.ask-markdown ol {
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+.ask-markdown li {
+  margin: 0.15em 0;
+}
+.ask-markdown a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ask-markdown a:hover {
+  opacity: 0.8;
+}
+.ask-markdown blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 0.75em;
+  margin: 0.5em 0;
+  color: var(--muted);
+}
+.ask-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  margin: 0.5em 0;
+}
+.ask-markdown th,
+.ask-markdown td {
+  border: 1px solid var(--border);
+  padding: 0.3em 0.6em;
+  text-align: left;
+}
+.ask-markdown th {
+  background: color-mix(in oklab, var(--surface) 60%, var(--background));
+  font-weight: 600;
+}
