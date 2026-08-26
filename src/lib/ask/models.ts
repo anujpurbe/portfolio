@@ -8,12 +8,10 @@ export type ModelProvider = {
 
 const geminiProvider: ModelProvider = {
   name: "gemini",
-  baseURL: (
-    process.env.AI_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai"
-  ).replace(/\/$/, ""),
+  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
   apiKey: process.env.AI_API_KEY ?? "",
-  model: process.env.AI_MODEL ?? "gemini-3.6-flash",
-  timeoutMs: Number(process.env.AI_TIMEOUT_MS ?? 45000),
+  model: "gemini-3.6-flash",
+  timeoutMs: 45000,
 };
 
 const grokProvider: ModelProvider | null = process.env.GROK_API_KEY
