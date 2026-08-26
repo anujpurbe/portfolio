@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { clientIp, rateLimited } from "@/lib/rate-limit";
 import { buildPortfolioKnowledge } from "@/lib/ask/knowledge";
-import { askAI, isAIConfigured } from "@/lib/ask/ai";
+import { isAIConfigured } from "@/lib/ask/ai";
 import { answerQuestion } from "@/lib/ask/local";
 import { getToolDefinitions, executeTool } from "@/lib/ask/tools";
+import { buildRAGContext } from "@/lib/ask/rag";
+import { getDefaultProvider } from "@/lib/ask/models";
 import type { AskHistoryMessage, GeminiToolCall } from "@/lib/ask/types";
 
 export const dynamic = "force-dynamic";
@@ -107,13 +109,6 @@ export async function POST(request: Request) {
   });
 }
 
-const API_KEY = process.env.AI_API_KEY;
-const BASE_URL = (
-  process.env.AI_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai"
-).replace(/\/$/, "");
-const MODEL = process.env.AI_MODEL ?? "gemini-3.6-flash";
-const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS ?? 30000);
-
 const SYSTEM_PROMPT = `You are ask://anuj, the AI assistant embedded inside Anuj Purbe's personal engineering portfolio.
 
 Your purpose is to help visitors understand and explore the portfolio.
@@ -170,7 +165,17 @@ async function streamFromAI(
   history: AskHistoryMessage[],
   send: (event: string, data: unknown) => void,
 ): Promise<void> {
-  const knowledge = buildPortfolioKnowledge();
+  const provider = getDefaultProvider();
+  if (!provider.apiKey) {
+    send("error", { message: "AI not configured." });
+    return;
+  }
+
+  let knowledge = buildPortfolioKnowledge();
+  try {
+    const ragContext = await buildRAGContext(message);
+    if (ragContext) knowledge += "\n\n" + ragContext;
+  } catch { /* RAG optional */ }
   const tools = getToolDefinitions();
 
   const messages: { role: string; content: string; tool_calls?: GeminiToolCall[]; tool_call_id?: string }[] = [
@@ -182,21 +187,21 @@ async function streamFromAI(
   const MAX_ITERATIONS = 3;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-    const res = await fetch(`${BASE_URL}/chat/completions`, {
+    const res = await fetch(`${provider.baseURL}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${provider.apiKey}`,
       },
       body: JSON.stringify({
-        model: MODEL,
+        model: provider.model,
         temperature: 0.3,
         max_tokens: 600,
         messages,
         tools: tools.length > 0 ? tools : undefined,
         stream: iteration === 0,
       }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: AbortSignal.timeout(provider.timeoutMs),
       cache: "no-store",
     });
 
@@ -313,7 +318,6 @@ async function streamFromAI(
 
       if (textContent) {
         try {
-          const parsed = JSON.parse(textContent.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""));
           const start = textContent.indexOf("{");
           const end = textContent.lastIndexOf("}");
           if (start !== -1 && end > start) {

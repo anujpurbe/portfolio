@@ -3,6 +3,7 @@ import { clientIp, rateLimited } from "@/lib/rate-limit";
 import { buildPortfolioKnowledge } from "@/lib/ask/knowledge";
 import { askAI, isAIConfigured } from "@/lib/ask/ai";
 import { answerQuestion } from "@/lib/ask/local";
+import { buildRAGContext } from "@/lib/ask/rag";
 import type { AskHistoryMessage } from "@/lib/ask/types";
 
 export const dynamic = "force-dynamic";
@@ -66,8 +67,19 @@ export async function POST(request: Request) {
   }
   const history = parseHistory(rawHistory);
 
-  const knowledge = buildPortfolioKnowledge();
+  let knowledge = buildPortfolioKnowledge();
   const aiConfigured = isAIConfigured();
+
+  if (aiConfigured) {
+    try {
+      const ragContext = await buildRAGContext(trimmed);
+      if (ragContext) {
+        knowledge += "\n\n" + ragContext;
+      }
+    } catch {
+      // RAG is optional — continue without it
+    }
+  }
 
   if (aiConfigured) {
     try {

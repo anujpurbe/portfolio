@@ -13,14 +13,7 @@ import type {
 } from "./types";
 import { SCROLL_TARGETS } from "./local";
 import { getToolDefinitions, executeTool } from "./tools";
-
-const API_KEY = process.env.AI_API_KEY;
-const BASE_URL = (
-  process.env.AI_BASE_URL ??
-  "https://generativelanguage.googleapis.com/v1beta/openai"
-).replace(/\/$/, "");
-const MODEL = process.env.AI_MODEL ?? "gemini-3.6-flash";
-const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS ?? 30000);
+import { getDefaultProvider, getProvider } from "./models";
 
 const RESUME_PATH = site.resume;
 const CERT_FILES = new Set(certifications.map((c) => c.file));
@@ -38,7 +31,7 @@ const ALLOWED_LINKS: RegExp[] = [
 ];
 
 export function isAIConfigured(): boolean {
-  return typeof API_KEY === "string" && API_KEY.length > 0;
+  return getDefaultProvider().apiKey.length > 0;
 }
 
 function isExternalAllowed(href: string): boolean {
@@ -183,10 +176,12 @@ export async function askAI(
   message: string,
   knowledge: string,
   history: AskHistoryMessage[] = [],
+  providerName?: string,
 ): Promise<AskResponse | null> {
-  if (!isAIConfigured()) return null;
-  console.log("[ask] AI provider: Gemini (with tools)");
+  const provider = providerName ? getProvider(providerName) : getDefaultProvider();
+  if (!provider || !provider.apiKey) return null;
 
+  console.log(`[ask] AI provider: ${provider.name}`);
   const tools = getToolDefinitions();
   const toolNames = tools.map((t) => t.function.name);
   console.log("[ask] Available tools:", toolNames.join(", "));
@@ -208,20 +203,20 @@ export async function askAI(
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     let res: Response;
     try {
-      res = await fetch(`${BASE_URL}/chat/completions`, {
+      res = await fetch(`${provider.baseURL}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
+          Authorization: `Bearer ${provider.apiKey}`,
         },
         body: JSON.stringify({
-          model: MODEL,
+          model: provider.model,
           temperature: 0.3,
           max_tokens: 600,
           messages,
           tools: tools.length > 0 ? tools : undefined,
         }),
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(provider.timeoutMs),
         cache: "no-store",
       });
     } catch (error) {

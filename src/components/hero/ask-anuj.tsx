@@ -284,7 +284,6 @@ export function AskAnuj() {
   async function askStream(text: string, history: AskHistoryMessage[]) {
     setStatus("thinking");
     setError(null);
-    const assistantIndex = messages.length + 1;
 
     setMessages((m) => [
       ...m,
