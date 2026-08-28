@@ -290,6 +290,8 @@ export function AskAnuj() {
       { role: "assistant", text: "", actions: undefined, results: undefined },
     ]);
 
+    let hasValidResponse = false;
+
     try {
       const res = await fetch("/api/ask/stream", {
         method: "POST",
@@ -357,8 +359,8 @@ export function AskAnuj() {
         }
       }
 
+      // Parse final response - try JSON first, then plain text
       let displayText = accumulatedText;
-      let hasValidResponse = false;
       try {
         const cleaned = accumulatedText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
         const start = cleaned.indexOf("{");
@@ -373,11 +375,11 @@ export function AskAnuj() {
           }
         }
       } catch {
-        // Not JSON — use accumulated text as-is, check if it's non-empty
+        // Not JSON — use accumulated text as-is
         hasValidResponse = accumulatedText.trim().length > 0;
       }
 
-      // If we got a valid response (JSON answer or non-empty text), don't show connection error
+      // If we got a valid response, finalize and return
       if (hasValidResponse) {
         setMessages((m) => {
           const updated = [...m];
@@ -393,11 +395,21 @@ export function AskAnuj() {
           return updated;
         });
         setStatus("idle");
-      } else {
-        throw new Error("No response received");
+        return; // SUCCESS - exit early, don't fall through to catch
       }
+
+      // No valid response received - throw to trigger fallback
+      throw new Error("No response received");
     } catch {
+      // Only show fallback if we never got a valid response
       setMessages((m) => {
+        // Check if we already have a non-empty assistant message (success case)
+        const lastMsg = m[m.length - 1];
+        if (lastMsg?.role === "assistant" && lastMsg.text?.trim()) {
+          // Already have a valid answer - don't add fallback
+          return m;
+        }
+        // No valid response - show fallback
         const withoutEmpty = m.filter(
           (msg) => !(msg.role === "assistant" && msg.text === ""),
         );
@@ -444,14 +456,21 @@ export function AskAnuj() {
       ]);
       setStatus("idle");
     } catch {
-      setMessages((m) => [
-        ...m,
-        {
-          role: "assistant",
-          text: "I couldn't reach the portfolio assistant. You can still explore directly:",
-          actions: OFFLINE_ACTIONS,
-        },
-      ]);
+      // Only show fallback if no valid answer exists
+      setMessages((m) => {
+        const lastMsg = m[m.length - 1];
+        if (lastMsg?.role === "assistant" && lastMsg.text?.trim()) {
+          return m; // Already have valid answer
+        }
+        return [
+          ...m.filter((msg) => !(msg.role === "assistant" && msg.text === "")),
+          {
+            role: "assistant",
+            text: "I couldn't reach the portfolio assistant. You can still explore directly:",
+            actions: OFFLINE_ACTIONS,
+          },
+        ];
+      });
       setError("Connection failed — your question wasn't answered.");
       setStatus("error");
     }
