@@ -26,7 +26,7 @@ export type AskResponse = {
   answer: string;
   actions?: AskAction[];
   results?: AskResult[];
-  source?: "ai" | "local";
+  source?: "ai" | "local" | "tool";
   notice?: string;
 };
 

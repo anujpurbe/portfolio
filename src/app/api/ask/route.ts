@@ -4,6 +4,7 @@ import { buildPortfolioKnowledge } from "@/lib/ask/knowledge";
 import { askAI, isAIConfigured } from "@/lib/ask/ai";
 import { answerQuestion } from "@/lib/ask/local";
 import { buildRAGContext } from "@/lib/ask/rag";
+import { classifyIntent, executeRoute } from "@/lib/ask/router";
 import type { AskHistoryMessage } from "@/lib/ask/types";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,14 @@ export async function POST(request: Request) {
   }
   const history = parseHistory(rawHistory);
 
+  // Try router first for deterministic operations
+  const route = classifyIntent(trimmed, history);
+  const routed = await executeRoute(route, history);
+  if (routed) {
+    return NextResponse.json({ ...routed, source: routed.source ?? "tool" });
+  }
+
+  // Fall back to AI for complex reasoning
   let knowledge = buildPortfolioKnowledge();
   const aiConfigured = isAIConfigured();
 

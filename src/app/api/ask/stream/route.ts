@@ -6,6 +6,7 @@ import { answerQuestion } from "@/lib/ask/local";
 import { getToolDefinitions, executeTool } from "@/lib/ask/tools";
 import { buildRAGContext } from "@/lib/ask/rag";
 import { getDefaultProvider } from "@/lib/ask/models";
+import { classifyIntent, executeRoute } from "@/lib/ask/router";
 import type { AskHistoryMessage, GeminiToolCall } from "@/lib/ask/types";
 
 export const dynamic = "force-dynamic";
@@ -57,16 +58,47 @@ export async function POST(request: Request) {
   }
   const history = parseHistory(rawHistory);
 
+  // Try router first for deterministic operations
+  const route = classifyIntent(trimmed, history);
+  const routed = await executeRoute(route, history);
+  if (routed) {
+    const stream = new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder();
+        function send(event: string, data: unknown) {
+          controller.enqueue(encoder.encode(sse(event, data)));
+        }
+        send("text", { delta: routed.answer });
+        if (routed.actions) send("actions", { actions: routed.actions });
+        if (routed.results) send("results", { results: routed.results });
+        send("done", { source: routed.source ?? "tool" });
+        controller.close();
+      },
+    });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  }
+
   const aiConfigured = isAIConfigured();
 
   if (!aiConfigured) {
     const local = answerQuestion(trimmed, history);
     const stream = new ReadableStream({
       start(controller) {
-        controller.enqueue(sse("text", { delta: local.answer }));
-        if (local.actions) controller.enqueue(sse("actions", { actions: local.actions }));
-        if (local.results) controller.enqueue(sse("results", { results: local.results }));
-        controller.enqueue(sse("done", { source: "local" }));
+        const encoder = new TextEncoder();
+        function send(event: string, data: unknown) {
+          controller.enqueue(encoder.encode(sse(event, data)));
+        }
+        send("text", { delta: local.answer });
+        if (local.actions) send("actions", { actions: local.actions });
+        if (local.results) send("results", { results: local.results });
+        send("done", { source: "local" });
         controller.close();
       },
     });
@@ -302,9 +334,7 @@ async function streamFromAI(
             console.error("[ask-stream] Bad tool args:", tc.function.arguments);
           }
 
-          send("tool_call", { name: tc.function.name, args });
           const result = await executeTool(tc.function.name, args);
-          send("tool_result", { name: tc.function.name, result: result.output });
 
           messages.push({
             role: "tool",
@@ -344,9 +374,7 @@ async function streamFromAI(
         for (const tc of toolCalls) {
           let args: Record<string, unknown> = {};
           try { args = JSON.parse(tc.function.arguments); } catch { /* skip */ }
-          send("tool_call", { name: tc.function.name, args });
           const result = await executeTool(tc.function.name, args);
-          send("tool_result", { name: tc.function.name, result: result.output });
           messages.push({ role: "tool", content: result.output, tool_call_id: tc.id });
         }
         continue;
