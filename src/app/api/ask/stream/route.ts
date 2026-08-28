@@ -4,7 +4,6 @@ import { buildPortfolioKnowledge } from "@/lib/ask/knowledge";
 import { isAIConfigured } from "@/lib/ask/ai";
 import { answerQuestion } from "@/lib/ask/local";
 import { getToolDefinitions, executeTool } from "@/lib/ask/tools";
-import { buildRAGContext } from "@/lib/ask/rag";
 import { getDefaultProvider } from "@/lib/ask/models";
 import { classifyIntent, executeRoute } from "@/lib/ask/router";
 import type { AskHistoryMessage, GeminiToolCall } from "@/lib/ask/types";
@@ -203,11 +202,7 @@ async function streamFromAI(
     return;
   }
 
-  let knowledge = buildPortfolioKnowledge();
-  try {
-    const ragContext = await buildRAGContext(message);
-    if (ragContext) knowledge += "\n\n" + ragContext;
-  } catch { /* RAG optional */ }
+  const knowledge = buildPortfolioKnowledge();
   const tools = getToolDefinitions();
 
   const messages: { role: string; content: string; tool_calls?: GeminiToolCall[]; tool_call_id?: string }[] = [

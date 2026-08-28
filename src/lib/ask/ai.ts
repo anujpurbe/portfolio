@@ -13,7 +13,7 @@ import type {
 } from "./types";
 import { SCROLL_TARGETS } from "./local";
 import { getToolDefinitions, executeTool } from "./tools";
-import { getDefaultProvider, getProvider } from "./models";
+import { getDefaultProvider, isProviderConfigured } from "./models";
 
 const RESUME_PATH = site.resume;
 const CERT_FILES = new Set(certifications.map((c) => c.file));
@@ -176,9 +176,8 @@ export async function askAI(
   message: string,
   knowledge: string,
   history: AskHistoryMessage[] = [],
-  providerName?: string,
 ): Promise<AskResponse | null> {
-  const provider = providerName ? getProvider(providerName) : getDefaultProvider();
+  const provider = getDefaultProvider();
   if (!provider || !provider.apiKey) return null;
 
   const tools = getToolDefinitions();
@@ -195,15 +194,7 @@ export async function askAI(
     { role: "user", content: message },
   ];
 
-  const fallbackModels = ["gemini-3.6-flash", "gemini-3.7-flash"];
-  const models = [provider.model, ...fallbackModels.filter((m) => m !== provider.model)];
-
-  for (const model of models) {
-    const result = await tryWithModel(provider, model, messages, tools);
-    if (result) return result;
-  }
-
-  return null;
+  return tryWithModel(provider, provider.model, messages, tools);
 }
 
 async function tryWithModel(

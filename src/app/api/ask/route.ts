@@ -3,7 +3,6 @@ import { clientIp, rateLimited } from "@/lib/rate-limit";
 import { buildPortfolioKnowledge } from "@/lib/ask/knowledge";
 import { askAI, isAIConfigured } from "@/lib/ask/ai";
 import { answerQuestion } from "@/lib/ask/local";
-import { buildRAGContext } from "@/lib/ask/rag";
 import { classifyIntent, executeRoute } from "@/lib/ask/router";
 import type { AskHistoryMessage } from "@/lib/ask/types";
 
@@ -29,7 +28,7 @@ function parseHistory(value: unknown): AskHistoryMessage[] {
 const AI_UNAVAILABLE_NOTICE =
   "AI mode is temporarily unavailable, but I can still help you explore the portfolio.";
 
-const DEGRADED_FALLBACK_ACTIONS = [
+const DEGRADE_FALLBACK_ACTIONS = [
   { label: "Projects", type: "scroll", target: "projects" },
   { label: "Skills", type: "scroll", target: "skills" },
   { label: "Education", type: "scroll", target: "education" },
@@ -75,20 +74,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ...routed, source: routed.source ?? "tool" });
   }
 
-  // Fall back to AI for complex reasoning
-  let knowledge = buildPortfolioKnowledge();
+  // Fall back to AI for complex reasoning (no RAG - send minimal context)
+  const knowledge = buildPortfolioKnowledge();
   const aiConfigured = isAIConfigured();
-
-  if (aiConfigured) {
-    try {
-      const ragContext = await buildRAGContext(trimmed);
-      if (ragContext) {
-        knowledge += "\n\n" + ragContext;
-      }
-    } catch {
-      // RAG is optional — continue without it
-    }
-  }
 
   if (aiConfigured) {
     try {
@@ -105,7 +93,7 @@ export async function POST(request: Request) {
   if (aiConfigured) {
     const actions = local.actions?.length
       ? local.actions
-      : DEGRADED_FALLBACK_ACTIONS.map((a) => ({ ...a }));
+      : DEGRADE_FALLBACK_ACTIONS.map((a) => ({ ...a }));
     return NextResponse.json({
       ...local,
       actions,
