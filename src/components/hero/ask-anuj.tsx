@@ -350,33 +350,6 @@ export function AskAnuj() {
               finalResults = d.results as AskResult[];
             }
 
-            if (eventType === "tool_call" && typeof d.name === "string") {
-              const toolLabel = typeof d.args === "object" && d.args !== null
-                ? `${d.name}(${JSON.stringify(d.args).slice(0, 40)}...)`
-                : d.name;
-              accumulatedText += `\n\n_Using tool: ${toolLabel}_\n`;
-              setMessages((m) => {
-                const updated = [...m];
-                const last = updated[updated.length - 1];
-                if (last?.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, text: accumulatedText };
-                }
-                return updated;
-              });
-            }
-
-            if (eventType === "tool_result" && typeof d.result === "string") {
-              accumulatedText += `\n_Tool result: ${d.result.slice(0, 100)}_\n`;
-              setMessages((m) => {
-                const updated = [...m];
-                const last = updated[updated.length - 1];
-                if (last?.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, text: accumulatedText };
-                }
-                return updated;
-              });
-            }
-
             if (eventType === "error" && typeof d.message === "string") {
               throw new Error(d.message);
             }
@@ -385,6 +358,7 @@ export function AskAnuj() {
       }
 
       let displayText = accumulatedText;
+      let hasValidResponse = false;
       try {
         const cleaned = accumulatedText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
         const start = cleaned.indexOf("{");
@@ -393,28 +367,35 @@ export function AskAnuj() {
           const obj = JSON.parse(cleaned.slice(start, end + 1));
           if (typeof obj.answer === "string" && obj.answer.trim()) {
             displayText = obj.answer.trim();
+            hasValidResponse = true;
             if (obj.actions && !finalActions) finalActions = obj.actions;
             if (obj.results && !finalResults) finalResults = obj.results;
           }
         }
       } catch {
-        // Not JSON — use accumulated text as-is
+        // Not JSON — use accumulated text as-is, check if it's non-empty
+        hasValidResponse = accumulatedText.trim().length > 0;
       }
 
-      setMessages((m) => {
-        const updated = [...m];
-        const last = updated[updated.length - 1];
-        if (last?.role === "assistant") {
-          updated[updated.length - 1] = {
-            ...last,
-            text: displayText,
-            actions: finalActions,
-            results: finalResults,
-          };
-        }
-        return updated;
-      });
-      setStatus("idle");
+      // If we got a valid response (JSON answer or non-empty text), don't show connection error
+      if (hasValidResponse) {
+        setMessages((m) => {
+          const updated = [...m];
+          const last = updated[updated.length - 1];
+          if (last?.role === "assistant") {
+            updated[updated.length - 1] = {
+              ...last,
+              text: displayText,
+              actions: finalActions,
+              results: finalResults,
+            };
+          }
+          return updated;
+        });
+        setStatus("idle");
+      } else {
+        throw new Error("No response received");
+      }
     } catch {
       setMessages((m) => {
         const withoutEmpty = m.filter(
