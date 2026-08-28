@@ -301,6 +301,52 @@ function goodbyeResponse(): AskResponse {
   };
 }
 
+function personalInfoResponse(query: string): AskResponse | null {
+  const q = query.toLowerCase();
+  
+  if (q.includes("age") || q.includes("old")) {
+    return {
+      answer: "Anuj is a computer engineering undergraduate (early 20s).",
+      actions: [scroll("about", "About Anuj")],
+    };
+  }
+  
+  if (q.includes("name") || q.includes("who is") || q.includes("who are")) {
+    return {
+      answer: "Anuj Purbe — computer engineering undergraduate at Amrita Vishwa Vidyapeetham.",
+      actions: [scroll("about", "About Anuj"), scroll("contact", "Contact")],
+    };
+  }
+  
+  if (q.includes("university") || q.includes("college") || q.includes("where.*study") || q.includes("where.*from")) {
+    return {
+      answer: "Anuj studies Computer Engineering at Amrita Vishwa Vidyapeetham.",
+      actions: [scroll("education", "Education"), scroll("about", "About Anuj")],
+    };
+  }
+  
+  if (q.includes("experience") || q.includes("background")) {
+    return {
+      answer: "Anuj is a computer engineering undergraduate focused on DSA, OOP, and relational databases. He's built full-stack apps like Hiingers and FoodieHub, and has solved 200+ algorithmic problems.",
+      actions: [scroll("projects", "Projects"), scroll("skills", "Skills"), scroll("about", "About Anuj")],
+    };
+  }
+  
+  if (q.includes("contact") || q.includes("email") || q.includes("reach") || q.includes("touch")) {
+    return contactResponse();
+  }
+  
+  if (q.includes("resume") || q.includes("cv")) {
+    return resumeResponse();
+  }
+  
+  if (q.includes("github")) {
+    return githubResponse();
+  }
+  
+  return null;
+}
+
 function interestingResponse(): AskResponse {
   const facts = [
     `Anuj has solved ${stats.problemsSolved} algorithmic problems and maintains a ${stats.cgpa} CGPA.`,
@@ -423,6 +469,9 @@ export function answerQuestion(
   if (hasWord(q, "bye", "goodbye", "good bye", "see you", "take care", "gtg", "farewell")) {
     return goodbyeResponse();
   }
+
+  const personal = personalInfoResponse(raw);
+  if (personal) return personal;
 
   if (hasWord(q, "something interesting", "interesting", "fun fact", "something cool", "impress me", "tell me a fact", "favorite fact")) {
     return interestingResponse();
