@@ -51,6 +51,7 @@ const PORTFOLIO_KEYWORDS = [
   "certificate", "certificates", "certification", "certifications", "cert", "certs", "credential", "credentials",
   "education", "academic", "university", "college", "school", "degree", "semester", "sem", "gpa", "course", "courses", "study",
   "contact", "email", "reach", "get in touch", "message",
+  "instagram", "linkedin", "social", "socials", "handles", "follow",
   "resume", "cv", "curriculum",
   "github",
   "intern", "internship", "hire", "hiring", "recruit", "open to", "full time", "job",
@@ -90,7 +91,7 @@ export function classifyIntent(message: string, history: AskHistoryMessage[]): R
   // Calculator - highest priority for exact math
   if (matchesPatterns(message, CALCULATOR_PATTERNS)) {
     // Extract expression from "calculate 2+2" or "what is 2+2"
-    let expr = message
+    const expr = message
       .replace(/^\s*calculate\s+/i, "")
       .replace(/^\s*what is\s+/i, "")
       .replace(/[!?.]+$/, "")

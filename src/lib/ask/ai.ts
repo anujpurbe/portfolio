@@ -203,7 +203,7 @@ async function tryWithModel(
   messages: { role: string; content: string; tool_calls?: GeminiToolCall[]; tool_call_id?: string }[],
   tools: ReturnType<typeof getToolDefinitions>,
 ): Promise<AskResponse | null> {
-  const MAX_ITERATIONS = 3;
+  const MAX_ITERATIONS = 2;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     let res: Response;
@@ -217,7 +217,7 @@ async function tryWithModel(
         body: JSON.stringify({
           model,
           temperature: 0.3,
-          max_tokens: 600,
+          max_tokens: 300,
           messages,
           tools: tools.length > 0 ? tools : undefined,
         }),
@@ -264,23 +264,27 @@ async function tryWithModel(
         tool_calls: toolCalls,
       });
 
-      for (const tc of toolCalls) {
-        let args: Record<string, unknown> = {};
-        try {
-          args = JSON.parse(tc.function.arguments);
-        } catch {
-          console.error("[ask] Failed to parse tool arguments:", tc.function.arguments);
-        }
+      const results = await Promise.all(
+        toolCalls.map(async (tc) => {
+          let args: Record<string, unknown> = {};
+          try {
+            args = JSON.parse(tc.function.arguments);
+          } catch {
+            console.error("[ask] Failed to parse tool arguments:", tc.function.arguments);
+          }
 
-        const result = await executeTool(tc.function.name, args);
-        console.log(`[ask] Tool ${tc.function.name}: ${result.success ? "success" : "failure"}`);
+          const result = await executeTool(tc.function.name, args);
+          console.log(`[ask] Tool ${tc.function.name}: ${result.success ? "success" : "failure"}`);
 
-        messages.push({
-          role: "tool",
-          content: result.output,
-          tool_call_id: tc.id,
-        });
-      }
+          return {
+            role: "tool" as const,
+            content: result.output,
+            tool_call_id: tc.id,
+          };
+        }),
+      );
+
+      messages.push(...results);
 
       continue;
     }

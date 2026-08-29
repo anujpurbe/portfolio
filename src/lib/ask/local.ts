@@ -6,6 +6,7 @@ import { education, academicJourney } from "@/data/education";
 import { currentStack, aspiringStack } from "@/data/skills";
 import { achievements } from "@/data/achievements";
 import { stats } from "@/data/stats";
+import { profileData } from "./profile-data";
 import type { Project } from "@/lib/types";
 import type {
   AskAction,
@@ -127,13 +128,14 @@ function allSkills(): AskResponse {
 }
 
 function contactResponse(): AskResponse {
+  const email = profileData.socials.find((s) => s.label === "Email");
   return {
     answer:
       "You can reach Anuj at " +
-      site.email +
+      profileData.email +
       " — or send a message through the contact form. He's open to software engineering internships.",
     actions: [
-      { label: "Email", type: "external", href: site.email },
+      { label: "Email", type: "external", href: email?.href ?? profileData.email },
       { label: "Contact form", type: "scroll", target: "contact" },
     ],
   };
@@ -148,12 +150,49 @@ function resumeResponse(): AskResponse {
 }
 
 function githubResponse(): AskResponse {
+  const gh = profileData.socials.find((s) => s.label === "GitHub");
   return {
     answer:
       "Anuj's GitHub is github.com/anujpurbe — open source work and project repos. The GitHub section on this page shows live repo data.",
     actions: [
-      { label: "Open GitHub", type: "external", href: site.github },
+      { label: "Open GitHub", type: "external", href: gh?.href ?? site.github },
       scroll("github", "GitHub activity"),
+    ],
+  };
+}
+
+function instagramResponse(): AskResponse {
+  const ig = profileData.socials.find((s) => s.label === "Instagram");
+  return {
+    answer:
+      "You can find Anuj on Instagram here.",
+    actions: [
+      { label: "Instagram", type: "external", href: ig?.href ?? site.socials.instagram.href },
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
+function linkedinResponse(): AskResponse {
+  const li = profileData.socials.find((s) => s.label === "LinkedIn");
+  return {
+    answer:
+      "Anuj's LinkedIn is linkedin.com/in/anuj-purbe — connect there for professional updates.",
+    actions: [
+      { label: "LinkedIn", type: "external", href: li?.href ?? site.linkedin },
+      scroll("contact", "Contact"),
+    ],
+  };
+}
+
+function socialsResponse(): AskResponse {
+  const socials = profileData.socials.filter((s) => s.label !== "Email");
+  return {
+    answer:
+      "Here are Anuj's social links — GitHub, LinkedIn, and Instagram.",
+    actions: [
+      ...socials.map((s) => ({ label: s.label, type: "external" as const, href: s.href })),
+      { label: "Email", type: "external", href: profileData.email },
     ],
   };
 }
@@ -306,7 +345,8 @@ function personalInfoResponse(query: string): AskResponse | null {
   
   if (q.includes("age") || q.includes("old")) {
     return {
-      answer: "Anuj is a computer engineering undergraduate (early 20s).",
+      answer:
+        "Anuj is a computer engineering undergraduate at Amrita Vishwa Vidyapeetham. His exact age isn't published on the portfolio, but the About section covers his background and what he's working on.",
       actions: [scroll("about", "About Anuj")],
     };
   }
@@ -327,7 +367,7 @@ function personalInfoResponse(query: string): AskResponse | null {
   
   if (q.includes("experience") || q.includes("background")) {
     return {
-      answer: "Anuj is a computer engineering undergraduate focused on DSA, OOP, and relational databases. He's built full-stack apps like Hiingers and FoodieHub, and has solved 200+ algorithmic problems.",
+      answer: `Anuj is a computer engineering undergraduate focused on DSA, OOP, and relational databases. He's built full-stack apps like Hiingers and FoodieHub, and has solved ${stats.problemsSolved}+ algorithmic problems.`,
       actions: [scroll("projects", "Projects"), scroll("skills", "Skills"), scroll("about", "About Anuj")],
     };
   }
@@ -342,6 +382,18 @@ function personalInfoResponse(query: string): AskResponse | null {
   
   if (q.includes("github")) {
     return githubResponse();
+  }
+  
+  if (q.includes("instagram") || q.includes("instagram link") || q.includes("ig")) {
+    return instagramResponse();
+  }
+  
+  if (q.includes("linkedin")) {
+    return linkedinResponse();
+  }
+  
+  if (q.includes("social") || q.includes("socials") || q.includes("profile") && q.includes("link") || q.includes("follow")) {
+    return socialsResponse();
   }
   
   return null;
@@ -421,6 +473,27 @@ function anaphoraResponse(q: string, prevUser: string): AskResponse | null {
   return null;
 }
 
+// Simple LRU cache for deterministic local responses
+const cacheLimit = 100;
+const localCache = new Map<string, AskResponse>();
+
+function cachedAnswer(q: string, prevUser: string, compute: () => AskResponse): AskResponse {
+  const key = `${q}\u0001${prevUser}`;
+  const hit = localCache.get(key);
+  if (hit) {
+    localCache.delete(key);
+    localCache.set(key, hit);
+    return hit;
+  }
+  const response = compute();
+  localCache.set(key, response);
+  if (localCache.size > cacheLimit) {
+    const oldestKey = localCache.keys().next().value;
+    if (oldestKey !== undefined) localCache.delete(oldestKey);
+  }
+  return response;
+}
+
 export function answerQuestion(
   raw: string,
   history: AskHistoryMessage[] = [],
@@ -430,6 +503,10 @@ export function answerQuestion(
     .reverse()
     .find((m) => m.role === "user")?.text ?? "";
 
+  return cachedAnswer(q, prevUser, () => computeAnswer(q, raw, prevUser));
+}
+
+function computeAnswer(q: string, raw: string, prevUser: string): AskResponse {
   if (!q) {
     return {
       answer:
@@ -494,6 +571,18 @@ export function answerQuestion(
     return githubResponse();
   }
 
+  if (has(q, "instagram") && !has(q, "project", "projects")) {
+    return instagramResponse();
+  }
+
+  if (has(q, "linkedin")) {
+    return linkedinResponse();
+  }
+
+  if (has(q, "social", "socials", "handles", "follow")) {
+    return socialsResponse();
+  }
+
   if (has(q, "contact", "email", "reach", "get in touch", "message")) {
     return contactResponse();
   }
@@ -505,7 +594,7 @@ export function answerQuestion(
   }
 
   const mentioned = findProjectInText(q);
-  if (mentioned && !has(q, "projects", "project", "list", "all", "show")) {
+  if (mentioned && !has(q, "projects", "list", "all", "show")) {
     const isTech = /technolog|stack|built with|used|tool|language/.test(q);
     if (isTech) {
       return {

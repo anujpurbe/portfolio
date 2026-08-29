@@ -31,6 +31,20 @@ const DEFAULT_LOCATION = {
   name: "Coimbatore, India",
 };
 
+// Simple in-memory caches
+const geocodeCache = new Map<string, { lat: number; lon: number; name: number; expires: number }>();
+const weatherCache = new Map<string, { output: string; expires: number }>();
+const CACHE_TTL_GEOCODE = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_WEATHER = 5 * 60 * 1000; // 5 minutes
+
+function getCacheKey(lat: number, lon: number): string {
+  return `${lat.toFixed(4)},${lon.toFixed(4)}`;
+}
+
+function getGeocodeCacheKey(name: string): string {
+  return name.toLowerCase().trim();
+}
+
 const weatherTool: Tool = {
   name: "get_weather",
   description:
@@ -51,32 +65,59 @@ const weatherTool: Tool = {
 
     let latitude = DEFAULT_LOCATION.latitude;
     let longitude = DEFAULT_LOCATION.longitude;
+    let displayName = DEFAULT_LOCATION.name;
 
     if (locationName !== DEFAULT_LOCATION.name) {
-      try {
-        const geoRes = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=1&language=en`,
-          { signal: AbortSignal.timeout(8000) },
-        );
-        const geoData = (await geoRes.json()) as {
-          results?: Array<{ latitude: number; longitude: number; name: string }>;
-        };
-        if (geoData.results && geoData.results.length > 0) {
-          latitude = geoData.results[0].latitude;
-          longitude = geoData.results[0].longitude;
+      const geocodeCacheKey = getGeocodeCacheKey(locationName);
+      const now = Date.now();
+      const cachedGeo = geocodeCache.get(geocodeCacheKey);
+
+      if (cachedGeo && cachedGeo.expires > now) {
+        latitude = cachedGeo.lat;
+        longitude = cachedGeo.lon;
+        displayName = locationName;
+      } else {
+        try {
+          const geoRes = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=1&language=en`,
+            { signal: AbortSignal.timeout(5000) },
+          );
+          const geoData = (await geoRes.json()) as {
+            results?: Array<{ latitude: number; longitude: number; name: string }>;
+          };
+          if (geoData.results && geoData.results.length > 0) {
+            latitude = geoData.results[0].latitude;
+            longitude = geoData.results[0].longitude;
+            displayName = geoData.results[0].name;
+            geocodeCache.set(geocodeCacheKey, {
+              lat: latitude,
+              lon: longitude,
+              name: 0,
+              expires: now + CACHE_TTL_GEOCODE,
+            });
+          }
+        } catch {
+          return {
+            success: false,
+            output: `Could not geocode location "${locationName}".`,
+          };
         }
-      } catch {
-        return {
-          success: false,
-          output: `Could not geocode location "${locationName}".`,
-        };
       }
+    }
+
+    // Check weather cache
+    const weatherCacheKey = getCacheKey(latitude, longitude);
+    const now = Date.now();
+    const cachedWeather = weatherCache.get(weatherCacheKey);
+
+    if (cachedWeather && cachedWeather.expires > now) {
+      return { success: true, output: cachedWeather.output };
     }
 
     try {
       const weatherRes = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`,
-        { signal: AbortSignal.timeout(8000) },
+        { signal: AbortSignal.timeout(5000) },
       );
       const weatherData = (await weatherRes.json()) as {
         current?: {
@@ -99,13 +140,21 @@ const weatherTool: Tool = {
       const wind = current.wind_speed_10m;
       const condition = code !== undefined ? WMO_CODES[code] ?? `Code ${code}` : "Unknown";
 
-      const parts = [`Weather in ${locationName}:`];
+      const parts = [`Weather in ${displayName}:`];
       if (temp !== undefined) parts.push(`Temperature: ${temp}°C`);
       parts.push(`Conditions: ${condition}`);
       if (humidity !== undefined) parts.push(`Humidity: ${humidity}%`);
       if (wind !== undefined) parts.push(`Wind: ${wind} km/h`);
 
-      return { success: true, output: parts.join("\n") };
+      const output = parts.join("\n");
+
+      // Cache the weather result
+      weatherCache.set(weatherCacheKey, {
+        output,
+        expires: now + CACHE_TTL_WEATHER,
+      });
+
+      return { success: true, output };
     } catch {
       return { success: false, output: "Could not fetch weather data." };
     }

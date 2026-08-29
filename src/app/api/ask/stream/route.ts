@@ -6,6 +6,7 @@ import { answerQuestion } from "@/lib/ask/local";
 import { getToolDefinitions, executeTool } from "@/lib/ask/tools";
 import { getDefaultProvider } from "@/lib/ask/models";
 import { classifyIntent, executeRoute } from "@/lib/ask/router";
+import { normalizeAnswer, normalizePayload } from "@/lib/ask/normalize";
 import type { AskHistoryMessage, GeminiToolCall } from "@/lib/ask/types";
 
 export const dynamic = "force-dynamic";
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
         function send(event: string, data: unknown) {
           controller.enqueue(encoder.encode(sse(event, data)));
         }
-        send("text", { delta: routed.answer });
+        send("text", { delta: normalizeAnswer(routed.answer) });
         if (routed.actions) send("actions", { actions: routed.actions });
         if (routed.results) send("results", { results: routed.results });
         send("done", { source: routed.source ?? "tool" });
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
         function send(event: string, data: unknown) {
           controller.enqueue(encoder.encode(sse(event, data)));
         }
-        send("text", { delta: local.answer });
+        send("text", { delta: normalizeAnswer(local.answer) });
         if (local.actions) send("actions", { actions: local.actions });
         if (local.results) send("results", { results: local.results });
         send("done", { source: "local" });
@@ -211,7 +212,7 @@ async function streamFromAI(
     { role: "user", content: message },
   ];
 
-  const MAX_ITERATIONS = 3;
+  const MAX_ITERATIONS = 2;
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     const res = await fetch(`${provider.baseURL}/chat/completions`, {
@@ -223,7 +224,7 @@ async function streamFromAI(
       body: JSON.stringify({
         model: provider.model,
         temperature: 0.3,
-        max_tokens: 600,
+        max_tokens: 300,
         messages,
         tools: tools.length > 0 ? tools : undefined,
         stream: iteration === 0,
@@ -275,7 +276,6 @@ async function streamFromAI(
 
           if (typeof delta.content === "string" && delta.content) {
             textContent += delta.content;
-            send("text", { delta: delta.content });
           }
 
           if (delta.tool_calls && Array.isArray(delta.tool_calls)) {
@@ -321,40 +321,39 @@ async function streamFromAI(
           tool_calls: Array.from(toolCallsMap.values()),
         });
 
-        for (const tc of toolCallsMap.values()) {
-          let args: Record<string, unknown> = {};
-          try {
-            args = JSON.parse(tc.function.arguments);
-          } catch {
-            console.error("[ask-stream] Bad tool args:", tc.function.arguments);
-          }
+        const toolResults = await Promise.all(
+          Array.from(toolCallsMap.values()).map(async (tc) => {
+            let args: Record<string, unknown> = {};
+            try {
+              args = JSON.parse(tc.function.arguments);
+            } catch {
+              console.error("[ask-stream] Bad tool args:", tc.function.arguments);
+            }
 
-          const result = await executeTool(tc.function.name, args);
+            const result = await executeTool(tc.function.name, args);
 
-          messages.push({
-            role: "tool",
-            content: result.output,
-            tool_call_id: tc.id,
-          });
-        }
+            return {
+              role: "tool" as const,
+              content: result.output,
+              tool_call_id: tc.id,
+            };
+          }),
+        );
+
+        messages.push(...toolResults);
 
         continue;
       }
 
       if (textContent) {
-        try {
-          const start = textContent.indexOf("{");
-          const end = textContent.lastIndexOf("}");
-          if (start !== -1 && end > start) {
-            const obj = JSON.parse(textContent.slice(start, end + 1));
-            if (obj.actions) send("actions", { actions: obj.actions });
-            if (obj.results) send("results", { results: obj.results });
-          }
-        } catch {
-          // Text wasn't JSON — send as-is
+        const payload = normalizePayload(textContent);
+        if (payload?.answer) {
+          send("text", { delta: payload.answer });
+          if (payload.actions) send("actions", { actions: payload.actions });
+          if (payload.results) send("results", { results: payload.results });
+          send("done", { source: "ai" });
+          return;
         }
-        send("done", { source: "ai" });
-        return;
       }
     }
 
@@ -366,28 +365,27 @@ async function streamFromAI(
 
       if (toolCalls && Array.isArray(toolCalls) && toolCalls.length > 0) {
         messages.push({ role: "assistant", content: content ?? "", tool_calls: toolCalls });
-        for (const tc of toolCalls) {
-          let args: Record<string, unknown> = {};
-          try { args = JSON.parse(tc.function.arguments); } catch { /* skip */ }
-          const result = await executeTool(tc.function.name, args);
-          messages.push({ role: "tool", content: result.output, tool_call_id: tc.id });
-        }
+        const results = await Promise.all(
+          toolCalls.map(async (tc: GeminiToolCall) => {
+            let args: Record<string, unknown> = {};
+            try { args = JSON.parse(tc.function.arguments); } catch { /* skip */ }
+            const result = await executeTool(tc.function.name, args);
+            return { role: "tool" as const, content: result.output, tool_call_id: tc.id };
+          }),
+        );
+        messages.push(...results);
         continue;
       }
 
       if (content) {
-        send("text", { delta: content });
-        try {
-          const start = content.indexOf("{");
-          const end = content.lastIndexOf("}");
-          if (start !== -1 && end > start) {
-            const parsed = JSON.parse(content.slice(start, end + 1));
-            if (parsed.actions) send("actions", { actions: parsed.actions });
-            if (parsed.results) send("results", { results: parsed.results });
-          }
-        } catch { /* skip */ }
-        send("done", { source: "ai" });
-        return;
+        const payload = normalizePayload(content);
+        if (payload?.answer) {
+          send("text", { delta: payload.answer });
+          if (payload.actions) send("actions", { actions: payload.actions });
+          if (payload.results) send("results", { results: payload.results });
+          send("done", { source: "ai" });
+          return;
+        }
       }
     }
 

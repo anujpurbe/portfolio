@@ -321,10 +321,11 @@ export function AskAnuj() {
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
 
-        for (const line of lines) {
+        for (let li = 0; li < lines.length; li++) {
+          const line = lines[li];
           if (line.startsWith("event: ")) {
             const eventType = line.slice(7).trim();
-            const nextLine = lines[lines.indexOf(line) + 1];
+            const nextLine = lines[li + 1];
             if (!nextLine?.startsWith("data: ")) continue;
 
             const dataStr = nextLine.slice(6).trim();
@@ -334,6 +335,7 @@ export function AskAnuj() {
 
             if (eventType === "text" && typeof d.delta === "string") {
               accumulatedText += d.delta;
+              hasValidResponse = true;
               setMessages((m) => {
                 const updated = [...m];
                 const last = updated[updated.length - 1];
@@ -346,10 +348,16 @@ export function AskAnuj() {
 
             if (eventType === "actions" && Array.isArray(d.actions)) {
               finalActions = d.actions as AskAction[];
+              hasValidResponse = true;
             }
 
             if (eventType === "results" && Array.isArray(d.results)) {
               finalResults = d.results as AskResult[];
+              hasValidResponse = true;
+            }
+
+            if (eventType === "done") {
+              hasValidResponse = true;
             }
 
             if (eventType === "error" && typeof d.message === "string") {
@@ -359,28 +367,12 @@ export function AskAnuj() {
         }
       }
 
-      // Parse final response - try JSON first, then plain text
-      let displayText = accumulatedText;
-      try {
-        const cleaned = accumulatedText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-        const start = cleaned.indexOf("{");
-        const end = cleaned.lastIndexOf("}");
-        if (start !== -1 && end > start) {
-          const obj = JSON.parse(cleaned.slice(start, end + 1));
-          if (typeof obj.answer === "string" && obj.answer.trim()) {
-            displayText = obj.answer.trim();
-            hasValidResponse = true;
-            if (obj.actions && !finalActions) finalActions = obj.actions;
-            if (obj.results && !finalResults) finalResults = obj.results;
-          }
-        }
-      } catch {
-        // Not JSON — use accumulated text as-is
-        hasValidResponse = accumulatedText.trim().length > 0;
-      }
+      // Server already normalizes every answer to a clean string — display it as-is.
+      // No JSON re-parsing here, so a nested/duplicated {"answer": ...} can never appear.
+      const displayText = accumulatedText.trim();
 
       // If we got a valid response, finalize and return
-      if (hasValidResponse) {
+      if (hasValidResponse && displayText) {
         setMessages((m) => {
           const updated = [...m];
           const last = updated[updated.length - 1];
@@ -401,15 +393,15 @@ export function AskAnuj() {
       // No valid response received - throw to trigger fallback
       throw new Error("No response received");
     } catch {
-      // Only show fallback if we never got a valid response
+      // If a valid response was already received (text/actions/results/done),
+      // treat the request as successful — never show a fallback or connection error.
+      if (hasValidResponse) {
+        setStatus("idle");
+        setError(null);
+        return;
+      }
+      // No valid response received — show the genuine offline fallback.
       setMessages((m) => {
-        // Check if we already have a non-empty assistant message (success case)
-        const lastMsg = m[m.length - 1];
-        if (lastMsg?.role === "assistant" && lastMsg.text?.trim()) {
-          // Already have a valid answer - don't add fallback
-          return m;
-        }
-        // No valid response - show fallback
         const withoutEmpty = m.filter(
           (msg) => !(msg.role === "assistant" && msg.text === ""),
         );

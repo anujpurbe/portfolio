@@ -11,7 +11,7 @@ const geminiProvider: ModelProvider = {
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
   apiKey: process.env.AI_API_KEY ?? "",
   model: "gemini-3.6-flash",
-  timeoutMs: 45000,
+  timeoutMs: 30000,
 };
 
 export function getDefaultProvider(): ModelProvider {

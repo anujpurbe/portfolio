@@ -4,6 +4,7 @@ import { buildPortfolioKnowledge } from "@/lib/ask/knowledge";
 import { askAI, isAIConfigured } from "@/lib/ask/ai";
 import { answerQuestion } from "@/lib/ask/local";
 import { classifyIntent, executeRoute } from "@/lib/ask/router";
+import { normalizeResponse } from "@/lib/ask/normalize";
 import type { AskHistoryMessage } from "@/lib/ask/types";
 
 export const dynamic = "force-dynamic";
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
     try {
       const ai = await askAI(trimmed, knowledge, history);
       if (ai) {
-        return NextResponse.json({ ...ai, source: "ai" });
+        return NextResponse.json({ ...normalizeResponse(ai), source: "ai" });
       }
     } catch (error) {
       console.error("[ask] fallback to local:", (error as Error)?.message);

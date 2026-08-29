@@ -100,6 +100,7 @@ LINKS
 - Email: ${site.email}
 - GitHub: ${site.github}
 - LinkedIn: ${site.linkedin}
+- Instagram: ${site.socials.instagram.href}
 - LeetCode: ${site.coding.platforms.find((p) => p.label === "LeetCode")?.href ?? `${site.coding.leetcodeUrl}/u/anujpurbe/`}
 - Resume PDF: ${site.resume}
 
