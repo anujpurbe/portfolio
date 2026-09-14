@@ -37,9 +37,10 @@ export const site = {
       "Backend",
     ],
     openGraphImage: "/og-image.png",
-    // Paste the token Google provides during Search Console verification
-    // (URL-prefix property → HTML tag method). Leave empty until then.
-    googleSiteVerification: "",
+    // Google Search Console verification token (URL-prefix property → HTML tag
+    // method). Rendered in <head> via metadata verification on every page.
+    googleSiteVerification:
+      "BfM8dM1DhDgww9nYurOMdpbrv1BnUFmrLM7TcmwLhdo",
   },
   coding: {
     leetcodeUsername: "",
