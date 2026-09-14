@@ -10,10 +10,12 @@ import {
   getRelatedEntries,
 } from "@/lib/journal";
 import { formatDate, cn } from "@/lib/utils";
+import { seo } from "@/lib/seo";
 import { Badge } from "@/components/ui/badge";
 import { projects } from "@/data/projects";
 import { ReadingProgress } from "@/components/journal/reading-progress";
 import { CopyLink } from "@/components/journal/copy-link";
+import { JsonLd } from "@/components/seo/json-ld";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -31,16 +33,35 @@ export async function generateMetadata({
   const { slug } = await params;
   const entry = getEntry(slug);
   if (!entry) return {};
+  const url = `${seo.siteUrl}/journal/${entry.slug}`;
   return {
     title: entry.title,
     description: entry.excerpt,
+    alternates: {
+      canonical: `/journal/${entry.slug}`,
+    },
     openGraph: {
       type: "article",
-      title: entry.title,
+      title: `${entry.title} — ${seo.fullName}`,
       description: entry.excerpt,
+      url,
       publishedTime: entry.date,
       modifiedTime: entry.updated,
       tags: entry.tags,
+      images: [
+        {
+          url: seo.openGraphImage,
+          width: seo.openGraphImageWidth,
+          height: seo.openGraphImageHeight,
+          alt: seo.siteName,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${entry.title} — ${seo.fullName}`,
+      description: entry.excerpt,
+      images: [seo.openGraphImage],
     },
   };
 }
@@ -57,9 +78,25 @@ export default async function JournalEntryPage({ params }: PageProps) {
     ? projects.find((project) => project.slug === entry.relatedProject)
     : null;
   const EntryComponent = entry.Component;
+  const articleUrl = `${seo.siteUrl}/journal/${entry.slug}`;
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: entry.title,
+    description: entry.excerpt,
+    url: articleUrl,
+    image: seo.openGraphImage,
+    datePublished: entry.date,
+    dateModified: entry.updated ?? entry.date,
+    author: { "@type": "Person", name: seo.fullName, url: seo.siteUrl },
+    publisher: { "@type": "Person", name: seo.fullName, url: seo.siteUrl },
+    mainEntityOfPage: articleUrl,
+    keywords: entry.tags.join(", "),
+  };
 
   return (
     <>
+      <JsonLd data={articleJsonLd} />
       <ReadingProgress />
       <article className="pt-32 pb-20 sm:pt-40 sm:pb-28">
         <div className="container-shell max-w-3xl">

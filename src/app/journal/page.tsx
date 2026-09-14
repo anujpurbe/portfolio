@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { seo } from "@/lib/seo";
 import { getAllEntries } from "@/lib/journal";
 import { Reveal } from "@/components/ui/reveal";
 import { JournalFilter } from "@/components/journal/journal-filter";
@@ -8,6 +9,15 @@ export const metadata: Metadata = {
   title: "Journal",
   description:
     "Engineering notes, technical lessons, project decisions, and things I'm learning while building.",
+  alternates: {
+    canonical: "/journal",
+  },
+  openGraph: {
+    title: "Journal — Anuj Purbe",
+    description:
+      "Engineering notes, technical lessons, project decisions, and things I'm learning while building.",
+    url: `${seo.siteUrl}/journal`,
+  },
 };
 
 export default function JournalPage() {

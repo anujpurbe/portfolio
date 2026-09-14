@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { Hero } from "@/components/hero/hero";
 import { Stats } from "@/components/stats/stats";
 import { Currently } from "@/components/currently/currently";
@@ -15,10 +16,18 @@ import { JournalSection } from "@/components/journal/journal-section";
 import { Comments } from "@/components/comments/comments";
 import { Contact } from "@/components/contact/contact";
 import { SectionSkeleton } from "@/components/ui/section-skeleton";
+import { WebSiteJsonLd } from "@/components/seo/website-json-ld";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function Home() {
   return (
     <>
+      <WebSiteJsonLd />
       <Hero />
       <Stats />
       <Currently />

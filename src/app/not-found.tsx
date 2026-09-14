@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Compass, FileQuestion } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
+
+export const metadata: Metadata = {
+  title: "Page Not Found",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function NotFound() {
   return (
@@ -29,7 +38,7 @@ export default function NotFound() {
               Back home
             </Link>
             <Link
-              href="/projects"
+              href="/#projects"
               className="focus-ring inline-flex items-center gap-1.5 rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-muted transition-colors hover:border-accent/50 hover:text-foreground"
             >
               <Compass className="size-4" />

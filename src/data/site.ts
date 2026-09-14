@@ -19,7 +19,27 @@ export const site = {
   },
   photo: {
     primary: "/images/profile/anuj-purbe.webp",
-    og: "/images/profile/anuj-purbe-og.webp",
+    og: "/og-image.png",
+  },
+  seo: {
+    title: "Anuj Purbe | CSE Portfolio",
+    titleTemplate: "%s — Anuj Purbe",
+    description:
+      "The personal CSE portfolio of Anuj Purbe — a computer engineering undergraduate at Amrita Vishwa Vidyapeetham building efficient, well-structured software with a focus on data structures, algorithms, and databases. Open to software engineering internships.",
+    keywords: [
+      "Anuj Purbe",
+      "Computer Engineering",
+      "Software Engineer",
+      "Data Structures",
+      "Algorithms",
+      "Java",
+      "MySQL",
+      "Backend",
+    ],
+    openGraphImage: "/og-image.png",
+    // Paste the token Google provides during Search Console verification
+    // (URL-prefix property → HTML tag method). Leave empty until then.
+    googleSiteVerification: "",
   },
   coding: {
     leetcodeUsername: "",

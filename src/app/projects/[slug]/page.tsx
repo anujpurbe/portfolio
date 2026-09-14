@@ -15,6 +15,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { projects } from "@/data/projects";
+import { seo } from "@/lib/seo";
 import { ProjectCover } from "@/components/projects/project-cover";
 import { Badge } from "@/components/ui/badge";
 import { Reveal } from "@/components/ui/reveal";
@@ -35,13 +36,33 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
   if (!project) return {};
+  const url = `${seo.siteUrl}/projects/${project.slug}`;
+  const image = project.media?.cover
+    ? `${seo.siteUrl}${project.media.cover}`
+    : seo.openGraphImage;
   return {
     title: project.title,
     description: project.description,
+    alternates: {
+      canonical: `/projects/${project.slug}`,
+    },
     openGraph: {
-      title: project.title,
+      title: `${project.title} — ${seo.fullName}`,
       description: project.description,
       type: "article",
+      url,
+      images: [
+        {
+          url: image,
+          alt: `${project.title} cover`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.title} — ${seo.fullName}`,
+      description: project.description,
+      images: [image],
     },
   };
 }

@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import dynamicImport from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
-import { site } from "@/data/site";
+import { seo } from "@/lib/seo";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer/footer";
+import { PersonJsonLd } from "@/components/seo/person-json-ld";
 import "./globals.css";
 
 const Cursor = dynamicImport(() =>
@@ -21,49 +22,50 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteDescription =
-  "The personal CSE portfolio of Anuj Purbe — a computer engineering undergraduate at Amrita Vishwa Vidyapeetham building efficient, well-structured software with a focus on data structures, algorithms, and databases. Open to software engineering internships.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
+  metadataBase: new URL(`${seo.siteUrl}/`),
   title: {
-    default: `${site.name} | CSE Portfolio`,
-    template: `%s — ${site.name}`,
+    default: seo.title,
+    template: seo.titleTemplate,
   },
-  alternates: {
-    canonical: "/",
-  },
-  description: siteDescription,
-  keywords: [
-    "Anuj Purbe",
-    "Computer Engineering",
-    "Software Engineer",
-    "Data Structures",
-    "Algorithms",
-    "Java",
-    "MySQL",
-    "Backend",
-  ],
-  authors: [{ name: site.fullName, url: site.url }],
-  creator: site.fullName,
+  description: seo.description,
+  keywords: seo.keywords,
+  authors: [{ name: seo.fullName, url: seo.siteUrl }],
+  creator: seo.fullName,
+  ...(seo.googleSiteVerification
+    ? {
+        verification: {
+          google: seo.googleSiteVerification,
+        },
+      }
+    : {}),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: site.url,
-    siteName: site.name,
-    title: `${site.name} | CSE Portfolio`,
-    description: siteDescription,
+    url: `${seo.siteUrl}/`,
+    siteName: seo.siteName,
+    title: seo.title,
+    description: seo.description,
     images: [
-      { url: "/og-image.png", width: 1200, height: 630, alt: site.name },
+      {
+        url: seo.openGraphImage,
+        width: seo.openGraphImageWidth,
+        height: seo.openGraphImageHeight,
+        alt: seo.siteName,
+      },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} | CSE Portfolio`,
-    description: siteDescription,
-    images: ["/og-image.png"],
+    title: seo.title,
+    description: seo.description,
+    images: [seo.openGraphImage],
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/logo.png",
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -85,6 +87,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
+        <PersonJsonLd />
         <ThemeProvider>
           <a
             href="#main"
