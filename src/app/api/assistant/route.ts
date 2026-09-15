@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { answerAssistant, prepareRequest } from "@/lib/assistant";
 
-// Deprecated compat endpoint — retained only so existing integrations (and the
-// retry path in the hero widget) keep working during the migration. Use
-// /api/assistant for new code. Deleted when src/lib/ask is removed.
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
@@ -16,11 +13,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const { response } = await answerAssistant(
+  const { response, aiUsed } = await answerAssistant(
     prepared.message,
     prepared.ip,
     prepared.history,
   );
 
-  return NextResponse.json(response);
+  return NextResponse.json({ ...response, aiUsed });
 }

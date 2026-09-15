@@ -3,8 +3,6 @@ import { prepareRequest, runAssistantStream } from "@/lib/assistant";
 import { sse, SSE_HEADERS } from "@/lib/assistant/sse";
 import type { StreamEmit } from "@/lib/assistant";
 
-// Deprecated compat endpoint — the old hero widget streams through this route.
-// Same SSE contract as /api/assistant/stream. Use /api/assistant for new code.
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
@@ -26,7 +24,7 @@ export async function POST(request: Request) {
       try {
         await runAssistantStream(prepared.message, prepared.ip, prepared.history, emit);
       } catch (error) {
-        console.error("[ask] compat stream error:", (error as Error)?.message);
+        console.error("[assistant] stream error:", (error as Error)?.message);
         emit("error", { message: "Something went wrong. Please try again." });
       }
       controller.close();
