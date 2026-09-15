@@ -24,11 +24,22 @@ function redis(): Redis | null {
   }
 }
 
+// Best-effort client IP for rate limiting. Platforms like Vercel set
+// `x-real-ip` to the true remote address (not client-controllable), so it wins.
+// `x-forwarded-for` is a comma list appended by each proxy — the rightmost
+// entry is the one added closest to the origin, so we read from the end
+// instead of trusting the leftmost (attacker-controlled) value.
 export function clientIp(request: Request) {
-  const fwd = request.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
   const real = request.headers.get("x-real-ip");
   if (real) return real.trim();
+  const fwd = request.headers.get("x-forwarded-for");
+  if (fwd) {
+    const parts = fwd
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parts[parts.length - 1] ?? "unknown";
+  }
   return "unknown";
 }
 

@@ -4,7 +4,10 @@ import { getLeetCodeStats } from "@/lib/leetcode";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 
-const username = process.env.NEXT_PUBLIC_LEETCODE_USERNAME ?? "";
+const username =
+  (process.env.NEXT_PUBLIC_LEETCODE_USERNAME ?? "").trim() ||
+  (coding.leetcode.profileUrl.split("/").filter(Boolean).pop()?.toLowerCase() ??
+    "");
 const leetcodeHref = username
   ? coding.leetcode.url(username)
   : "https://leetcode.com";
