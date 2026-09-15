@@ -36,6 +36,55 @@ const weatherCache = new Map<string, { output: string; expires: number }>();
 const CACHE_TTL_GEOCODE = 60 * 60 * 1000;
 const CACHE_TTL_WEATHER = 5 * 60 * 1000;
 
+type Geocode = { latitude: number; longitude: number; name: string };
+
+// Primary geocoder is Open-Meteo; Nominatim (OSM) is a no-key fallback for
+// environments where the primary host is unreachable.
+async function geocode(name: string): Promise<Geocode | null> {
+  try {
+    const openMeteo = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=en`,
+      { signal: AbortSignal.timeout(4000) },
+    );
+    if (openMeteo.ok) {
+      const data = (await openMeteo.json()) as {
+        results?: Array<{ latitude: number; longitude: number; name: string }>;
+      };
+      const first = data.results?.[0];
+      if (first) {
+        return { latitude: first.latitude, longitude: first.longitude, name: first.name };
+      }
+    }
+  } catch {
+    // Fall through to Nominatim.
+  }
+
+  try {
+    const nominatim = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=jsonv2&limit=1`,
+      {
+        signal: AbortSignal.timeout(4000),
+        headers: { "User-Agent": "AnujPurbePortfolio/1.0 (portfolio assistant)" },
+      },
+    );
+    if (nominatim.ok) {
+      const data = (await nominatim.json()) as Array<{ display_name: string; lat: string; lon: string }>;
+      const first = data[0];
+      if (first) {
+        return {
+          latitude: parseFloat(first.lat),
+          longitude: parseFloat(first.lon),
+          name: first.display_name.split(",")[0],
+        };
+      }
+    }
+  } catch {
+    // No geocoder available.
+  }
+
+  return null;
+}
+
 function getWeatherCacheKey(lat: number, lon: number): string {
   return `${lat.toFixed(4)},${lon.toFixed(4)}`;
 }
@@ -72,30 +121,21 @@ export const weatherTool: Tool = {
         longitude = cachedGeo.lon;
         displayName = locationName;
       } else {
-        try {
-          const geoRes = await fetch(
-            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationName)}&count=1&language=en`,
-            { signal: AbortSignal.timeout(5000) },
-          );
-          const geoData = (await geoRes.json()) as {
-            results?: Array<{ latitude: number; longitude: number; name: string }>;
-          };
-          if (geoData.results && geoData.results.length > 0) {
-            latitude = geoData.results[0].latitude;
-            longitude = geoData.results[0].longitude;
-            displayName = geoData.results[0].name;
-            geocodeCache.set(geocodeKey, {
-              lat: latitude,
-              lon: longitude,
-              expires: now + CACHE_TTL_GEOCODE,
-            });
-          }
-        } catch {
+        const resolved = await geocode(locationName);
+        if (!resolved) {
           return {
             success: false,
             output: `Could not geocode location "${locationName}".`,
           };
         }
+        latitude = resolved.latitude;
+        longitude = resolved.longitude;
+        displayName = resolved.name;
+        geocodeCache.set(geocodeKey, {
+          lat: latitude,
+          lon: longitude,
+          expires: now + CACHE_TTL_GEOCODE,
+        });
       }
     }
 

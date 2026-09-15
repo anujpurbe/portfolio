@@ -57,24 +57,37 @@ const PORTFOLIO_KEYWORDS = [
 ];
 
 // General programming / coding questions — answered by the AI (quota-gated).
+// Portfolio-style questions are routed earlier, so these patterns are deliberately
+// CS-vocabulary-heavy to avoid burning quota on non-coding small talk.
 const CODING_PATTERNS = [
   /\bcode\b/i,
   /\bcoding\b/i,
-  /\bprogram(ming|matically)?\b/i,
+  /\bprogram(ming|matically|mer|mers)?\b/i,
   /\bfunction\b/i,
   /\balgorithm(s)?\b/i,
   /\brecursion\b/i,
+  /\brecursive\b/i,
   /\bsyntax\b/i,
   /\bbug(s)?\b/i,
   /\bdebug(g(ing|ged)?)?\b/i,
   /\bcompile(r|ing|d)?\b/i,
   /\bcomplexity\b/i,
-  /\bbig o\b/i,
-  /\bdata structure(s)?\b/i,
+  /\bbig[- ]?o\b/i,
+  /\b(time|space|asymptotic)\s+complexity\b/i,
+  /\bdata\s+structure(s)?\b/i,
   /\bsolve\b/i,
-  /\bhow (do|to|would|should)\b/i,
-  /\bexplain (how|why|the code)\b/i,
-  /\bwrite (a |the |some )?(function|code|program|loop)/i,
+  /\b(binary|linear|depth[- ]?first|breadth[- ]?first)\s+search\b/i,
+  /\b(array|linked\s+list|hash\s*map|stack|queue|graph|binary\s+tree|bst|avl|trie|heap)\b/i,
+  /\b(quick|merge|insertion|selection|bubble|heap)\s*sort\b/i,
+  /\bsorting\b/i,
+  /\bdfs\b/i,
+  /\bbfs\b/i,
+  /\b(timeout|async|await|promise|thread|callback|deadlock|race condition)\b/i,
+  /\b(variable|loop|conditional|operator)\b/i,
+  /\bhow\s+(do|to|would|should)\s+(i\s*\/?)?(code|write|build|implement|solve)\b/i,
+  /\bexplain\s+what\b/i,
+  /\bwrite\s+(a\s+|the\s+|some\s+)?(function|code|program|loop|class|api)\b/i,
+  /^what\s+is\s+(a\s+)?(function|variable|loop|recursion|algorithm|binary search|framework|api|library|compiler|syntax)\b/i,
 ];
 
 function norm(raw: string): string {
@@ -94,6 +107,18 @@ function hasKeywords(text: string, keywords: string[]): boolean {
   return keywords.some((kw) => normalized.includes(kw));
 }
 
+// Pulls the location out of a weather query. Word boundaries keep "in"/"for"/"at"
+// from matching inside other words (e.g. "at" inside "what"), and the end anchor
+// prefers the last location phrase. Time filler words are discarded so
+// "weather in London today" resolves to London, and "weather for today" falls
+// back to the default location.
+function extractLocation(message: string): string {
+  const match = message.match(/\b(?:in|for|at)\s+([a-zA-Z][a-zA-Z\s]*)$/i);
+  let location = match ? match[1].trim() : "";
+  location = location.replace(/\b(today|tomorrow|tonight|right now|now|please|pls)\b/gi, "").trim();
+  return location || "current location";
+}
+
 export function isConversational(message: string): boolean {
   return matchesPatterns(message, CONVERSATIONAL_PATTERNS);
 }
@@ -111,16 +136,15 @@ export function classifyIntent(message: string): RouteResult {
     return { type: INTENT.CALCULATOR, payload: { expression: expr } };
   }
 
+  // Weather — before date/time so queries like "weather for today" don't get
+  // misrouted by the date keywords.
+  if (matchesPatterns(message, WEATHER_PATTERNS)) {
+    return { type: INTENT.WEATHER, payload: { location: extractLocation(message) } };
+  }
+
   // Date/Time.
   if (matchesPatterns(message, DATETIME_PATTERNS)) {
     return { type: INTENT.DATETIME, payload: { timezone: "Asia/Kolkata" } };
-  }
-
-  // Weather.
-  if (matchesPatterns(message, WEATHER_PATTERNS)) {
-    const locationMatch = message.match(/(?:in|for|at)\s+([a-zA-Z\s]+)/i);
-    const location = locationMatch ? locationMatch[1].trim() : "current location";
-    return { type: INTENT.WEATHER, payload: { location } };
   }
 
   // Small talk / conversational — local only.
