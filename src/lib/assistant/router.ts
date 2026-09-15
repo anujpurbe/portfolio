@@ -10,10 +10,10 @@ export interface RouteResult {
 }
 
 const CALCULATOR_PATTERNS = [
-  /^\s*\d+\s*[\+\-\*/]\s*\d+\s*$/,
+  /^\s*[\d\s+\-*/^().]+$/,
   /^\s*calculate\s+/i,
-  /^\s*what is\s+\d+\s*[\+\-\*/]\s*\d+/i,
-  /^\s*\d+\s*\^\s*\d+\s*$/,
+  /^\s*what(?:'s| is)\s+[\d\s+\-*/^().]+/i,
+  /^\s*(?:solve|eval(?:uate)?)\s+[\d\s+\-*/^().]+/i,
 ];
 
 const DATETIME_PATTERNS = [
@@ -113,7 +113,7 @@ function hasKeywords(text: string, keywords: string[]): boolean {
 // "weather in London today" resolves to London, and "weather for today" falls
 // back to the default location.
 function extractLocation(message: string): string {
-  const match = message.match(/\b(?:in|for|at)\s+([a-zA-Z][a-zA-Z\s]*)$/i);
+  const match = message.match(/\b(?:in|for|at|of)\s+([a-zA-Z][a-zA-Z\s]*)$/i);
   let location = match ? match[1].trim() : "";
   location = location.replace(/\b(today|tomorrow|tonight|right now|now|please|pls)\b/gi, "").trim();
   return location || "current location";
@@ -130,7 +130,7 @@ export function classifyIntent(message: string): RouteResult {
   if (matchesPatterns(message, CALCULATOR_PATTERNS)) {
     const expr = message
       .replace(/^\s*calculate\s+/i, "")
-      .replace(/^\s*what is\s+/i, "")
+      .replace(/^\s*what(?:'s| is)\s+/i, "")
       .replace(/[!?.]+$/, "")
       .trim();
     return { type: INTENT.CALCULATOR, payload: { expression: expr } };
