@@ -62,10 +62,6 @@ export const metadata: Metadata = {
     images: [seo.openGraphImage],
   },
   robots: { index: true, follow: true },
-  icons: {
-    icon: "/icon.svg",
-    apple: "/logo.png",
-  },
 };
 
 export const dynamic = "force-dynamic";
