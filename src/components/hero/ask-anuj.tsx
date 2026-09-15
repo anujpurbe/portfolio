@@ -6,11 +6,11 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowUp, ArrowUpRight, RotateCcw, Sparkles } from "lucide-react";
 import type {
-  AskAction,
-  AskHistoryMessage,
-  AskResult,
+  AssistantAction,
+  AssistantHistoryMessage,
+  AssistantResult,
   Message,
-} from "@/lib/ask/types";
+} from "@/lib/assistant/types";
 import { cn } from "@/lib/utils";
 
 const MAX_MESSAGE = 400;
@@ -24,7 +24,7 @@ const CHIPS = [
   "How can I contact him?",
 ];
 
-const OFFLINE_ACTIONS: AskAction[] = [
+const OFFLINE_ACTIONS: AssistantAction[] = [
   { label: "Projects", type: "scroll", target: "projects" },
   { label: "Skills", type: "scroll", target: "skills" },
   { label: "Education", type: "scroll", target: "education" },
@@ -38,7 +38,7 @@ function scrollToSection(target: string) {
   el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
 }
 
-function ActionChip({ action }: { action: AskAction }) {
+function ActionChip({ action }: { action: AssistantAction }) {
   const router = useRouter();
   if (action.type === "scroll") {
     return (
@@ -80,7 +80,7 @@ function ActionChip({ action }: { action: AskAction }) {
   );
 }
 
-function ResultCard({ result }: { result: AskResult }) {
+function ResultCard({ result }: { result: AssistantResult }) {
   const router = useRouter();
   if (result.type === "project") {
     return (
@@ -281,7 +281,7 @@ export function AskAnuj() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
-  async function askStream(text: string, history: AskHistoryMessage[]) {
+  async function askStream(text: string, history: AssistantHistoryMessage[]) {
     setStatus("thinking");
     setError(null);
 
@@ -293,7 +293,7 @@ export function AskAnuj() {
     let hasValidResponse = false;
 
     try {
-      const res = await fetch("/api/ask/stream", {
+      const res = await fetch("/api/assistant/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, history }),
@@ -310,8 +310,8 @@ export function AskAnuj() {
       const decoder = new TextDecoder();
       let buffer = "";
       let accumulatedText = "";
-      let finalActions: AskAction[] | undefined;
-      let finalResults: AskResult[] | undefined;
+      let finalActions: AssistantAction[] | undefined;
+      let finalResults: AssistantResult[] | undefined;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -347,12 +347,12 @@ export function AskAnuj() {
             }
 
             if (eventType === "actions" && Array.isArray(d.actions)) {
-              finalActions = d.actions as AskAction[];
+              finalActions = d.actions as AssistantAction[];
               hasValidResponse = true;
             }
 
             if (eventType === "results" && Array.isArray(d.results)) {
-              finalResults = d.results as AskResult[];
+              finalResults = d.results as AssistantResult[];
               hasValidResponse = true;
             }
 
@@ -419,19 +419,19 @@ export function AskAnuj() {
     }
   }
 
-  async function askFallback(text: string, history: AskHistoryMessage[]) {
+  async function askFallback(text: string, history: AssistantHistoryMessage[]) {
     setStatus("thinking");
     setError(null);
     try {
-      const res = await fetch("/api/ask", {
+      const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, history }),
       });
       const json = (await res.json()) as {
         answer?: string;
-        actions?: AskAction[];
-        results?: AskResult[];
+        actions?: AssistantAction[];
+        results?: AssistantResult[];
         notice?: string;
         error?: string;
       };
@@ -478,7 +478,7 @@ export function AskAnuj() {
     lastQuestionRef.current = text;
     const history = messages
       .slice(-8)
-      .map((m) => ({ role: m.role, text: m.text } satisfies AskHistoryMessage));
+      .map((m) => ({ role: m.role, text: m.text } satisfies AssistantHistoryMessage));
     setInput("");
     setMessages((m) => [...m, { role: "user", text }]);
     await askStream(text, history);
@@ -498,7 +498,7 @@ export function AskAnuj() {
       setMessages((m) => m.slice(0, -1));
       const history = messages
         .slice(-8)
-        .map((m) => ({ role: m.role, text: m.text } satisfies AskHistoryMessage));
+        .map((m) => ({ role: m.role, text: m.text } satisfies AssistantHistoryMessage));
       void askFallback(last, history);
     } else {
       reset();
