@@ -110,7 +110,7 @@ async function storeViaSupabase(
   body: ContactPayload,
   request: Request,
   ip: string,
-): Promise<{ id: string } | { dbStatus: number } | null> {
+): Promise<{ id: string } | { dbStatus: number } | { reason: string } | null> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) return null;
@@ -164,11 +164,13 @@ async function storeViaSupabase(
     const rows = (await res.json()) as Array<{ id: string }>;
     return { id: rows[0]?.id ?? "" };
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     console.error(
       "[contact] supabase network error",
-      err instanceof Error ? err.message : String(err),
+      message,
     );
-    return null;
+    // Diagnostic: surface the thrown reason so the storage failure is fixable.
+    return { reason: message.slice(0, 200) };
   }
 }
 
@@ -240,6 +242,12 @@ export async function POST(request: Request) {
   if (!stored) {
     return NextResponse.json(
       { error: "Message couldn't be stored right now." },
+      { status: 502 },
+    );
+  }
+  if ("reason" in stored) {
+    return NextResponse.json(
+      { error: `Message couldn't be stored right now. (db: ${stored.reason})` },
       { status: 502 },
     );
   }

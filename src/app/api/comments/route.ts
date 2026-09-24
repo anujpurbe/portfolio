@@ -45,7 +45,7 @@ function supabase() {
 async function storeComment(
   body: CommentPayload,
   ip: string,
-): Promise<{ ok: boolean; dbStatus?: number }> {
+): Promise<{ ok: boolean; dbStatus?: number; reason?: string }> {
   const { url, key } = supabase();
   const insert = async (payload: Record<string, string>) => {
     return fetch(`${url}/comments`, {
@@ -89,11 +89,10 @@ async function storeComment(
     }
     return { ok: true };
   } catch (err) {
-    console.error(
-      "[comments] network error",
-      err instanceof Error ? err.message : String(err),
-    );
-    return { ok: false };
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[comments] network error", message);
+    // Diagnostic: surface the thrown reason so the storage failure is fixable.
+    return { ok: false, reason: message.slice(0, 200) };
   }
 }
 
@@ -164,7 +163,11 @@ export async function POST(request: Request) {
 
   const stored = await storeComment(body, ip);
   if (!stored.ok) {
-    const hint = stored.dbStatus ? ` (db: ${stored.dbStatus})` : "";
+    const hint = stored.reason
+      ? ` (db: ${stored.reason})`
+      : stored.dbStatus
+        ? ` (db: ${stored.dbStatus})`
+        : "";
     return NextResponse.json(
       { error: `Comment couldn't be stored right now.${hint}` },
       { status: 502 },
