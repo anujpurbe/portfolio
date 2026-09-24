@@ -42,10 +42,13 @@ function supabase() {
   };
 }
 
-async function storeComment(body: CommentPayload, ip: string) {
+async function storeComment(
+  body: CommentPayload,
+  ip: string,
+): Promise<{ ok: boolean; dbStatus?: number }> {
   const { url, key } = supabase();
-  try {
-    const res = await fetch(`${url}/comments`, {
+  const insert = async (payload: Record<string, string>) => {
+    return fetch(`${url}/comments`, {
       method: "POST",
       headers: {
         apikey: key,
@@ -53,16 +56,44 @@ async function storeComment(body: CommentPayload, ip: string) {
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
-      body: JSON.stringify({
-        name: body.name.trim(),
-        comment: body.comment.trim(),
-        status: "pending",
-        ip,
-      }),
+      body: JSON.stringify(payload),
     });
-    return res.ok;
-  } catch {
-    return false;
+  };
+
+  const base: Record<string, string> = {
+    name: body.name.trim(),
+    comment: body.comment.trim(),
+    status: "pending",
+  };
+
+  try {
+    let res = await insert({ ...base, ip });
+    if (!res.ok && res.status === 400) {
+      // A 400 with a PostgREST PGRST204 "column does not exist" means the
+      // table predates the `ip` column. Retry without it so comments still
+      // store; the reconciliation migration restores the column later.
+      res = await insert(base);
+      if (res.ok) {
+        console.warn(
+          "[comments] inserted without ip column (running reconcile migration)",
+        );
+      }
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(
+        "[comments] insert failed",
+        JSON.stringify({ status: res.status, body: text.slice(0, 300) }),
+      );
+      return { ok: false, dbStatus: res.status };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error(
+      "[comments] network error",
+      err instanceof Error ? err.message : String(err),
+    );
+    return { ok: false };
   }
 }
 
@@ -132,9 +163,10 @@ export async function POST(request: Request) {
   }
 
   const stored = await storeComment(body, ip);
-  if (!stored) {
+  if (!stored.ok) {
+    const hint = stored.dbStatus ? ` (db: ${stored.dbStatus})` : "";
     return NextResponse.json(
-      { error: "Comment couldn't be stored right now." },
+      { error: `Comment couldn't be stored right now.${hint}` },
       { status: 502 },
     );
   }

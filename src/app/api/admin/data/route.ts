@@ -50,11 +50,36 @@ export async function GET(request: Request) {
       ),
     ]);
 
+    const warnings: Array<{ table: string; status: number }> = [];
     const messages = messagesRes.ok ? await messagesRes.json() : [];
+    if (!messagesRes.ok) {
+      warnings.push({ table: "contact_messages", status: messagesRes.status });
+      console.error(
+        "[admin] contact_messages read failed",
+        JSON.stringify({
+          status: messagesRes.status,
+          body: (await messagesRes.text().catch(() => "")).slice(0, 300),
+        }),
+      );
+    }
     const comments = commentsRes.ok ? await commentsRes.json() : [];
+    if (!commentsRes.ok) {
+      warnings.push({ table: "comments", status: commentsRes.status });
+      console.error(
+        "[admin] comments read failed",
+        JSON.stringify({
+          status: commentsRes.status,
+          body: (await commentsRes.text().catch(() => "")).slice(0, 300),
+        }),
+      );
+    }
 
-    return NextResponse.json({ configured: true, messages, comments });
-  } catch {
+    return NextResponse.json({ configured: true, messages, comments, warnings });
+  } catch (err) {
+    console.error(
+      "[admin] supabase error",
+      err instanceof Error ? err.message : String(err),
+    );
     return NextResponse.json(
       { error: "Couldn't reach the database." },
       { status: 502 },

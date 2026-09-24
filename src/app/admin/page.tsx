@@ -35,9 +35,16 @@ type Comment = {
   created_at: string;
 };
 
+type Warning = { table: string; status: number };
+
 type Data =
   | { configured: false }
-  | { configured: true; messages: Message[]; comments: Comment[] };
+  | {
+      configured: true;
+      messages: Message[];
+      comments: Comment[];
+      warnings?: Warning[];
+    };
 
 const messageStatus: Record<Message["status"], string> = {
   new: "New",
@@ -361,6 +368,25 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        {data.warnings && data.warnings.length > 0 && (
+          <div className="mb-6 flex flex-col gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+            <p className="text-sm font-medium text-amber-500">
+              Database read problem
+            </p>
+            <p className="text-xs leading-5 text-muted">
+              The database returned an error for:{" "}
+              {data.warnings
+                .map((w) => `${w.table} (db: ${w.status})`)
+                .join(", ")}
+              . Rows may be missing until the schema is reconciled — see
+              <code className="mx-1 rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[10px]">
+                supabase/migrations/20260924_reconcile_schema.sql
+              </code>
+              .
+            </p>
+          </div>
+        )}
 
         {tab === "contact_messages" ? (
           messages.length === 0 ? (

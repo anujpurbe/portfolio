@@ -110,13 +110,13 @@ async function storeViaSupabase(
   body: ContactPayload,
   request: Request,
   ip: string,
-): Promise<string | null> {
+): Promise<{ id: string } | { dbStatus: number } | null> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) return null;
 
-  try {
-    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/contact_messages`, {
+  const insert = async (payload: Record<string, string | null>) => {
+    return fetch(`${url.replace(/\/$/, "")}/rest/v1/contact_messages`, {
       method: "POST",
       headers: {
         apikey: key,
@@ -124,20 +124,50 @@ async function storeViaSupabase(
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
-      body: JSON.stringify({
-        name: body.from_name.trim(),
-        email: body.reply_to.trim(),
-        subject: body.subject.trim(),
-        message: body.message.trim(),
-        status: "new",
-        ip,
-        user_agent: request.headers.get("user-agent")?.slice(0, 500) ?? null,
-      }),
+      body: JSON.stringify(payload),
     });
-    if (!res.ok) return null;
+  };
+
+  const base: Record<string, string | null> = {
+    name: body.from_name.trim(),
+    email: body.reply_to.trim(),
+    subject: body.subject.trim(),
+    message: body.message.trim(),
+    status: "new",
+  };
+
+  try {
+    let res = await insert({
+      ...base,
+      ip,
+      user_agent: request.headers.get("user-agent")?.slice(0, 500) ?? null,
+    });
+    if (!res.ok && res.status === 400) {
+      // Table predates the ip/user_agent columns (PGRST204). Retry without
+      // them so messages still store; the reconciliation migration restores
+      // the columns later.
+      res = await insert(base);
+      if (res.ok) {
+        console.warn(
+          "[contact] stored without ip/user_agent columns (running reconcile migration)",
+        );
+      }
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(
+        "[contact] supabase insert failed",
+        JSON.stringify({ status: res.status, body: text.slice(0, 300) }),
+      );
+      return { dbStatus: res.status };
+    }
     const rows = (await res.json()) as Array<{ id: string }>;
-    return rows[0]?.id ?? null;
-  } catch {
+    return { id: rows[0]?.id ?? "" };
+  } catch (err) {
+    console.error(
+      "[contact] supabase network error",
+      err instanceof Error ? err.message : String(err),
+    );
     return null;
   }
 }
@@ -206,7 +236,20 @@ export async function POST(request: Request) {
   }
 
   // 1. Persist first — the message must be stored before anything else.
-  const rowId = await storeViaSupabase(body, request, ip);
+  const stored = await storeViaSupabase(body, request, ip);
+  if (!stored) {
+    return NextResponse.json(
+      { error: "Message couldn't be stored right now." },
+      { status: 502 },
+    );
+  }
+  if ("dbStatus" in stored) {
+    return NextResponse.json(
+      { error: `Message couldn't be stored right now. (db: ${stored.dbStatus})` },
+      { status: 502 },
+    );
+  }
+  const rowId = stored.id;
   if (!rowId) {
     return NextResponse.json(
       { error: "Message couldn't be stored right now." },
