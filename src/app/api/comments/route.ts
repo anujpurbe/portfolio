@@ -42,13 +42,35 @@ function supabase() {
   };
 }
 
+function fetchFailure(err: unknown, url: string): string {
+  const parts: string[] = [];
+  let cur: unknown = err;
+  let depth = 0;
+  while (cur && depth < 5) {
+    if (cur instanceof Error && cur.message) parts.push(cur.message);
+    cur =
+      typeof cur === "object" && cur !== null && "cause" in cur
+        ? (cur as { cause?: unknown }).cause
+        : null;
+    depth += 1;
+  }
+  let host = "?";
+  try {
+    host = new URL(url).host;
+  } catch {
+    host = (url || "").slice(0, 40);
+  }
+  return [...parts, `host:${host}`].join(" | ");
+}
+
 async function storeComment(
   body: CommentPayload,
   ip: string,
 ): Promise<{ ok: boolean; dbStatus?: number; reason?: string }> {
   const { url, key } = supabase();
+  const restUrl = `${url}/comments`;
   const insert = async (payload: Record<string, string>) => {
-    return fetch(`${url}/comments`, {
+    return fetch(restUrl, {
       method: "POST",
       headers: {
         apikey: key,
@@ -89,10 +111,9 @@ async function storeComment(
     }
     return { ok: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[comments] network error", message);
+    console.error("[comments] network error", JSON.stringify(fetchFailure(err, restUrl)));
     // Diagnostic: surface the thrown reason so the storage failure is fixable.
-    return { ok: false, reason: message.slice(0, 200) };
+    return { ok: false, reason: fetchFailure(err, restUrl).slice(0, 300) };
   }
 }
 
