@@ -35,7 +35,7 @@ type Comment = {
   created_at: string;
 };
 
-type Warning = { table: string; status: number };
+type Warning = { table: string; status: number; message?: string };
 
 type Data =
   | { configured: false }
@@ -377,7 +377,11 @@ export default function AdminPage() {
             <p className="text-xs leading-5 text-muted">
               The database returned an error for:{" "}
               {data.warnings
-                .map((w) => `${w.table} (db: ${w.status})`)
+                .map((w) =>
+                  w.message
+                    ? `${w.table}: ${w.message}`
+                    : `${w.table} (db: ${w.status})`,
+                )
                 .join(", ")}
               . Rows may be missing until the schema is reconciled — see
               <code className="mx-1 rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[10px]">

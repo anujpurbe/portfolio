@@ -42,7 +42,7 @@ function supabase() {
   };
 }
 
-function fetchFailure(err: unknown, url: string): string {
+function fetchFailure(err: unknown, url?: string, includeHost = true): string {
   const parts: string[] = [];
   let cur: unknown = err;
   let depth = 0;
@@ -54,13 +54,16 @@ function fetchFailure(err: unknown, url: string): string {
         : null;
     depth += 1;
   }
-  let host = "?";
-  try {
-    host = new URL(url).host;
-  } catch {
-    host = (url || "").slice(0, 40);
+  if (includeHost) {
+    let host = "?";
+    try {
+      host = new URL(url ?? "").host;
+    } catch {
+      host = (url ?? "").slice(0, 40);
+    }
+    parts.push(`host:${host}`);
   }
-  return [...parts, `host:${host}`].join(" | ");
+  return parts.join(" | ");
 }
 
 async function storeComment(
@@ -112,8 +115,8 @@ async function storeComment(
     return { ok: true };
   } catch (err) {
     console.error("[comments] network error", JSON.stringify(fetchFailure(err, restUrl)));
-    // Diagnostic: surface the thrown reason so the storage failure is fixable.
-    return { ok: false, reason: fetchFailure(err, restUrl).slice(0, 300) };
+    // Diagnostic: surface the failure class (no host) so storage issues are fixable.
+    return { ok: false, reason: fetchFailure(err, undefined, false).slice(0, 240) };
   }
 }
 

@@ -26,6 +26,21 @@ const VALID_STATUS = new Set([
 ]);
 const VALID_TABLES = new Set(["contact_messages", "comments"]);
 
+function failureChain(err: unknown): string {
+  const parts: string[] = [];
+  let cur: unknown = err;
+  let depth = 0;
+  while (cur && depth < 5) {
+    if (cur instanceof Error && cur.message) parts.push(cur.message);
+    cur =
+      typeof cur === "object" && cur !== null && "cause" in cur
+        ? (cur as { cause?: unknown }).cause
+        : null;
+    depth += 1;
+  }
+  return parts.join(" | ").slice(0, 200);
+}
+
 export async function GET(request: Request) {
   if (!isAdminSession(request)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -76,14 +91,14 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ configured: true, messages, comments, warnings });
   } catch (err) {
-    console.error(
-      "[admin] supabase error",
-      err instanceof Error ? err.message : String(err),
-    );
-    return NextResponse.json(
-      { error: "Couldn't reach the database." },
-      { status: 502 },
-    );
+    const message = failureChain(err);
+    console.error("[admin] supabase network error", JSON.stringify({ message }));
+    return NextResponse.json({
+      configured: true,
+      messages: [],
+      comments: [],
+      warnings: [{ table: "supabase", status: 0, message }],
+    });
   }
 }
 
